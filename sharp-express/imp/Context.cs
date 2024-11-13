@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
-using System.Security.Principal;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -10,19 +9,22 @@ public partial class Context : IContext
 {
     private readonly HttpListenerContext _ctx;
     private string _body;
-    
+
     public Context(HttpListenerContext ctx)
     {
         _ctx = ctx;
     }
 
+    public Stack<IMatch> CurrentPath { get; } = new();
     public CookieCollection Cookies => _ctx.Response.Cookies;
     public NameValueCollection Query => _ctx.Request.QueryString;
     public NameValueCollection ClientHeaders => _ctx.Request.Headers;
     public NameValueCollection ResponseHeaders => _ctx.Response.Headers;
+
     public string HttpMethod => _ctx.Request.HttpMethod;
 
     public byte[]? Result { get; protected set; }
+
     public string ContentType
     {
         get => _ctx.Response.ContentType;
@@ -30,6 +32,7 @@ public partial class Context : IContext
     }
 
     public IDictionary<string, string> Parameters { get; set; }
+    public HandleStages Stage { get; set; }
     public Uri Url => _ctx.Request.Url!;
 
     public async Task<string> Body()
@@ -65,6 +68,12 @@ public partial class Context : IContext
         throw err;
     }
 
+    public Exception Throw(HttpStatusCode code, string message)
+    {
+        var err = new HttpRequestException(message, null, code);
+        throw err;
+    }
+
     public void Redirect(string path)
     {
         _ctx.Response.Redirect(path);
@@ -77,7 +86,12 @@ public partial class Context : IContext
 
     public void Send(HttpStatusCode code = HttpStatusCode.BadRequest)
     {
-        Send(Encoding.UTF8.GetBytes(code.ToString()));
+        Send(code, code.ToString());
+    }
+
+    public void Send(HttpStatusCode code, string message)
+    {
+        Html(message);
         _ctx.Response.StatusCode = (int)code;
     }
 
@@ -86,7 +100,7 @@ public partial class Context : IContext
         Send(Encoding.UTF8.GetBytes(text));
         ContentType = "text/html";
     }
-    
+
     public void Json(object obj)
     {
         Send(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(obj)));

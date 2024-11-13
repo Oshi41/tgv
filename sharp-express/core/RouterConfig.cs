@@ -2,5 +2,5 @@
 
 public class RouterConfig
 {
-    
+    public bool IgnoreTrailingSlashes { get; set; } = true;
 }

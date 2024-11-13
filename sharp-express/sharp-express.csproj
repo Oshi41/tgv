@@ -7,4 +7,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="PartialMixin" Version="1.0.55" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="middleware\" />
+    </ItemGroup>
+
 </Project>
