@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using Ignite.SharpNetSH;
 using tgv.core;
 
 namespace tgv.imp;
@@ -29,6 +30,20 @@ public class HttpServer
         Debug.WriteLine("Starting HTTP server...");
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://{_host}:{_port}/");
+
+        if (_config.UseHttps)
+        {
+            if (_config.Certificate == null)
+            {
+                Console.Error.WriteLine($"Cannot start HTTPS server without HTTPS certificate");
+            }
+            else
+            {
+                BindCertificate();
+                _listener.Prefixes.Add($"https://{_host}:{_port}/");
+            }
+        }
+        
         _listener.Start();
         Debug.WriteLine("HTTP server started on {0} port", _port);
         _ = Listen();
@@ -41,6 +56,11 @@ public class HttpServer
         Debug.WriteLine("Stopping the server");
         _listener.Stop();
         return true;
+    }
+
+    private void BindCertificate()
+    {
+        // todo implement
     }
 
     private async Task Listen()

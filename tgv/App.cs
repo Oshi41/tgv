@@ -24,22 +24,22 @@ public class App : IRouter
         _server = new HttpServer(_root, _config);
         _server.Start(port);
         
-        Started?.Invoke(this, this);
+        Started?.Invoke(this, _server);
     }
 
     public bool Stop()
     {
         if (_server?.Stop() == true)
         {
-            Closed?.Invoke(this, this);
+            Closed?.Invoke(this, _server);
             return true;
         }
 
         return false;
     }
 
-    public event EventHandler<App> Started; 
-    public event EventHandler<App> Closed; 
+    public event EventHandler<HttpServer> Started; 
+    public event EventHandler<HttpServer> Closed; 
 
     public string? RunningUrl => _server?.Url;
 
