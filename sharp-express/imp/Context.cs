@@ -1,9 +1,12 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
+using System.Reflection;
 using System.Text;
+using MimeTypes;
 using Newtonsoft.Json;
+using sharp_express.core;
 
-namespace sharp_express.core;
+namespace sharp_express.imp;
 
 public partial class Context : IContext
 {
@@ -15,27 +18,23 @@ public partial class Context : IContext
         _ctx = ctx;
     }
 
-    public Stack<IMatch> CurrentPath { get; } = new();
-    public CookieCollection Cookies => _ctx.Response.Cookies;
-    public NameValueCollection Query => _ctx.Request.QueryString;
-    public NameValueCollection ClientHeaders => _ctx.Request.Headers;
-    public NameValueCollection ResponseHeaders => _ctx.Response.Headers;
+    public override CookieCollection Cookies => _ctx.Response.Cookies;
+    public override NameValueCollection Query => _ctx.Request.QueryString;
+    public override NameValueCollection ClientHeaders => _ctx.Request.Headers;
+    public override NameValueCollection ResponseHeaders => _ctx.Response.Headers;
 
-    public string HttpMethod => _ctx.Request.HttpMethod;
+    public override string HttpMethod => _ctx.Request.HttpMethod;
 
-    public byte[]? Result { get; protected set; }
-
-    public string ContentType
+    public override string ContentType
     {
         get => _ctx.Response.ContentType;
         set => _ctx.Response.ContentType = value;
     }
 
-    public IDictionary<string, string> Parameters { get; set; }
-    public HandleStages Stage { get; set; }
-    public Uri Url => _ctx.Request.Url!;
+    public override Guid TraceId => _ctx.Request.RequestTraceIdentifier;
+    public override Uri Url => _ctx.Request.Url!;
 
-    public async Task<string> Body()
+    public override async Task<string> Body()
     {
         if (_body == null)
         {
@@ -48,7 +47,7 @@ public partial class Context : IContext
         return _body;
     }
 
-    public async Task<T> Body<T>()
+    public override async Task<T> Body<T>()
     {
         var body = await Body();
         try
@@ -62,46 +61,46 @@ public partial class Context : IContext
         }
     }
 
-    public Exception Throw(HttpStatusCode code, Exception? e = null)
+    public override Exception Throw(HttpStatusCode code, Exception? e = null)
     {
-        var err = new HttpRequestException(code.ToString(), e, code);
+        throw Throw(code, e?.Message ?? code.ToString());
+    }
+
+    public override Exception Throw(HttpStatusCode code, string message)
+    {
+        var err = new HttpException(code, message);
         throw err;
     }
 
-    public Exception Throw(HttpStatusCode code, string message)
-    {
-        var err = new HttpRequestException(message, null, code);
-        throw err;
-    }
-
-    public void Redirect(string path)
+    public override void Redirect(string path)
     {
         _ctx.Response.Redirect(path);
     }
 
-    public void Send(byte[] bytes)
+    public override void Send(byte[] bytes)
     {
         Result = bytes;
     }
 
-    public void Send(HttpStatusCode code = HttpStatusCode.BadRequest)
+    public override void Send(HttpStatusCode code, string message)
     {
-        Send(code, code.ToString());
-    }
-
-    public void Send(HttpStatusCode code, string message)
-    {
-        Html(message);
+        Send(Encoding.UTF8.GetBytes(code.ToString()));
         _ctx.Response.StatusCode = (int)code;
     }
 
-    public void Html(string text)
+    public override void Html(string text)
     {
         Send(Encoding.UTF8.GetBytes(text));
         ContentType = "text/html";
     }
 
-    public void Json(object obj)
+    public override void Text(string text)
+    {
+        Send(Encoding.UTF8.GetBytes(text));
+        ContentType = "text/plain";
+    }
+
+    public override void Json(object obj)
     {
         Send(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(obj)));
         ContentType = "application/json";

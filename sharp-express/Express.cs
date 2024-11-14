@@ -23,9 +23,23 @@ public class Express : IRouter
         Stop();
         _server = new HttpServer(_root, _config);
         _server.Start(port);
+        
+        Started?.Invoke(this, this);
     }
 
-    public void Stop() => _server?.Stop();
+    public bool Stop()
+    {
+        if (_server?.Stop() == true)
+        {
+            Closed?.Invoke(this, this);
+            return true;
+        }
+
+        return false;
+    }
+
+    public event EventHandler<Express> Started; 
+    public event EventHandler<Express> Closed; 
 
     public string? RunningUrl => _server?.Url;
 

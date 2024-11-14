@@ -3,13 +3,7 @@ using System.Net;
 using MimeTypes;
 using sharp_express.core;
 
-namespace sharp_express.middleware;
-
-public class StaticFilesConfig
-{
-    public bool FallThrough { get; set; } = true;
-    public string SourceDirectory { get; set; }
-}
+namespace sharp_express.middleware.static_serve;
 
 public static class StaticFilesMiddleware
 {
@@ -17,12 +11,6 @@ public static class StaticFilesMiddleware
     {
         async Task Middleware(IContext ctx, Action next, Exception? e)
         {
-            if (ctx.Stage != HandleStages.Handle)
-            {
-                next();
-                return;
-            }
-
             if (ctx.HttpMethod is not "GET" and not "HEAD")
             {
                 if (cfg.FallThrough)
@@ -42,8 +30,16 @@ public static class StaticFilesMiddleware
                 await Console.Error.WriteLineAsync($"Source directory {cfg.SourceDirectory} does not exist");
                 throw ctx.Throw(HttpStatusCode.InternalServerError);
             }
+
+            var file = ctx.Url.AbsolutePath
+                .Replace("/", Path.DirectorySeparatorChar.ToString())
+                .Replace("\\", Path.DirectorySeparatorChar.ToString())
+                .Trim(Path.DirectorySeparatorChar, ' ');
             
-            var file = Path.GetFullPath(Path.Join(cfg.SourceDirectory, ctx.Url.AbsolutePath));
+            if (!file.Contains("."))
+                file += $"{Path.DirectorySeparatorChar}index.html";
+            
+            file = Path.GetFullPath(Path.Combine(cfg.SourceDirectory, file));
             if (!File.Exists(file))
             {
                 next();
@@ -56,7 +52,7 @@ public static class StaticFilesMiddleware
                 throw ctx.Throw(HttpStatusCode.BadRequest);
             }
             
-            var bytes = await File.ReadAllBytesAsync(file);
+            var bytes = File.ReadAllBytes(file);
             ctx.Send(bytes);
             ctx.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(file));
         }

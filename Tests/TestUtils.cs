@@ -26,9 +26,6 @@ public static class TestUtils
         ctx.Setup(x => x.Url).Returns(uri);
         ctx.Setup(x => x.Query).Returns(q);
         ctx.Setup(x => x.HttpMethod).Returns(method);
-        ctx.Setup(x => x.CurrentPath).Returns(history);
-        ctx.SetupProperty(x => x.Parameters);
-        ctx.SetupProperty(x => x.Stage);
         ctx.Object.Stage = HandleStages.Handle;
         return ctx.Object;
     }
@@ -36,5 +33,10 @@ public static class TestUtils
     public static bool IsSuccess(int code)
     {
         return code - code % 100 == 200;
+    }
+
+    public static int RandPort()
+    {
+        return 5000 + new Random().Next(500) + (int)(DateTime.Now.ToFileTimeUtc()) % 200;
     }
 }

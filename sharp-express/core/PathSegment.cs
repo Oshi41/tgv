@@ -11,7 +11,7 @@ public class PathSegment
             : pattern;
 
         Name = IsPattern
-            ? pattern[1..]
+            ? pattern.Substring(1)
             : null;
     }
 

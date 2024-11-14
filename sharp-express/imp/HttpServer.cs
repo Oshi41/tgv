@@ -34,13 +34,13 @@ public class HttpServer
         _ = Listen();
     }
 
-    public void Stop()
+    public bool Stop()
     {
-        if (_listener != null)
-        {
-            Debug.WriteLine("Stopping the server");
-            _listener.Stop();
-        }
+        if (_listener == null) return false;
+        
+        Debug.WriteLine("Stopping the server");
+        _listener.Stop();
+        return true;
     }
 
     private async Task Listen()
@@ -60,6 +60,7 @@ public class HttpServer
         using var _ = context.Response;
 
         IContext ctx = new Context(context);
+        context.Response.Cookies = context.Request.Cookies;
 
         foreach (var stage in new[] { HandleStages.Before, HandleStages.Handle, HandleStages.After })
         {

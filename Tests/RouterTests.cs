@@ -3,7 +3,6 @@ using sharp_express.imp;
 
 namespace Tests;
 
-[TestFixture, Parallelizable]
 public class RouterTests
 {
     [Test]

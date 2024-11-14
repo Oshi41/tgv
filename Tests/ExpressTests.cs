@@ -19,7 +19,6 @@ class User
     public Details Details { get; set; }
 }
 
-[TestFixture, Parallelizable]
 public class ExpressTests
 {
     private readonly List<User> _users = new();
@@ -115,7 +114,7 @@ public class ExpressTests
             return Task.CompletedTask;
         });
 
-        _app.Start(7000 + DateTime.Now.Millisecond);
+        _app.Start(TestUtils.RandPort());
     }
 
     [TearDown]

@@ -1,77 +1,82 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 namespace sharp_express.core;
 
-public interface IContext
+public abstract class IContext
 {
+    private Dictionary<Type, object> _states = new();
+    
     /// <summary>
     /// Current routers hierarchy
     /// </summary>
-    Stack<IMatch> CurrentPath { get; }
+    public Stack<IMatch> CurrentPath { get; } = new();
 
     /// <summary>
     /// Current request cookies 
     /// </summary>
-    CookieCollection Cookies { get; }
+    public abstract CookieCollection Cookies { get; }
 
     /// <summary>
     /// Query params
     /// </summary>
-    NameValueCollection Query { get; }
+    public abstract NameValueCollection Query { get; }
 
     /// <summary>
     /// Sent headers
     /// </summary>
-    NameValueCollection ClientHeaders { get; }
+    public abstract NameValueCollection ClientHeaders { get; }
 
     /// <summary>
     /// Headers to send
     /// </summary>
-    NameValueCollection ResponseHeaders { get; }
+    public abstract NameValueCollection ResponseHeaders { get; }
 
     /// <summary>
     /// Current HTTP method
     /// </summary>
-    string HttpMethod { get; }
+    public abstract string HttpMethod { get; }
 
     /// <summary>
     /// Pending result to send
     /// </summary>
-    byte[]? Result { get; }
+    public byte[]? Result { get; protected set; }
 
     /// <summary>
     /// Request content type
     /// </summary>
-    string ContentType { get; set; }
+    public abstract string ContentType { get; set; }
 
     /// <summary>
     /// Current route parameters
     /// </summary>
-    IDictionary<string, string>? Parameters { get; set; }
+    public IDictionary<string, string>? Parameters { get; set; }
+    
+    public abstract Guid TraceId { get; }
 
     /// <summary>
     /// Current handling stage
     /// </summary>
-    HandleStages Stage { get; set; }
+    public HandleStages Stage { get; set; }
 
     /// <summary>
     /// Current URL
     /// </summary>
-    Uri Url { get; }
+    public abstract Uri Url { get; }
 
     /// <summary>
     /// Reading body from request
     /// </summary>
     /// <returns></returns>
-    Task<string> Body();
+    public abstract Task<string> Body();
 
     /// <summary>
     /// Parsing JSON format body
     /// </summary>
     /// <typeparam name="T">Body type</typeparam>
     /// <returns>Parsed body</returns>
-    Task<T> Body<T>();
+    public abstract Task<T> Body<T>();
 
     /// <summary>
     /// Signalizing about error during HTTP message handling
@@ -79,39 +84,43 @@ public interface IContext
     /// <param name="code">HTTP code</param>
     /// <param name="e">Possible inner exceptioon</param>
     /// <returns>Http exception</returns>
-    Exception Throw(HttpStatusCode code, Exception? e = null);
+    public abstract Exception Throw(HttpStatusCode code, Exception? e = default);
 
-    Exception Throw(HttpStatusCode code, string message);
+    public abstract Exception Throw(HttpStatusCode code, string message);
 
     /// <summary>
     /// Redirect to
     /// </summary>
     /// <param name="path"></param>
-    void Redirect(string path);
+    public abstract void Redirect(string path);
 
     /// <summary>
     /// Sending raw bytes
     /// </summary>
     /// <param name="bytes"></param>
-    void Send(byte[] bytes);
+    public virtual void Send(byte[] bytes)
+    {
+        Result = bytes;
+    }
 
     /// <summary>
     /// Send HTTP code
     /// </summary>
     /// <param name="code"></param>
-    void Send(HttpStatusCode code = HttpStatusCode.BadRequest);
+    public virtual void Send(HttpStatusCode code) => Send(code, code.ToString());
 
-    void Send(HttpStatusCode code, string message);
+    public abstract void Send(HttpStatusCode code, string message);
 
     /// <summary>
     /// Send HTML / plain text
     /// </summary>
     /// <param name="text"></param>
-    void Html(string text);
+    public abstract void Html(string text);
+    public abstract void Text(string text);
 
     /// <summary>
     /// Send object parsed as JSON format
     /// </summary>
     /// <param name="obj"></param>
-    void Json(object obj);
+    public abstract void Json(object obj);
 }

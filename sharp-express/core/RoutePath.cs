@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using sharp_express.extensions;
 
 namespace sharp_express.core;
 
@@ -42,17 +43,17 @@ public class RoutePath : IMatch
         if (allSegments.All(x => x.IsWildcard))
             return ".+";
 
-        var regex = $"^/{string.Join('/', allSegments.Select(x => x.Regex))}";
+        var regex = $"^/{string.Join("/", allSegments.Select(x => x.Regex))}";
         // router must match onle the start
         if (!IsRouterPath)
             regex += "$";
 
         // should ignore trailing slash
-        if (!Config.IgnoreTrailingSlashes && regex.EndsWith('/'))
-            regex = regex[..^1];
+        if (!Config.IgnoreTrailingSlashes && regex.EndsWith("/"))
+            regex = regex.Substring(0, regex.Length - 1);
 
         // set trailing slash explicitly if needed
-        if (Config.IgnoreTrailingSlashes && ctx.Url.OriginalString.EndsWith('/') && !regex.EndsWith('/'))
+        if (Config.IgnoreTrailingSlashes && ctx.Url.OriginalString.EndsWith("/") && !regex.EndsWith("/"))
             regex += '/';
 
         return regex;
@@ -107,7 +108,7 @@ public class RoutePath : IMatch
         var parameters = Segments.Where(x => x.IsPattern).ToList();
         var groups = Regex.Match(ctx.Url.AbsolutePath, regex)
             .Groups
-            .Values
+            .OfType<Group>()
             .Where(x => x.GetType() == typeof(Group))
             .ToList();
         var dict = new Dictionary<string, string>();

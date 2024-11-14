@@ -2,7 +2,6 @@ using sharp_express.core;
 
 namespace Tests;
 
-[TestFixture, Parallelizable]
 public class RoutePathTests
 {
     [TestCase("/users/1/details")]
