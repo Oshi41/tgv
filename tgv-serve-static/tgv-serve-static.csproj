@@ -11,6 +11,10 @@
         <Copyright>MIT</Copyright>
         <PackageTags>tgv middleware http </PackageTags>
         <Nullable>enable</Nullable>
+        <Version>0.0.1</Version>
+        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">

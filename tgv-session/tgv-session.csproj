@@ -5,6 +5,23 @@
         <RootNamespace>tgv_session</RootNamespace>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
+        <Version>0.0.1</Version>
+        <Title>TGV-session</Title>
+        <Description>TGV middleware using cookie sessions</Description>
+        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+        <PackageTags>tgv middleware http cookie session</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x64</Platforms>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <OutputPath>..\bin\x64\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+      <OutputPath>..\bin\x64\Release\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>

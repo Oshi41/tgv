@@ -9,10 +9,10 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>TGV</Title>
         <Description>Express-like implementation of simple HTTP server</Description>
-        <PackageProjectUrl>https://github.com/Oshi41/sharp-express</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/Oshi41/sharp-express/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Oshi41/tgv/blob/master/LICENSE</PackageLicenseUrl>
         <PackageIcon>tgv.png</PackageIcon>
-        <RepositoryUrl>https://github.com/Oshi41/sharp-express</RepositoryUrl>
+        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
         <PackageTags>web http router app api</PackageTags>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x64</Platforms>
