@@ -1,8 +1,11 @@
 ﻿using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
+using Flurl.Http;
 using Moq;
+using tgv;
 using tgv.core;
 
-namespace Tests;
+namespace tgv_tests;
 
 public static class TestUtils
 {
@@ -38,5 +41,10 @@ public static class TestUtils
     public static int RandPort()
     {
         return 5000 + new Random().Next(500) + (int)(DateTime.Now.ToFileTimeUtc()) % 200;
+    }
+
+    public static IFlurlClient CreateAgent(this App app, string prefix, [CallerMemberName] string method = "")
+    {
+        return FlurlHttp.Clients.GetOrAdd($"{method}_{prefix}", app.RunningUrl);
     }
 }

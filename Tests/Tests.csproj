@@ -6,6 +6,20 @@
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
+
+        <Configurations>Release;Debug</Configurations>
+
+        <Platforms>x64</Platforms>
+
+        <OutputType>Library</OutputType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <OutputPath>..\bin\x64\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+      <OutputPath>..\bin\x64\Release\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,7 +34,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\sharp-express\sharp-express.csproj" />
+      <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
+      <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
+      <ProjectReference Include="..\tgv\tgv.csproj" />
     </ItemGroup>
 
 </Project>

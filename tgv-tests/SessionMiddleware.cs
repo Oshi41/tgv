@@ -2,7 +2,7 @@
 using tgv;
 using tgv.middleware.session;
 
-namespace Tests;
+namespace tgv_tests;
 
 public class SessionMiddleware
 {
@@ -32,8 +32,7 @@ public class SessionMiddleware
     [Test]
     public async Task Works()
     {
-        var resp = await (_app.RunningUrl + "hello")
-            .GetStringAsync();
+        var resp = await _app.CreateAgent("1").Request("hello").GetStringAsync();
         Assert.That(resp, Is.EqualTo("world"));
 
         var sessions = await _app.GetSessionStore()!.GetAllSessions();
@@ -43,7 +42,7 @@ public class SessionMiddleware
     [Test]
     public async Task ReuseSession()
     {
-        var client = FlurlHttp.Clients.GetOrAdd($"{nameof(ReuseSession)}_1", _app.RunningUrl);
+        var client = _app.CreateAgent("1");
         var jar = new CookieJar();
 
         var resp = await client.Request("hello").WithCookies(jar).GetAsync();
@@ -66,10 +65,10 @@ public class SessionMiddleware
     [Test]
     public async Task Reuse2Session()
     {
-        var client = FlurlHttp.Clients.GetOrAdd($"{nameof(Reuse2Session)}_1", _app.RunningUrl);
+        var client = _app.CreateAgent("1");
         var jar = new CookieJar();
         
-        var client2 = FlurlHttp.Clients.GetOrAdd($"{nameof(Reuse2Session)}_2", _app.RunningUrl);
+        var client2 = _app.CreateAgent("2");
         var jar2 = new CookieJar();
 
         for (int i = 0; i < 10; i++)

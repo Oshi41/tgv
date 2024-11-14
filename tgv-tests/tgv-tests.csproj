@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <RootNamespace>tgv_tests</RootNamespace>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <Platforms>x64</Platforms>
+        <OutputType>Library</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Flurl.Http" Version="4.0.2" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+      <PackageReference Include="Moq.AutoMock" Version="3.6.0-ci0596" />
+      <PackageReference Include="NUnit" Version="4.2.2" />
+      <PackageReference Include="NUnit.Analyzers" Version="4.4.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="NUnit3TestAdapter" Version="5.0.0-beta.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
+      <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
+      <ProjectReference Include="..\tgv\tgv.csproj" />
+    </ItemGroup>
+
+</Project>

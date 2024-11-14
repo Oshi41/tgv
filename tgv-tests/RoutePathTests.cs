@@ -1,6 +1,6 @@
 using tgv.core;
 
-namespace Tests;
+namespace tgv_tests;
 
 public class RoutePathTests
 {

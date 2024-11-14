@@ -1,7 +1,7 @@
 ﻿using tgv.core;
 using tgv.imp;
 
-namespace Tests;
+namespace tgv_tests;
 
 public class RouterTests
 {
