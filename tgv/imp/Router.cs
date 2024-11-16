@@ -71,6 +71,21 @@ public class Router : IRouter
         return AddRoutes(HttpMethodExtensions.Error, path, handlers);
     }
 
+    public IRouter Options(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Options, path, handlers);
+    }
+
+    public IRouter Connect(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethodExtensions.Connect, path, handlers);
+    }
+
+    public IRouter Trace(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Trace, path, handlers);
+    }
+
     public bool Match(Context ctx) => Route.Match(ctx);
     public Handle Handler { get; }
     
@@ -81,6 +96,7 @@ public class Router : IRouter
 
         foreach (var match in _routes.Where(x => x.Route.Match(ctx)))
         {
+            ctx.Visited.Enqueue(match);
             if (ctx.Parameters == null && match is RoutePath routePath)
             {
                 ctx.Parameters = routePath.Parameters(ctx);

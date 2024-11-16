@@ -18,4 +18,7 @@ public interface IRouter : IMatch
     IRouter Put(string path, params Handle[] handlers);
     IRouter Head(string path, params Handle[] handlers);
     IRouter Error(string path, params Handle[] handlers);
+    IRouter Options(string path, params Handle[] handlers);
+    IRouter Connect(string path, params Handle[] handlers);
+    IRouter Trace(string path, params Handle[] handlers);
 }

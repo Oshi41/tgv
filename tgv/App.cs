@@ -6,6 +6,7 @@ using WatsonWebserver.Lite;
 using Handle = tgv.core.Handle;
 using Hme = tgv.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
+using WatsonWebserver.Core;
 
 [assembly: InternalsVisibleTo("tgv-tests")]
 
@@ -42,7 +43,7 @@ public class App : IRouter
         Stop();
         var settings = _appConfig.Convert();
         settings.Port = port;
-        _server = new WebserverLite(settings, ctx => Handle(new Context(ctx, Logger)));
+        _server = new WebserverLite(settings, ServerHandler);
         _server.Events.Logger = Logger.WriteLog;
         _server.Start();
         Started?.Invoke(this, _server);
@@ -62,6 +63,31 @@ public class App : IRouter
 
     public event EventHandler<WebserverLite> Started;
     public event EventHandler<WebserverLite> Closed;
+
+    private async Task ServerHandler(HttpContextBase ctx)
+    {
+        using var context = new Context(ctx, Logger);
+        await Handle(context);
+        
+        // checking if response was sent
+        if (context.WasSent) return;
+
+        // no route was visited
+        if (!context.Visited.Any())
+        {
+            await context.Send(HttpStatusCode.NotFound);
+            return;
+        }
+        
+        // checking if visited any error
+        var wasError = context.Visited
+            .Select(x => x.Route)
+            .Any(x => x.Method == Hme.Error);
+        
+        await context.Send(wasError
+            ? HttpStatusCode.InternalServerError
+            : HttpStatusCode.OK);
+    }
 
     private async Task Handle(Context ctx)
     {
@@ -101,7 +127,7 @@ public class App : IRouter
         {
             ctx.Logger.Fatal($"Exception: {ex.Message}");
             if (!ctx.WasSent)
-                ctx.Send(HttpStatusCode.InternalServerError);
+                await ctx.Send(HttpStatusCode.InternalServerError);
         }
     }
 
@@ -178,6 +204,24 @@ public class App : IRouter
     public IRouter Error(string path, params Handle[] handlers)
     {
         _root.Error(path, handlers);
+        return this;
+    }
+
+    public IRouter Options(string path, params Handle[] handlers)
+    {
+        _root.Options(path, handlers);
+        return this;
+    }
+
+    public IRouter Connect(string path, params Handle[] handlers)
+    {
+        _root.Connect(path, handlers);
+        return this;
+    }
+
+    public IRouter Trace(string path, params Handle[] handlers)
+    {
+        _root.Trace(path, handlers);
         return this;
     }
 

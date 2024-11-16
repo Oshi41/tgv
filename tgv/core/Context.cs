@@ -10,7 +10,7 @@ using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace tgv.core;
 
-public class Context
+public class Context : IDisposable
 {
     internal readonly HttpContextBase Ctx;
     private string _body;
@@ -21,6 +21,11 @@ public class Context
     /// Current routers hierarchy
     /// </summary>
     public Stack<IMatch> CurrentPath { get; } = new();
+    
+    /// <summary>
+    /// Contains history of visited routes
+    /// </summary>
+    public Queue<IMatch> Visited { get; } = new();
 
     /// <summary>
     /// Current request cookies 
@@ -71,6 +76,8 @@ public class Context
     public bool WasSent => Ctx.Response.ResponseSent;
 
     public Logger Logger { get; }
+    
+    public event EventHandler RequestFinished;
 
     #endregion
 
@@ -112,26 +119,14 @@ public class Context
     /// </summary>
     /// <param name="path">location</param>
     /// <param name="code">Redirection code</param>
-    public void Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
+    public async Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
     {
-        CheckBeforeSending();
+        var afterResponse = BeforeSending();
 
         Ctx.Response.Headers["Location"] = path;
         Ctx.Response.StatusCode = (int)code;
-        Ctx.Response.Send();
-    }
-
-    public async Task SendRaw(byte[] bytes, int code, string contentType)
-    {
-        CheckBeforeSending();
-
-        var resp = Ctx.Response;
-
-        Cookies.WriteHeaders(resp.Headers);
-        resp.StatusCode = code;
-        resp.ContentType = contentType;
-        resp.ContentLength = bytes.Length;
-        await resp.Send(bytes);
+        await Ctx.Response.Send();
+        afterResponse();
     }
 
     public virtual Task Send(string text, HttpStatusCode code, string contentType)
@@ -153,20 +148,39 @@ public class Context
     public virtual async Task SendFile(string filename)
     {
         if (!File.Exists(filename)) throw new FileNotFoundException(filename);
+        
+        var afterResponse = BeforeSending();
 
         var fs = File.OpenRead(filename);
         ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(filename));
         await Ctx.Response.Send(fs.Length, fs);
+        afterResponse();
     }
 
     #endregion
 
-    private void CheckBeforeSending()
+    private Action BeforeSending()
     {
         if (WasSent)
         {
             throw new Exception("Request was sent");
         }
+        
+        // save cookies
+        Cookies.WriteHeaders(Ctx.Response.Headers);
+        return () => RequestFinished?.Invoke(this, EventArgs.Empty);
+    }
+    
+    private async Task SendRaw(byte[] bytes, int code, string contentType)
+    {
+        var afterSending = BeforeSending();
+
+        var resp = Ctx.Response;
+        resp.StatusCode = code;
+        resp.ContentType = contentType;
+        resp.ContentLength = bytes.Length;
+        await resp.Send(bytes);
+        afterSending();
     }
 
     internal Context(HttpContextBase ctx, Logger logger)
@@ -180,5 +194,17 @@ public class Context
         Method = ctx.Request.Method.Convert();
         
         Logger.Debug("Start handling request");
+    }
+
+    public virtual void Dispose()
+    {
+        foreach (var callback in RequestFinished?.GetInvocationList()?.OfType<EventHandler>() 
+                                 ?? Enumerable.Empty<EventHandler>().ToArray())
+        {
+            RequestFinished -= callback;
+        }
+        
+        Visited.Clear();
+        CurrentPath.Clear();
     }
 }
