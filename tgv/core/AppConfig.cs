@@ -1,11 +1,23 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using WatsonWebserver.Core;
 
 namespace tgv.core;
 
 public class AppConfig
 {
-    public string ContextPath { get; set; } = "/";
-    public string DefaultContentType { get; set; } = "text/plain";
-    public bool UseHttps { get; set; }
-    public X509Certificate? Certificate { get; set; }
+    public WebserverSettings.IOSettings Io { get; set; } = new();
+    public WebserverSettings.SslSettings Ssl { get; set; } = new();
+    public WebserverSettings.HeaderSettings Headers { get; set; } = new();
+    public WebserverSettings.DebugSettings Debug { get; set; } = new();
+    public AccessControlManager Access { get; set; } = new();
+
+    internal WebserverSettings Convert()
+    {
+        return new WebserverSettings
+        {
+            Ssl = Ssl,
+            Headers = Headers,
+            Debug = Debug,
+            AccessControl = Access,
+        };
+    }
 }

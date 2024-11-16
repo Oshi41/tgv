@@ -5,7 +5,7 @@ namespace tgv.core;
 
 public class RoutePath : IMatch
 {
-    public RoutePath(string method, string path, Handle handler, RouterConfig config, bool isRouterPath = false)
+    public RoutePath(HttpMethod method, string path, Handle handler, RouterConfig config, bool isRouterPath = false)
     {
         Method = method;
         Path = path;
@@ -21,7 +21,7 @@ public class RoutePath : IMatch
     }
 
     public RoutePath Route => this;
-    public string Method { get; }
+    public HttpMethod Method { get; }
     public string Path { get; }
     public bool IsRouterPath { get; }
 
@@ -29,7 +29,7 @@ public class RoutePath : IMatch
     public RouterConfig Config { get; }
     public List<PathSegment> Segments { get; }
 
-    private string ConstructRegex(List<PathSegment> segments, IContext ctx)
+    private string ConstructRegex(List<PathSegment> segments, Context ctx)
     {
         var allSegments = new List<PathSegment>();
 
@@ -59,29 +59,16 @@ public class RoutePath : IMatch
         return regex;
     }
 
-    public bool Match(IContext ctx)
+    public bool Match(Context ctx)
     {
         // router should work anyway
-        if (!IsRouterPath)
-        {
-            // should handled as BEFORE method
-            if (ctx.Stage == HandleStages.Before && Method != "BEFORE") return false;
-            
-            // regular handler
-            if (ctx.Stage == HandleStages.Handle && Method != ctx.HttpMethod) return false;
-            
-            // should handled as AFTER method
-            if (ctx.Stage == HandleStages.After && Method != "AFTER") return false;
-            
-            // special error handler
-            if (ctx.Stage == HandleStages.Error && Method != "ERROR") return false;
-        }
+        if (!IsRouterPath && ctx.Method != Method) return false;
 
         // full match
         if (new Regex(ConstructRegex(Segments, ctx)).IsMatch(ctx.Url.AbsolutePath)) return true;
 
-        // last parameter may be insinde query
-        if (Segments.LastOrDefault()?.IsPattern == true)
+        // last path segment can be skipped
+        if (Segments.Any() && Segments.Last() is { IsWildcard: true } or { IsPattern: true })
         {
             var regex = ConstructRegex(Segments.SkipLast(1).ToList(), ctx);
             if (new Regex(regex, RegexOptions.IgnoreCase).IsMatch(ctx.Url.AbsolutePath))
@@ -100,7 +87,7 @@ public class RoutePath : IMatch
         return false;
     }
 
-    public IDictionary<string, string> Parameters(IContext ctx, bool ignoreLastSegment = false)
+    public IDictionary<string, string> Parameters(Context ctx, bool ignoreLastSegment = false)
     {
         var regex = ConstructRegex(Segments.SkipLast(ignoreLastSegment ? 1 : 0).ToList(), ctx)
             .Replace("[^/]+?", "([^/]+?)");

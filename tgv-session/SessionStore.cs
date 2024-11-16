@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Runtime.Caching;
@@ -15,7 +14,7 @@ public class SessionStore
 {
     private readonly App _app;
     private readonly SessionConfig _config;
-    private readonly ConditionalWeakTable<IContext, SessionContext> _sessionsFields = new();
+    private readonly ConditionalWeakTable<Context, SessionContext> _sessionsFields = new();
     private readonly Task<ObjectCache> _sessions;
     
     public SessionStore(App app, SessionConfig config)
@@ -31,7 +30,7 @@ public class SessionStore
     /// <param name="ctx">HTTP context</param>
     /// <param name="shouldOpen">Should create new session if expired / not autificated / wrong data / etc.</param>
     /// <returns></returns>
-    public async Task<SessionContext?> GetContext(IContext ctx, bool shouldOpen)
+    public async Task<SessionContext?> GetContext(Context ctx, bool shouldOpen)
     {
         if (!_sessionsFields.TryGetValue(ctx, out var result))
         {
@@ -50,20 +49,20 @@ public class SessionStore
                 }
                 else
                 {
-                    Debug.WriteLine($"TT[{ctx.TraceId}] Cannot read session id: {cookie.Value}");
+                    ctx.Logger.Debug($"Cannot read session id '{cookie.Value}'");
                 }
             }
 
             if (cookie?.Expired == true)
             {
-                Debug.WriteLine($"TT[{ctx.TraceId}] S[{cookie.Value}] Session expired from cookie");
+                ctx.Logger.Debug($"Session expired from cookie {cookie.Value}");
             }
         }
 
         // closing session explicitly
         if (result is { IsExpired: true })
         {
-            Debug.WriteLine($"TT[{ctx.TraceId}] S[{result.Id}] Session expired from context");
+            ctx.Logger.Debug($"Session expired from context");
             
             (await _sessions).Remove(result.Id.ToString());
             _sessionsFields.Remove(ctx);
@@ -72,7 +71,7 @@ public class SessionStore
 
         if (shouldOpen && result == null)
         {
-            Debug.WriteLine($"TT[{ctx.TraceId}] Starting session...");
+            ctx.Logger.Debug($"Starting new session...");
             result = new SessionContext(await _config.GenerateId(), DateTime.Now + _config.Expire);
 
             var cookie = new Cookie(_config.Cookie, result.Id.ToString())
@@ -87,7 +86,7 @@ public class SessionStore
                 AbsoluteExpiration = cookie.Expires
             });
 
-            Debug.WriteLine($"TT[{ctx.TraceId}] S[{result.Id}] Session created");
+            ctx.Logger.Debug($"Session {result.Id} created");
         }
 
         return result;
@@ -110,7 +109,7 @@ public class SessionStore
     /// </summary>
     /// <param name="ctx"></param>
     /// <returns></returns>
-    public async Task<bool> CloseSession(IContext ctx)
+    public async Task<bool> CloseSession(Context ctx)
     {
         var session = await GetContext(ctx, false);
         if (session == null) return false;

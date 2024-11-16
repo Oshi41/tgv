@@ -1,36 +1,46 @@
 ﻿using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using Flurl.Http;
-using Moq;
 using tgv;
 using tgv.core;
+using tgv.imp;
+using Timestamps;
+using WatsonWebserver.Core;
+using WatsonWebserver.Lite;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace tgv_tests;
 
 public static class TestUtils
 {
-    public static IContext Create(string path, string method = "GET")
+    public static Context Create(string path, HttpMethod? method = null)
     {
-        var ctx = new Mock<IContext>();
-        var q = new NameValueCollection();
-        if (!path.StartsWith("/"))
-            path = "/" + path;
-        var uri = new Uri($"http://localhost{path}");
-        var history = new Stack<IMatch>();
-        if (uri.Query.Length > 1)
+        var now = new Timestamp();
+        method ??= HttpMethod.Get;
+        
+        var context = new HttpContext
         {
-            foreach (var arr in uri.Query[1..].Split('&', StringSplitOptions.RemoveEmptyEntries)
-                         .Select(x => x.Split('=')))
+            Guid = Guid.NewGuid(),
+            Request = new HttpRequest($"127.0.0.1:80", new MemoryStream(),
+                $"{method.Method} {path} HTTP/1.1"),
+            Timestamp = now,
+            Response = new HttpResponse
             {
-                q[arr[0]] = arr[1];
-            }
-        }
-
-        ctx.Setup(x => x.Url).Returns(uri);
-        ctx.Setup(x => x.Query).Returns(q);
-        ctx.Setup(x => x.HttpMethod).Returns(method);
-        ctx.Object.Stage = HandleStages.Handle;
-        return ctx.Object;
+                StatusCode = 200,
+                Timestamp = now,
+                Headers = new NameValueCollection(),
+                ContentType = "text/plain",
+                ResponseSent = false,
+                ChunkedTransfer = false,
+            },
+            RouteType = RouteTypeEnum.Default,
+        };
+        
+        var result = new Context(context, new Logger())
+        {
+            Method = method
+        };
+        return result;
     }
 
     public static bool IsSuccess(int code)

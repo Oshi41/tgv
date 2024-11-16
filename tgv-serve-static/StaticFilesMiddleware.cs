@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
-using MimeTypes;
 using tgv;
 using tgv.core;
 
@@ -13,16 +12,16 @@ public static class StaticFilesMiddleware
 {
     public static App ServeStatic(this App app, StaticFilesConfig cfg)
     {
-        async Task Middleware(IContext ctx, Action next, Exception? e)
+        async Task Middleware(Context ctx, Action next, Exception? e)
         {
-            if (ctx.HttpMethod is not "GET" and not "HEAD")
+            if (ctx.Method != HttpMethod.Get && ctx.Method != HttpMethod.Head)
             {
                 if (cfg.FallThrough)
                 {
                     next();
                     return;
                 }
-
+                
                 ctx.ResponseHeaders["Content-Length"] = "0";
                 ctx.ResponseHeaders["Allow"] = "GET, HEAD";
                 ctx.Send(HttpStatusCode.MethodNotAllowed);
@@ -31,7 +30,7 @@ public static class StaticFilesMiddleware
 
             if (!Directory.Exists(cfg.SourceDirectory))
             {
-                await Console.Error.WriteLineAsync($"Source directory {cfg.SourceDirectory} does not exist");
+                ctx.Logger.Fatal($"Source directory {cfg.SourceDirectory} does not exist");
                 throw ctx.Throw(HttpStatusCode.InternalServerError);
             }
 
@@ -52,13 +51,11 @@ public static class StaticFilesMiddleware
             
             if (!file.StartsWith(Path.GetFullPath(cfg.SourceDirectory)))
             {
-                Debug.WriteLine("Attempt to get file outside of the source directory: {0}", file);
+                ctx.Logger.Debug("Attempt to get file outside of the source directory: {0}", file);
                 throw ctx.Throw(HttpStatusCode.BadRequest);
             }
-            
-            var bytes = File.ReadAllBytes(file);
-            ctx.Send(bytes);
-            ctx.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(file));
+
+            await ctx.SendFile(file);
         }
 
         app.After(Middleware);

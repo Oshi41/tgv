@@ -1,4 +1,5 @@
 ﻿using tgv.core;
+using tgv.extensions;
 
 namespace tgv.imp;
 
@@ -10,23 +11,70 @@ public class Router : IRouter
     public Router(string path, RouterConfig? routerConfig = null)
     {
         _routerConfig = routerConfig ?? new RouterConfig();
-        Route = new RoutePath("BEFORE", path, null, _routerConfig, true);
+        Route = new RoutePath(HttpMethodExtensions.Before, path, null, _routerConfig, true);
         Handler = HandleInner;
     }
 
     public RoutePath Route { get; }
+    public IRouter Use(params Handle[] handlers) => Use("*", handlers);
 
-    private Router AddRoutes(string method, string path, params Handle[] handlers)
+    public IRouter After(params Handle[] handlers)  => After("*", handlers);
+
+    public IRouter Use(string path, params Handle[] handlers)
     {
-        foreach (var handler in handlers)
-        {
-            _routes.Add(new RoutePath(method, path, handler, _routerConfig));
-        }
+        return AddRoutes(HttpMethodExtensions.Before, path, handlers);
+    }
 
+    public IRouter After(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethodExtensions.After, path, handlers);
+    }
+
+    public IRouter Use(IRouter router)
+    {
+        _routes.Add(router);
         return this;
     }
 
-    private async Task HandleInner(IContext ctx, Action next, Exception? exception = null)
+    public IRouter Get(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Get, path, handlers);
+    }
+
+    public IRouter Post(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Post, path, handlers);
+    }
+
+    public IRouter Delete(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Delete, path, handlers);
+    }
+
+    public IRouter Patch(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethodExtensions.Patch, path, handlers);
+    }
+
+    public IRouter Put(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Put, path, handlers);
+    }
+
+    public IRouter Head(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethod.Head, path, handlers);
+    }
+
+    public IRouter Error(string path, params Handle[] handlers)
+    {
+        return AddRoutes(HttpMethodExtensions.Error, path, handlers);
+    }
+
+    public bool Match(Context ctx) => Route.Match(ctx);
+    public Handle Handler { get; }
+    
+    private async Task HandleInner(Context ctx, Action next, Exception? exception = null)
     {
         ctx.CurrentPath.Push(this);
         using var __ = new Disposable(() => ctx.CurrentPath.Pop());
@@ -48,64 +96,13 @@ public class Router : IRouter
         next();
     }
 
-    public IRouter Use(params Handle[] handlers) => Use("*", handlers);
-
-    public IRouter After(params Handle[] handlers)
+    private Router AddRoutes(HttpMethod method, string path, params Handle[] handlers)
     {
-        return After("*", handlers);
-    }
+        foreach (var handler in handlers)
+        {
+            _routes.Add(new RoutePath(method, path, handler, _routerConfig));
+        }
 
-    public IRouter Use(string path, params Handle[] handlers)
-    {
-        return AddRoutes("BEFORE", path, handlers);
-    }
-
-    public IRouter After(string path, params Handle[] handlers)
-    {
-        return AddRoutes("AFTER", path, handlers);
-    }
-
-    public IRouter Use(IRouter router)
-    {
-        _routes.Add(router);
         return this;
     }
-
-    public IRouter Get(string path, params Handle[] handlers)
-    {
-        return AddRoutes("GET", path, handlers);
-    }
-
-    public IRouter Post(string path, params Handle[] handlers)
-    {
-        return AddRoutes("POST", path, handlers);
-    }
-
-    public IRouter Delete(string path, params Handle[] handlers)
-    {
-        return AddRoutes("DELETE", path, handlers);
-    }
-
-    public IRouter Patch(string path, params Handle[] handlers)
-    {
-        return AddRoutes("PATCH", path, handlers);
-    }
-
-    public IRouter Put(string path, params Handle[] handlers)
-    {
-        return AddRoutes("PUT", path, handlers);
-    }
-
-    public IRouter Head(string path, params Handle[] handlers)
-    {
-        return AddRoutes("HEAD", path, handlers);
-    }
-
-    public IRouter Error(string path, params Handle[] handlers)
-    {
-        return AddRoutes("ERROR", path, handlers);
-    }
-
-    public bool Match(IContext ctx) => Route.Match(ctx);
-    public Handle Handler { get; }
 }

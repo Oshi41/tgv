@@ -13,7 +13,7 @@ public class RoutePathTests
     [TestCase("/users/231238*123/details?q=1#q=1")]
     public void Parameters_Match(string path)
     {
-        var route = new RoutePath("GET", "/users/:me/details", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "/users/:me/details", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)));
     }
 
@@ -26,7 +26,7 @@ public class RoutePathTests
     [TestCase("/other/domains/1/users/2/details")]
     public void Parameters_DoNotMatch(string path)
     {
-        var route = new RoutePath("GET", "domains/:domain/users/:me/details", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "domains/:domain/users/:me/details", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)), Is.False);
     }
 
@@ -38,7 +38,7 @@ public class RoutePathTests
     [TestCase("/sooo/long/path/some/domains/1sldfskjuhgr/detail")]
     public void Wildcard_Match(string path)
     {
-        var route = new RoutePath("GET", "*/domains/:id/detail", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "*/domains/:id/detail", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)));
     }
 
@@ -50,7 +50,7 @@ public class RoutePathTests
     [TestCase("/sooo/long/path/some/domains/some/1sldfskjuhgr/detail")]
     public void Wildcard_DoNotMatch(string path)
     {
-        var route = new RoutePath("GET", "*/domains/:id/detail", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "*/domains/:id/detail", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)), Is.False);
     }
 
@@ -60,25 +60,25 @@ public class RoutePathTests
     [TestCase("/users/1/details?detail=value")]
     public void ParameterAsQuery(string path)
     {
-        var route = new RoutePath("GET", "/users/:user/details/:detail", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "/users/:user/details/:detail", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)));
     }
 
     [TestCase("/users/1/h/")]
     [TestCase("?q=1")]
     [TestCase("?q=1#h=2")]
-    [TestCase("")]
+    [TestCase("/")]
     [TestCase("/asdasd/asdfsdfsdf/sdfsdf/sdfsd/fsd/fsd/fsdf")]
     public void WildcardOnly(string path)
     {
-        var route = new RoutePath("GET", "*", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "*", null, new RouterConfig());
         Assert.That(route.Match(TestUtils.Create(path)));
     }
 
     [Test]
     public void ParseQuery()
     {
-        var route = new RoutePath("GET", "/users/:user/details/:detail", null, new RouterConfig());
+        var route = new RoutePath(HttpMethod.Get, "/users/:user/details/:detail", null, new RouterConfig());
 
         for (int i = 0; i < 20; i++)
         {

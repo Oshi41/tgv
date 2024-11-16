@@ -46,6 +46,7 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="SharpNetSH" Version="2.0.5" />
       <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
+      <PackageReference Include="Watson.Lite" Version="6.2.3" />
     </ItemGroup>
 
     <ItemGroup>

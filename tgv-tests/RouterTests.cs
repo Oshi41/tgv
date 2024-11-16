@@ -8,12 +8,12 @@ public class RouterTests
     [Test]
     public void TestComplicatedHierarchy()
     {
-        var calls = new Dictionary<string, List<string>>();
+        var calls = new Dictionary<HttpMethod, List<string>>();
         Handle baseHandler = (context, next, _) =>
         {
-            if (!calls.TryGetValue(context.HttpMethod, out var records))
+            if (!calls.TryGetValue(context.Method, out var records))
             {
-                calls[context.HttpMethod] = records = new List<string>();
+                calls[context.Method] = records = new List<string>();
             }
 
             records.Add(context.Url.PathAndQuery);
@@ -56,43 +56,43 @@ public class RouterTests
         var ctx = TestUtils.Create("/user/find/1");
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["GET"].Contains("/user/find/1"));
+        Assert.That(calls[HttpMethod.Get].Contains("/user/find/1"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(1));
 
-        ctx = TestUtils.Create("/user/delete/123", "POST");
+        ctx = TestUtils.Create("/user/delete/123", HttpMethod.Post);
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["POST"].Contains("/user/delete/123"));
+        Assert.That(calls[HttpMethod.Post].Contains("/user/delete/123"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(2));
 
-        ctx = TestUtils.Create("/user/create/567567", "PUT");
+        ctx = TestUtils.Create("/user/create/567567", HttpMethod.Put);
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["PUT"].Contains("/user/create/567567"));
+        Assert.That(calls[HttpMethod.Put].Contains("/user/create/567567"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(3));
 
         ctx = TestUtils.Create("/user/details/some/info");
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["GET"].Contains("/user/details/some/info"));
+        Assert.That(calls[HttpMethod.Get].Contains("/user/details/some/info"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(4));
 
         ctx = TestUtils.Create("/user/details/some/more/path/segments/info");
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["GET"].Contains("/user/details/some/more/path/segments/info"));
+        Assert.That(calls[HttpMethod.Get].Contains("/user/details/some/more/path/segments/info"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(5));
         
         ctx = TestUtils.Create("/color/random/once");
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["GET"].Contains("/color/random/once"));
+        Assert.That(calls[HttpMethod.Get].Contains("/color/random/once"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(6));
         
         ctx = TestUtils.Create("/color/random/twice");
         Assert.That(root.Match(ctx));
         root.Handler(ctx, () => { }).Wait();
-        Assert.That(calls["GET"].Contains("/color/random/twice"));
+        Assert.That(calls[HttpMethod.Get].Contains("/color/random/twice"));
         Assert.That(calls.Values.Sum(x => x.Count), Is.EqualTo(8));
     }
 }

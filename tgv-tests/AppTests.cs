@@ -48,11 +48,11 @@ public class AppTests
         {
             if (exception != null)
             {
-                context.Send(HttpStatusCode.InternalServerError, "Error occured");
+                context.Send(HttpStatusCode.InternalServerError);
             }
             else
             {
-                context.Send(HttpStatusCode.NotFound, "Not found");
+                context.Send(HttpStatusCode.NotFound);
             }
 
             return Task.CompletedTask;
@@ -99,7 +99,7 @@ public class AppTests
                 throw context.Throw(HttpStatusCode.BadRequest, "User already exists");
 
             _users.Add(user);
-            context.Send(HttpStatusCode.OK);
+            await context.Send(HttpStatusCode.OK);
         });
 
         var details = new Router("/:user");
