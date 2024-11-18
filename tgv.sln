@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-session", "tgv-session\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-tests", "tgv-tests\tgv-tests.csproj", "{92A6F515-48D1-4518-A0BD-51C05672990C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-cors", "tgv-cors\tgv-cors.csproj", "{F08C322D-2F57-4DCC-9A97-B9A9DBD95286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -30,5 +32,9 @@ Global
 		{92A6F515-48D1-4518-A0BD-51C05672990C}.Release|x64.Build.0 = Release|x64
 		{92A6F515-48D1-4518-A0BD-51C05672990C}.Debug|x64.ActiveCfg = Debug|x64
 		{92A6F515-48D1-4518-A0BD-51C05672990C}.Debug|x64.Build.0 = Debug|x64
+		{F08C322D-2F57-4DCC-9A97-B9A9DBD95286}.Release|x64.ActiveCfg = Release|Any CPU
+		{F08C322D-2F57-4DCC-9A97-B9A9DBD95286}.Release|x64.Build.0 = Release|Any CPU
+		{F08C322D-2F57-4DCC-9A97-B9A9DBD95286}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F08C322D-2F57-4DCC-9A97-B9A9DBD95286}.Debug|x64.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
