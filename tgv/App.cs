@@ -38,7 +38,7 @@ public class App : IRouter
 
     public Logger Logger { get; }
 
-    public void Start(int port = 7000)
+    public async Task Start(int port = 7000)
     {
         Stop();
         var settings = _appConfig.Convert();
@@ -46,8 +46,13 @@ public class App : IRouter
         _server = new WebserverLite(settings, ServerHandler);
         _server.Events.Logger = Logger.WriteLog;
         _server.Start();
-        Started?.Invoke(this, _server);
 
+        while (string.IsNullOrEmpty(RunningUrl))
+        {
+            await Task.Delay(100);
+        }
+        
+        Started?.Invoke(this, _server);
         Logger.Debug($"Server started on port {_server.Settings.Port}");
     }
 

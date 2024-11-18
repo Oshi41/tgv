@@ -9,7 +9,7 @@ public class SessionMiddleware
     private App _app;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         _app = new App();
 
@@ -20,7 +20,7 @@ public class SessionMiddleware
         });
 
         _app.UseSession(new SessionConfig());
-        _app.Start(TestUtils.RandPort());
+        await _app.Start(TestUtils.RandPort());
     }
 
     [TearDown]

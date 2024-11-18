@@ -25,7 +25,7 @@ public class AppTests
     private App _app;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         var rand = new Random();
 
@@ -114,7 +114,8 @@ public class AppTests
             return Task.CompletedTask;
         });
 
-        _app.Start(TestUtils.RandPort());
+        await _app.Start(TestUtils.RandPort());
+        Assert.That(_app.RunningUrl, Is.Not.Null.Or.Empty);
     }
 
     [TearDown]
