@@ -165,9 +165,22 @@ public class Context : IDisposable
         {
             throw new Exception("Request was sent");
         }
+
+        var existing = new CookieCollection();
+        existing.Parse(Ctx.Request.RetrieveHeaderValue("Cookie") ?? string.Empty);
+
+        var save = Cookies.OfType<Cookie>().Except(existing.OfType<Cookie>()).ToList();
+        if (save.Any())
+        {
+            existing = new CookieCollection();
+            foreach (var cookie in save)
+                existing.Add(cookie);
+            
+            // save cookies
+            existing.WriteHeaders(Ctx.Response.Headers);
+        }
         
-        // save cookies
-        Cookies.WriteHeaders(Ctx.Response.Headers);
+        
         return () => RequestFinished?.Invoke(this, EventArgs.Empty);
     }
     
