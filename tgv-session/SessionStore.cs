@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Runtime.Caching;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using tgv;
 using tgv.core;
@@ -14,8 +11,7 @@ public class SessionStore
 {
     private readonly App _app;
     private readonly SessionConfig _config;
-    private readonly ConditionalWeakTable<Context, SessionContext> _sessionsFields = new();
-    private readonly Task<ObjectCache> _sessions;
+    private readonly Task<IStore> _sessions;
     
     public SessionStore(App app, SessionConfig config)
     {
@@ -32,63 +28,59 @@ public class SessionStore
     /// <returns></returns>
     public async Task<SessionContext?> GetContext(Context ctx, bool shouldOpen)
     {
-        if (!_sessionsFields.TryGetValue(ctx, out var result))
+        var cookie = ctx.Cookies[_config.Cookie];
+        var store = await _sessions;
+
+        if (cookie != null)
         {
-            var cookie = ctx.Cookies[_config.Cookie];
-            if (cookie is { Expired: false })
+            if (!cookie.Expired)
             {
                 if (Guid.TryParse(cookie.Value, out var guid))
                 {
-                    if ((await _sessions).Get(guid.ToString()) is SessionContext session)
+                    var session = await store.FindAsync(guid);
+                    if (session != null)
                     {
-                        // reuse same instance
-                        result = session;
-                        // assotiate with context
-                        _sessionsFields.Add(ctx, session);
+                        if (!session.IsExpired)
+                        {
+                            return session;
+                        }
+
+                        await store.RemoveAsync(guid);
+                        ctx.Logger.Debug($"Session {guid} was expired");
+                    }
+                    else
+                    {
+                        ctx.Logger.Debug($"Session {guid} not found");
                     }
                 }
                 else
                 {
-                    ctx.Logger.Debug($"Cannot read session id '{cookie.Value}'");
+                    ctx.Logger.Debug($"Wrong session cookie format: {cookie.Value}");
                 }
             }
-
-            if (cookie?.Expired == true)
+            else
             {
-                ctx.Logger.Debug($"Session expired from cookie {cookie.Value}");
+                ctx.Logger.Debug($"Session cookie was expired: {cookie.Value}");
             }
         }
-
-        // closing session explicitly
-        if (result is { IsExpired: true })
+        else
         {
-            ctx.Logger.Debug($"Session expired from context");
-            
-            (await _sessions).Remove(result.Id.ToString());
-            _sessionsFields.Remove(ctx);
-            result = null;
+            ctx.Logger.Debug($"Session cookie was not found");
         }
 
-        if (shouldOpen && result == null)
+        if (!shouldOpen) return null;
+        
+        ctx.Logger.Debug($"Opening new session: {ctx}");
+        var result = new SessionContext(await _config.GenerateId(), DateTime.Now + _config.Expire);
+        
+        cookie = new Cookie(_config.Cookie, result.Id.ToString())
         {
-            ctx.Logger.Debug($"Starting new session...");
-            result = new SessionContext(await _config.GenerateId(), DateTime.Now + _config.Expire);
-
-            var cookie = new Cookie(_config.Cookie, result.Id.ToString())
-            {
-                Expires = result.Expires
-            };
-            ctx.Cookies.Add(cookie);
-
-            _sessionsFields.Add(ctx, result);
-            (await _sessions).Add(new CacheItem(result.Id.ToString(), result), new CacheItemPolicy
-            {
-                AbsoluteExpiration = cookie.Expires
-            });
-
-            ctx.Logger.Debug($"Session {result.Id} created");
-        }
-
+            Expires = result.Expires,
+            HttpOnly = true,
+        };
+        ctx.Cookies.Add(cookie);
+        await store.PutAsync(result);
+        ctx.Logger.Debug($"Session {result.Id} created");
         return result;
     }
 
@@ -96,12 +88,10 @@ public class SessionStore
     /// Returns currently opened sessions
     /// </summary>
     /// <returns></returns>
-    public async Task<IList<SessionContext>> GetAllSessions()
+    public async Task<IEnumerable<SessionContext>> GetAllSessions()
     {
-        return (await _sessions)
-            .Select(x => x.Value)
-            .OfType<SessionContext>()
-            .ToList();
+        var store = await _sessions;
+        return await store.FindAllAsync();
     }
 
     /// <summary>
@@ -114,8 +104,8 @@ public class SessionStore
         var session = await GetContext(ctx, false);
         if (session == null) return false;
 
-        _sessionsFields.Remove(ctx);
-        (await _sessions).Remove(session.Id.ToString());
+        var store = await _sessions;
+        await store.RemoveAsync(session.Id);
         var cookie = ctx.Cookies[_config.Cookie];
         if (cookie != null)
         {

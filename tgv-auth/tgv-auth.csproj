@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>tgv_auth</RootNamespace>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\tgv\tgv.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JWT" Version="11.0.0-beta3" />
+    </ItemGroup>
+
+</Project>

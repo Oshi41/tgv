@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Win32.SafeHandles;
 using tgv.core;
 using tgv.extensions;
 
