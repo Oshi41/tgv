@@ -5,7 +5,7 @@
         <RootNamespace>tgv_session</RootNamespace>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <Title>TGV-session</Title>
         <Description>TGV middleware using cookie sessions</Description>
         <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>

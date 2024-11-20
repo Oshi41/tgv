@@ -13,12 +13,12 @@
         <PackageLicenseUrl>https://github.com/Oshi41/tgv/blob/master/LICENSE</PackageLicenseUrl>
         <PackageIcon>tgv.png</PackageIcon>
         <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
-        <PackageTags>web http router app api</PackageTags>
+        <PackageTags>web http https router app api</PackageTags>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x64</Platforms>
         <UserSecretsId>8b089600-ec7c-4402-a9c4-4a3c24055331</UserSecretsId>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <Authors>Oshi41</Authors>
         <Company>Oshi41</Company>
         <AssemblyVersion>0.0.1</AssemblyVersion>

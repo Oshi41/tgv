@@ -5,6 +5,15 @@
         <RootNamespace>tgv_cors</RootNamespace>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
+        <Version>0.0.2</Version>
+        <Title>TGV Cors</Title>
+        <Authors>Oshi41</Authors>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>TGV CORS middleware</Description>
+        <Copyright>MIT</Copyright>
+        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+        <PackageTags>tgv middleware cors</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
