@@ -4,7 +4,7 @@ using tgv;
 
 namespace tgv_tests;
 
-public class SessionMiddleware
+public class TgvSession
 {
     private App _app;
 

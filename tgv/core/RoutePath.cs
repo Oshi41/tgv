@@ -62,7 +62,7 @@ public class RoutePath : IMatch
     public bool Match(Context ctx)
     {
         // router should work anyway
-        if (!IsRouterPath && ctx.Method != Method) return false;
+        if (!IsRouterPath && ctx.Stage != Method) return false;
 
         // full match
         if (new Regex(ConstructRegex(Segments, ctx)).IsMatch(ctx.Url.AbsolutePath)) return true;

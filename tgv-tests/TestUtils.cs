@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using Flurl.Http;
+using HtmlParserDotNet;
 using tgv;
 using tgv.core;
 using tgv.imp;
@@ -38,7 +39,7 @@ public static class TestUtils
         
         var result = new Context(context, new Logger())
         {
-            Method = method
+            Stage = method
         };
         return result;
     }
@@ -56,5 +57,12 @@ public static class TestUtils
     public static IFlurlClient CreateAgent(this App app, string prefix, [CallerMemberName] string method = "")
     {
         return FlurlHttp.Clients.GetOrAdd($"{method}_{prefix}", app.RunningUrl);
+    }
+
+    public static async Task<HtmlElement> GetHtmlAsync(this IFlurlRequest request)
+    {
+        var txt = await request.GetStringAsync();
+        var html = HtmlParser.LoadFromHtmlString(txt);
+        return html.DocumentElement;
     }
 }

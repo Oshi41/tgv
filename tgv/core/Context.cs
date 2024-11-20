@@ -48,9 +48,14 @@ public class Context : IDisposable
     public NameValueCollection ResponseHeaders => Ctx.Response.Headers;
 
     /// <summary>
-    /// Current HTTP method
+    /// Current context HTTP method stage
     /// </summary>
-    public HttpMethod Method { get; internal set; }
+    public HttpMethod Stage { get; internal set; }
+    
+    /// <summary>
+    /// Original response HTTP method. Will not change in any ctx stage
+    /// </summary>
+    public HttpMethod ResponseMethod { get; }
 
     /// <summary>
     /// Request content type
@@ -203,8 +208,8 @@ public class Context : IDisposable
         Cookies.Parse(ctx.Request.RetrieveHeaderValue("Cookie") ?? string.Empty);
         Ctx = ctx;
         Logger = logger.WithCustomMessage((_, message, _, _, _)
-            => $"[{TraceId}][{Method?.Method}][{ctx.Request.Url.RawWithQuery}] {message}");
-        Method = ctx.Request.Method.Convert();
+            => $"[{TraceId}][{Stage?.Method}][{ctx.Request.Url.RawWithQuery}] {message}");
+        ResponseMethod = Stage = ctx.Request.Method.Convert();
         
         Logger.Debug("Start handling request");
     }

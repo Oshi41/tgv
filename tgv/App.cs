@@ -100,7 +100,7 @@ public class App : IRouter
         {
             foreach (var method in new [] { Hme.Before, ctx.Ctx.Request.Method.Convert(), Hme.After })
             {
-                ctx.Method = method;
+                ctx.Stage = method;
                 var next = false;
                 await _root.Handler(ctx, () => next = true);
 
@@ -120,12 +120,12 @@ public class App : IRouter
     {
         try
         {
-            if (ctx.Method == Hme.Error)
+            if (ctx.Stage == Hme.Error)
             {
                 throw new Exception($"Fatal error occured");
             }
             
-            ctx.Method = Hme.Error;
+            ctx.Stage = Hme.Error;
             await _root.Handler(ctx, () => { }, error);
         }
         catch (Exception ex)

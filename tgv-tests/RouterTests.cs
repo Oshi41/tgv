@@ -11,9 +11,9 @@ public class RouterTests
         var calls = new Dictionary<HttpMethod, List<string>>();
         Handle baseHandler = (context, next, _) =>
         {
-            if (!calls.TryGetValue(context.Method, out var records))
+            if (!calls.TryGetValue(context.Stage, out var records))
             {
-                calls[context.Method] = records = new List<string>();
+                calls[context.Stage] = records = new List<string>();
             }
 
             records.Add(context.Url.PathAndQuery);

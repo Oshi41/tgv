@@ -26,7 +26,7 @@ public static class CorsMiddleware
             ctx.ResponseHeaders["Access-Control-Expose-Headers"] = string.Join(",", settings.ExposedHeaders);
 
         // continue all request except preflight
-        if (ctx.Method != HttpMethod.Options)
+        if (ctx.Stage != HttpMethod.Options)
         {
             next();
             return;

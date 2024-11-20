@@ -14,7 +14,7 @@ public static class StaticFilesMiddleware
     {
         async Task Middleware(Context ctx, Action next, Exception? e)
         {
-            if (ctx.Method != HttpMethod.Get && ctx.Method != HttpMethod.Head)
+            if (ctx.ResponseMethod != HttpMethod.Get && ctx.ResponseMethod != HttpMethod.Head)
             {
                 if (cfg.FallThrough)
                 {
@@ -24,7 +24,7 @@ public static class StaticFilesMiddleware
                 
                 ctx.ResponseHeaders["Content-Length"] = "0";
                 ctx.ResponseHeaders["Allow"] = "GET, HEAD";
-                ctx.Send(HttpStatusCode.MethodNotAllowed);
+                await ctx.Send(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -40,7 +40,7 @@ public static class StaticFilesMiddleware
                 .Trim(Path.DirectorySeparatorChar, ' ');
             
             if (!file.Contains("."))
-                file += $"{Path.DirectorySeparatorChar}index.html";
+                file += $"index.html";
             
             file = Path.GetFullPath(Path.Combine(cfg.SourceDirectory, file));
             if (!File.Exists(file))

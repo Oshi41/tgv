@@ -10,8 +10,17 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <OutputPath>..\bin\x64\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+      <OutputPath>..\bin\x64\Release\</OutputPath>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Flurl.Http" Version="4.0.2" />
+      <PackageReference Include="HtmlParserDotNet" Version="1.0.0" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
       <PackageReference Include="Moq.AutoMock" Version="3.6.0-ci0596" />
       <PackageReference Include="NUnit" Version="4.2.2" />
@@ -26,6 +35,12 @@
       <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
       <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
       <ProjectReference Include="..\tgv\tgv.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="static\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
