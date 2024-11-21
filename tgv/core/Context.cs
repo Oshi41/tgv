@@ -21,7 +21,7 @@ public class Context : IDisposable
     /// Current routers hierarchy
     /// </summary>
     public Stack<IMatch> CurrentPath { get; } = new();
-    
+
     /// <summary>
     /// Contains history of visited routes
     /// </summary>
@@ -51,7 +51,7 @@ public class Context : IDisposable
     /// Current context HTTP method stage
     /// </summary>
     public HttpMethod Stage { get; internal set; }
-    
+
     /// <summary>
     /// Original response HTTP method. Will not change in any ctx stage
     /// </summary>
@@ -81,7 +81,7 @@ public class Context : IDisposable
     public bool WasSent => Ctx.Response.ResponseSent;
 
     public Logger Logger { get; }
-    
+
     public event EventHandler RequestFinished;
 
     #endregion
@@ -137,7 +137,8 @@ public class Context : IDisposable
     public virtual Task Send(string text, HttpStatusCode code, string contentType)
         => SendRaw(Encoding.UTF8.GetBytes(text), (int)code, contentType);
 
-    public virtual Task Send(HttpStatusCode code) => Send(code.ToString(), code, "text/plain");
+    public virtual Task Send(HttpStatusCode code, string? message = null)
+        => Send(message ?? code.ToString(), code, "text/plain");
 
     public virtual Task Json(object resp)
     {
@@ -153,7 +154,7 @@ public class Context : IDisposable
     public virtual async Task SendFile(string filename)
     {
         if (!File.Exists(filename)) throw new FileNotFoundException(filename);
-        
+
         var afterResponse = BeforeSending();
 
         var fs = File.OpenRead(filename);
@@ -180,15 +181,15 @@ public class Context : IDisposable
             existing = new CookieCollection();
             foreach (var cookie in save)
                 existing.Add(cookie);
-            
+
             // save cookies
             existing.WriteHeaders(Ctx.Response.Headers);
         }
-        
-        
+
+
         return () => RequestFinished?.Invoke(this, EventArgs.Empty);
     }
-    
+
     private async Task SendRaw(byte[] bytes, int code, string contentType)
     {
         var afterSending = BeforeSending();
@@ -210,18 +211,18 @@ public class Context : IDisposable
         Logger = logger.WithCustomMessage((_, message, _, _, _)
             => $"[{TraceId}][{Stage?.Method}][{ctx.Request.Url.RawWithQuery}] {message}");
         ResponseMethod = Stage = ctx.Request.Method.Convert();
-        
+
         Logger.Debug("Start handling request");
     }
 
     public virtual void Dispose()
     {
-        foreach (var callback in RequestFinished?.GetInvocationList()?.OfType<EventHandler>() 
+        foreach (var callback in RequestFinished?.GetInvocationList()?.OfType<EventHandler>()
                                  ?? Enumerable.Empty<EventHandler>().ToArray())
         {
             RequestFinished -= callback;
         }
-        
+
         Visited.Clear();
         CurrentPath.Clear();
     }

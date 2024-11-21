@@ -51,7 +51,7 @@ public class App : IRouter
         {
             await Task.Delay(100);
         }
-        
+
         Started?.Invoke(this, _server);
         Logger.Debug($"Server started on port {_server.Settings.Port}");
     }
@@ -73,32 +73,13 @@ public class App : IRouter
     {
         using var context = new Context(ctx, Logger);
         await Handle(context);
-        
-        // checking if response was sent
-        if (context.WasSent) return;
-
-        // no route was visited
-        if (!context.Visited.Any())
-        {
-            await context.Send(HttpStatusCode.NotFound);
-            return;
-        }
-        
-        // checking if visited any error
-        var wasError = context.Visited
-            .Select(x => x.Route)
-            .Any(x => x.Method == Hme.Error);
-        
-        await context.Send(wasError
-            ? HttpStatusCode.InternalServerError
-            : HttpStatusCode.OK);
     }
 
     private async Task Handle(Context ctx)
     {
         try
         {
-            foreach (var method in new [] { Hme.Before, ctx.Ctx.Request.Method.Convert(), Hme.After })
+            foreach (var method in new[] { Hme.Before, ctx.Ctx.Request.Method.Convert(), Hme.After })
             {
                 ctx.Stage = method;
                 var next = false;
@@ -106,6 +87,13 @@ public class App : IRouter
 
                 // do not allow to call further 
                 if (!next) break;
+            }
+
+            // sending default response if didn't do so
+            if (!ctx.WasSent)
+            {
+                ctx.Logger.Info("Sending default OK response");
+                await ctx.Send(HttpStatusCode.OK);
             }
         }
         catch (Exception e)
@@ -124,15 +112,30 @@ public class App : IRouter
             {
                 throw new Exception($"Fatal error occured");
             }
-            
+
             ctx.Stage = Hme.Error;
             await _root.Handler(ctx, () => { }, error);
         }
         catch (Exception ex)
         {
+            error = ex;
             ctx.Logger.Fatal($"Exception: {ex.Message}");
+        }
+        finally
+        {
+            // sending default error response
             if (!ctx.WasSent)
-                await ctx.Send(HttpStatusCode.InternalServerError);
+            {
+                ctx.Logger.Info("Sending default InternalServerError response");
+                if (error is HttpException httpException)
+                {
+                    await ctx.Send(httpException.Code, httpException.Message);
+                }
+                else
+                {
+                    await ctx.Send(HttpStatusCode.InternalServerError);
+                }
+            }
         }
     }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using tgv;
 using tgv.core;
 
-namespace charsp_express_serve_static;
+namespace tgv_serve_static;
 
 public static class StaticFilesMiddleware
 {

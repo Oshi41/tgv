@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-cors", "tgv-cors\tgv-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-auth", "tgv-auth\tgv-auth.csproj", "{D4A65673-1F29-4EC1-8ECE-EDE53B94F4A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-benchmark", "tgv-benchmark\tgv-benchmark.csproj", "{5B5BAA99-5484-418E-B8AA-7D6B229C254B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -42,5 +44,9 @@ Global
 		{D4A65673-1F29-4EC1-8ECE-EDE53B94F4A2}.Debug|x64.Build.0 = Debug|Any CPU
 		{D4A65673-1F29-4EC1-8ECE-EDE53B94F4A2}.Release|x64.ActiveCfg = Release|x64
 		{D4A65673-1F29-4EC1-8ECE-EDE53B94F4A2}.Release|x64.Build.0 = Release|x64
+		{5B5BAA99-5484-418E-B8AA-7D6B229C254B}.Release|x64.ActiveCfg = Release|Any CPU
+		{5B5BAA99-5484-418E-B8AA-7D6B229C254B}.Release|x64.Build.0 = Release|Any CPU
+		{5B5BAA99-5484-418E-B8AA-7D6B229C254B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5B5BAA99-5484-418E-B8AA-7D6B229C254B}.Debug|x64.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

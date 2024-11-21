@@ -1,4 +1,4 @@
-﻿namespace charsp_express_serve_static;
+﻿namespace tgv_serve_static;
 
 public class StaticFilesConfig
 {

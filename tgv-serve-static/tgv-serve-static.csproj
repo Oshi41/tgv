@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <RootNamespace>charsp_express_serve_static</RootNamespace>
+        <RootNamespace>tgv_serve_static</RootNamespace>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x64</Platforms>
         <LangVersion>12</LangVersion>

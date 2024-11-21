@@ -1,0 +1,57 @@
+﻿@host = http://localhost:7000
+
+# @name=BasicRequest
+GET {{host}}/say_hello
+Accept: text/plain
+###
+
+# @name=AllUsers
+GET {{host}}/users
+Accept: application/json
+###
+
+# @name=UserById
+GET {{host}}/users/0
+Accept: application/json
+###
+
+# @name=NotUserById
+GET {{host}}/users/asd-asd-asd-df
+Accept: application/json
+###
+
+# @name=DeleteExistingUser
+DELETE {{host}}/users/1
+Accept: text/plain
+###
+
+# @name=DeleteNotFoundUser
+DELETE {{host}}/users/sdfsdf-sdfsdf-sdf
+Accept: text/plain
+###
+
+# @name=PatchExistingUser
+PATCH {{host}}/users
+Accept: text/plain
+Content-Type: application/json
+
+{
+  "Id": "0",
+  "Name": "{{$random.name.firstName}}",
+  "Surname": "{{$random.name.lastName}}",
+  "Age": 1{{$random.number.digit}}
+}
+###
+
+# @name=PatchNotExistingUser
+PATCH {{host}}/users
+Accept: text/plain
+Content-Type: application/json
+
+{
+  "Id": "{{$random.idNumber.valid}}",
+  "Name": "{{$random.name.firstName}}",
+  "Surname": "{{$random.name.lastName}}",
+  "Age": 1{{$random.number.digit}}
+}
+###
