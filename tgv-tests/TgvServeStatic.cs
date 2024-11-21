@@ -3,6 +3,7 @@ using Flurl.Http;
 using HtmlParserDotNet;
 using tgv_serve_static;
 using tgv;
+using tgv.servers;
 
 namespace tgv_tests;
 
@@ -13,7 +14,7 @@ public class TgvServeStatic
     [SetUp]
     public async Task Setup()
     {
-        _app = new App();
+        _app = new App(h => new WatsonHttpServer(h));
         _app.ServeStatic(new StaticFilesConfig(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "static")))
         {
             FallThrough = true,
@@ -24,7 +25,7 @@ public class TgvServeStatic
             context.Text("world");
             return Task.CompletedTask;
         });
-        
+
         await _app.Start(TestUtils.RandPort());
     }
 
@@ -41,7 +42,7 @@ public class TgvServeStatic
             .Request("")
             .AllowHttpStatus("2xx")
             .GetHtmlAsync();
-        
+
         Assert.That(resp.GetElementsByTagName("title").First().InnerHTML,
             Is.EqualTo("Hello World!"));
     }

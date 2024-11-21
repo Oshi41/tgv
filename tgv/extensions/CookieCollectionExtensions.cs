@@ -61,10 +61,17 @@ public static class CookieCollectionExtensions
         }
     }
 
-    public static void WriteHeaders(this CookieCollection cookies, NameValueCollection headers)
+    public static IEnumerable<Cookie> Diff(this CookieCollection left, CookieCollection right)
     {
-        if (cookies.Count < 1) return;
-        
-        headers["Set-Cookie"] = string.Join(", ", cookies.OfType<Cookie>().Select(x => x.ToString()));
+        return right.OfType<Cookie>().Except(left.OfType<Cookie>());
+    }
+
+    public static void WriteHeaders(this IEnumerable<Cookie> cookies, NameValueCollection headers)
+    {
+        var str = string.Join(", ", cookies?.Select(x => x.ToString()) ?? []);
+        if (!string.IsNullOrEmpty(str))
+        {
+            headers["Set-Cookie"] = str;
+        }
     }
 }

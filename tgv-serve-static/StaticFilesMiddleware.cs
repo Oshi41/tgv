@@ -14,7 +14,7 @@ public static class StaticFilesMiddleware
     {
         async Task Middleware(Context ctx, Action next, Exception? e)
         {
-            if (ctx.ResponseMethod != HttpMethod.Get && ctx.ResponseMethod != HttpMethod.Head)
+            if (ctx.Method != HttpMethod.Get && ctx.Method != HttpMethod.Head)
             {
                 if (cfg.FallThrough)
                 {

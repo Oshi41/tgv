@@ -2,27 +2,29 @@
 using tgv.core;
 using tgv.extensions;
 using tgv.imp;
-using WatsonWebserver.Lite;
 using Handle = tgv.core.Handle;
 using Hme = tgv.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
+using tgv.servers;
 using WatsonWebserver.Core;
 
 [assembly: InternalsVisibleTo("tgv-tests")]
 
 namespace tgv;
 
+public delegate Task HttpHandler(Context ctx);
+
 public class App : IRouter
 {
-    private readonly AppConfig _appConfig;
-    private WebserverLite _server;
+    private IServer _server;
     private IRouter _root;
 
-    public App(AppConfig? config = null, RouterConfig? routerConfig = null)
+    public App(Func<HttpHandler, IServer> server, RouterConfig? cfg = null)
     {
-        _appConfig = config ?? new AppConfig();
-        _root = new Router("*", routerConfig ?? new RouterConfig());
         Logger = new Logger();
+        _root = new Router("*", cfg ?? new RouterConfig());
+        _server = server(Handle);
+        _server.Logger.WriteLog = Logger.WriteLog;
     }
 
     public string? RunningUrl
@@ -31,8 +33,8 @@ public class App : IRouter
         {
             if (_server?.IsListening != true) return null;
 
-            var prefix = _server.Settings.Ssl.Enable ? "https" : "http";
-            return $"{prefix}://localhost:{_server.Settings.Port}/";
+            var prefix = _server.IsHttps ? "https" : "http";
+            return $"{prefix}://localhost:{_server.Port}/";
         }
     }
 
@@ -41,11 +43,7 @@ public class App : IRouter
     public async Task Start(int port = 7000)
     {
         Stop();
-        var settings = _appConfig.Convert();
-        settings.Port = port;
-        _server = new WebserverLite(settings, ServerHandler);
-        _server.Events.Logger = Logger.WriteLog;
-        _server.Start();
+        await _server.StartAsync(port);
 
         while (string.IsNullOrEmpty(RunningUrl))
         {
@@ -53,7 +51,7 @@ public class App : IRouter
         }
 
         Started?.Invoke(this, _server);
-        Logger.Debug($"Server started on port {_server.Settings.Port}");
+        Logger.Debug($"Server started on port {_server.Port}");
     }
 
     public bool Stop()
@@ -66,20 +64,14 @@ public class App : IRouter
         return true;
     }
 
-    public event EventHandler<WebserverLite> Started;
-    public event EventHandler<WebserverLite> Closed;
-
-    private async Task ServerHandler(HttpContextBase ctx)
-    {
-        using var context = new Context(ctx, Logger);
-        await Handle(context);
-    }
+    public event EventHandler<IServer> Started;
+    public event EventHandler<IServer> Closed;
 
     private async Task Handle(Context ctx)
     {
         try
         {
-            foreach (var method in new[] { Hme.Before, ctx.Ctx.Request.Method.Convert(), Hme.After })
+            foreach (var method in new[] { Hme.Before, ctx.Method, Hme.After })
             {
                 ctx.Stage = method;
                 var next = false;

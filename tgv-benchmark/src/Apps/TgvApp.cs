@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
 using tgv;
+using tgv.servers;
 
 namespace tgv_benchmark.Apps;
 
@@ -10,7 +11,7 @@ public class TgvApp : IApp
     
     public TgvApp()
     {
-        _app = new App();
+        _app = new App(handler => new WatsonHttpServer(handler));
         _app.Logger.WriteLog = _ => { };
         var users = Enumerable.Range(0, 20).Select(i => new User(i.ToString())).ToList();
 

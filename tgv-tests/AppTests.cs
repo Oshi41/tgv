@@ -2,6 +2,7 @@
 using Flurl.Http;
 using tgv;
 using tgv.imp;
+using tgv.servers;
 
 namespace tgv_tests;
 
@@ -43,7 +44,7 @@ public class AppTests
             });
         }
 
-        _app = new App();
+        _app = new App(handler => new WatsonHttpServer(handler));
         _app.After((context, next, exception) =>
         {
             if (exception != null)

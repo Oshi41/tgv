@@ -18,7 +18,7 @@ public static class TestUtils
     {
         var now = new Timestamp();
         method ??= HttpMethod.Get;
-        
+
         var context = new HttpContext
         {
             Guid = Guid.NewGuid(),
@@ -36,8 +36,8 @@ public static class TestUtils
             },
             RouteType = RouteTypeEnum.Default,
         };
-        
-        var result = new Context(context, new Logger())
+
+        var result = new WatsonContext(context, new Logger())
         {
             Stage = method
         };

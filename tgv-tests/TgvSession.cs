@@ -1,6 +1,7 @@
 ﻿using Flurl.Http;
 using tgv_session;
 using tgv;
+using tgv.servers;
 
 namespace tgv_tests;
 
@@ -11,7 +12,7 @@ public class TgvSession
     [SetUp]
     public async Task Setup()
     {
-        _app = new App();
+        _app = new App(handler => new WatsonHttpServer(handler));
 
         _app.Get("/hello", (context, _, _) =>
         {
