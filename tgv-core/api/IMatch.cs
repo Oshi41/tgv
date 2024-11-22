@@ -1,6 +1,6 @@
-﻿using tgv_common.imp;
+﻿using tgv_core.imp;
 
-namespace tgv_common.api;
+namespace tgv_core.api;
 
 public interface IMatch
 {

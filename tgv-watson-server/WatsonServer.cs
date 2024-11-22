@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
+using tgv_core.imp;
 using WatsonWebserver.Core;
 using WatsonWebserver.Lite;
 

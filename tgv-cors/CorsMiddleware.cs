@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Net.Http;
-using tgv_common.api;
+using tgv_core.api;
 
 namespace tgv_cors;
 

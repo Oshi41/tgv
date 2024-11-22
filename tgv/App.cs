@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using Hme = tgv_common.extensions.HttpMethodExtensions;
+using Hme = tgv_core.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
+using tgv_core.imp;
 
 [assembly: InternalsVisibleTo("tgv-tests")]
 

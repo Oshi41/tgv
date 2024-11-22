@@ -1,4 +1,4 @@
-﻿namespace tgv_common.imp;
+﻿namespace tgv_core.imp;
 
 public class PathSegment
 {

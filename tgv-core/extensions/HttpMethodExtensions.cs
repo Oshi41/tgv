@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace tgv_common.extensions;
+namespace tgv_core.extensions;
 
 public static class HttpMethodExtensions
 {

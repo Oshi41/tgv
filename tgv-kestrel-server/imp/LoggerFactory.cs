@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using tgv_common.imp;
+using tgv_core.imp;
 
 namespace tgv_kestrel_server.imp;
 

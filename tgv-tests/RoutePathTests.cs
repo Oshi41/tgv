@@ -1,4 +1,4 @@
-using tgv_common.imp;
+using tgv_core.imp;
 
 namespace tgv_tests;
 

@@ -1,6 +1,5 @@
-﻿using tgv_common.api;
-using tgv_common.imp;
-
+﻿using tgv_core.api;
+using tgv_core.imp;
 
 namespace tgv_tests;
 

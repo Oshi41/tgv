@@ -3,8 +3,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
+using tgv_core.imp;
 
 namespace tgv_auth.imp;
 

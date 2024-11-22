@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using tgv_common.api;
+using tgv_core.api;
 
 namespace tgv_auth;
 

@@ -1,62 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <EnforceExtendedAnalyzerRules>false</EnforceExtendedAnalyzerRules>
-        <LangVersion>12</LangVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Title>TGV</Title>
-        <Description>Express-like implementation of simple HTTP server</Description>
-        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/Oshi41/tgv/blob/master/LICENSE</PackageLicenseUrl>
-        <PackageIcon>tgv.png</PackageIcon>
-        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
-        <PackageTags>web http https router app api</PackageTags>
-        <Configurations>Release;Debug</Configurations>
-        <Platforms>x64</Platforms>
-        <UserSecretsId>8b089600-ec7c-4402-a9c4-4a3c24055331</UserSecretsId>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <Version>0.0.2</Version>
-        <Authors>Oshi41</Authors>
-        <Company>Oshi41</Company>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
-        <FileVersion>0.0.1</FileVersion>
-        <PublicSign>false</PublicSign>
-        <DelaySign>true</DelaySign>
-        <NeutralLanguage>en-001</NeutralLanguage>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-      <OutputPath>..\bin\x64\Release\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <OutputPath>..\bin\x64\Debug\</OutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.2.0" />
-      <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0-3.final" />
-      <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="tgv.png">
-        <Pack>True</Pack>
-        <PackagePath></PackagePath>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\tgv-common\tgv-common.csproj" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>false</EnforceExtendedAnalyzerRules>
+    <LangVersion>12</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Title>TGV</Title>
+    <Description>Express-like implementation of simple HTTP server</Description>
+    <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Oshi41/tgv/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageIcon>tgv.png</PackageIcon>
+    <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+    <PackageTags>web http https router app api</PackageTags>
+    <Configurations>Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
+    <UserSecretsId>8b089600-ec7c-4402-a9c4-4a3c24055331</UserSecretsId>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Version>0.0.3.0</Version>
+    <Authors>Oshi41</Authors>
+    <Company>Oshi41</Company>
+    <AssemblyVersion>0.0.3.0</AssemblyVersion>
+    <FileVersion>0.0.3.0</FileVersion>
+    <PublicSign>false</PublicSign>
+    <DelaySign>true</DelaySign>
+    <NeutralLanguage>en-001</NeutralLanguage>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>..\bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>..\bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0-3.final" />
+    <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="tgv.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\tgv-core\tgv-core.csproj" />
+  </ItemGroup>
 </Project>

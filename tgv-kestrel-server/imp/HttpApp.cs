@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
+using tgv_core.imp;
 
 namespace tgv_kestrel_server.imp;
 

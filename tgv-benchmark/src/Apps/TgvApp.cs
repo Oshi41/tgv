@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
 using tgv_kestrel_server;
 using tgv_watson_server;
 using tgv;

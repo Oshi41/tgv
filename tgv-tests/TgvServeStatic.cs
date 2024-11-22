@@ -1,8 +1,7 @@
 ﻿using Flurl.Http;
 using HtmlParserDotNet;
-using tgv_common.api;
+using tgv_core.api;
 using tgv_serve_static;
-using tgv_watson_server;
 using tgv;
 
 namespace tgv_tests;

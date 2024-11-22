@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using tgv_common.api;
+using tgv_core.api;
 using tgv;
 
 namespace tgv_serve_static;

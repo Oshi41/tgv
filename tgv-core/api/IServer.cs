@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using tgv_common.imp;
+using tgv_core.imp;
 
-namespace tgv_common.api;
+namespace tgv_core.api;
 
 /// <summary>
 /// Base delegate for handling endpoints \ middleware

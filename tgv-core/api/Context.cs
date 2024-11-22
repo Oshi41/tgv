@@ -10,12 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using MimeTypes;
 using Newtonsoft.Json;
-using tgv_common.extensions;
-using tgv_common.imp;
+using tgv_core.extensions;
+using tgv_core.imp;
 
 [assembly: InternalsVisibleTo("tgv")]
 [assembly: InternalsVisibleTo("tgv-tests")]
-namespace tgv_common.api;
+namespace tgv_core.api;
 
 public abstract class Context : IDisposable
 {

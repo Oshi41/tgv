@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace tgv_common.imp;
+namespace tgv_core.imp;
 
 public delegate string LogAction(EventLevel level, string message, string? caller, string? member, int? line);
 

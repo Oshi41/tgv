@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 
-namespace tgv_common.extensions;
+namespace tgv_core.extensions;
 
 public static class CookieCollectionExtensions
 {

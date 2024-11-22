@@ -1,33 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <RootNamespace>tgv_cors</RootNamespace>
-        <LangVersion>12</LangVersion>
-        <Nullable>enable</Nullable>
-        <Version>0.0.2</Version>
-        <Title>TGV Cors</Title>
-        <Authors>Oshi41</Authors>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Description>TGV CORS middleware</Description>
-        <Copyright>MIT</Copyright>
-        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
-        <PackageTags>tgv middleware cors</PackageTags>
-        <Configurations>Release;Debug</Configurations>
-        <Platforms>x64</Platforms>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <OutputPath>..\bin\x64\Debug\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-      <OutputPath>..\bin\x64\Release\</OutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\tgv\tgv.csproj" />
-    </ItemGroup>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>tgv_cors</RootNamespace>
+    <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+    <Version>0.0.3.0</Version>
+    <Title>TGV Cors</Title>
+    <Authors>Oshi41</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>TGV CORS middleware</Description>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+    <PackageTags>tgv middleware cors</PackageTags>
+    <Configurations>Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
+    <AssemblyVersion>0.0.3.0</AssemblyVersion>
+    <FileVersion>0.0.3.0</FileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>..\bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>..\bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\tgv\tgv.csproj" />
+  </ItemGroup>
 </Project>

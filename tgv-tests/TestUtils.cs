@@ -2,8 +2,8 @@
 using System.Runtime.CompilerServices;
 using Flurl.Http;
 using HtmlParserDotNet;
-using tgv_common.api;
-using tgv_common.imp;
+using tgv_core.api;
+using tgv_core.imp;
 using tgv;
 using HttpMethod = System.Net.Http.HttpMethod;
 

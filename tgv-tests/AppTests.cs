@@ -1,8 +1,7 @@
 ﻿using System.Net;
 using Flurl.Http;
-using tgv_common.api;
-using tgv_common.imp;
-using tgv_watson_server;
+using tgv_core.api;
+using tgv_core.imp;
 using tgv;
 
 namespace tgv_tests;

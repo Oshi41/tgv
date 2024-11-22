@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
-using tgv_common.api;
+using tgv_core.api;
 
 namespace tgv_auth;
 

@@ -1,6 +1,4 @@
-﻿using tgv_common.api;
-using tgv_common.imp;
-using tgv_kestrel_server;
+﻿using tgv_core.api;
 using tgv_watson_server;
 
 namespace tgv_tests;
