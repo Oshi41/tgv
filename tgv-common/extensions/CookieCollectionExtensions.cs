@@ -1,12 +1,17 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 
-namespace tgv.extensions;
+namespace tgv_common.extensions;
 
 public static class CookieCollectionExtensions
 {
     public static void Parse(this CookieCollection cookies, string header)
     {
+        if (string.IsNullOrEmpty(header)) return;
+        
         foreach (var cookieRaw in header.Replace("\n", "").Replace("\r", "")
                      .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                      .Select(x => x.Trim()))
@@ -63,15 +68,39 @@ public static class CookieCollectionExtensions
 
     public static IEnumerable<Cookie> Diff(this CookieCollection left, CookieCollection right)
     {
-        return right.OfType<Cookie>().Except(left.OfType<Cookie>());
+        return right.OfType<Cookie>().Except(left.OfType<Cookie>())
+            .Union(left.OfType<Cookie>().Except(right.OfType<Cookie>()));
     }
 
     public static void WriteHeaders(this IEnumerable<Cookie> cookies, NameValueCollection headers)
     {
-        var str = string.Join(", ", cookies?.Select(x => x.ToString()) ?? []);
-        if (!string.IsNullOrEmpty(str))
+        var list = cookies.ToList();
+        if (!list.Any()) return;
+
+        var header = string.Join(", ", list.Select(x => string.Join("; ", x.ToParts())));
+        if (!string.IsNullOrEmpty(header))
         {
-            headers["Set-Cookie"] = str;
+            headers["Set-Cookie"] = header;
         }
+    }
+
+    public static IEnumerable<string> ToParts(this Cookie cookie)
+    {
+        yield return $"{cookie.Name}={cookie.Value}";
+        
+        if (!string.IsNullOrWhiteSpace(cookie.Path))
+            yield return $"{nameof(cookie.Path)}={cookie.Path}";
+        
+        if (!string.IsNullOrWhiteSpace(cookie.Domain))
+            yield return $"{nameof(cookie.Domain)}={cookie.Domain}";
+        
+        if (cookie.Secure)
+            yield return "Secure";
+        
+        if (cookie.HttpOnly)
+            yield return "HttpOnly";
+        
+        if (cookie.Expires != DateTime.MinValue)
+            yield return $"{nameof(cookie.Expires)}={cookie.Expires:R}";
     }
 }

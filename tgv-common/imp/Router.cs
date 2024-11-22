@@ -1,7 +1,12 @@
-﻿using tgv.core;
-using tgv.extensions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using tgv_common.api;
+using tgv_common.extensions;
 
-namespace tgv.imp;
+namespace tgv_common.imp;
 
 public class Router : IRouter
 {
@@ -16,16 +21,16 @@ public class Router : IRouter
     }
 
     public RoutePath Route { get; }
-    public IRouter Use(params Handle[] handlers) => Use("*", handlers);
+    public IRouter Use(params HttpHandler[] handlers) => Use("*", handlers);
 
-    public IRouter After(params Handle[] handlers)  => After("*", handlers);
+    public IRouter After(params HttpHandler[] handlers)  => After("*", handlers);
 
-    public IRouter Use(string path, params Handle[] handlers)
+    public IRouter Use(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.Before, path, handlers);
     }
 
-    public IRouter After(string path, params Handle[] handlers)
+    public IRouter After(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.After, path, handlers);
     }
@@ -36,58 +41,58 @@ public class Router : IRouter
         return this;
     }
 
-    public IRouter Get(string path, params Handle[] handlers)
+    public IRouter Get(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Get, path, handlers);
     }
 
-    public IRouter Post(string path, params Handle[] handlers)
+    public IRouter Post(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Post, path, handlers);
     }
 
-    public IRouter Delete(string path, params Handle[] handlers)
+    public IRouter Delete(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Delete, path, handlers);
     }
 
-    public IRouter Patch(string path, params Handle[] handlers)
+    public IRouter Patch(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.Patch, path, handlers);
     }
 
-    public IRouter Put(string path, params Handle[] handlers)
+    public IRouter Put(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Put, path, handlers);
     }
 
-    public IRouter Head(string path, params Handle[] handlers)
+    public IRouter Head(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Head, path, handlers);
     }
 
-    public IRouter Error(string path, params Handle[] handlers)
+    public IRouter Error(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.Error, path, handlers);
     }
 
-    public IRouter Options(string path, params Handle[] handlers)
+    public IRouter Options(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Options, path, handlers);
     }
 
-    public IRouter Connect(string path, params Handle[] handlers)
+    public IRouter Connect(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.Connect, path, handlers);
     }
 
-    public IRouter Trace(string path, params Handle[] handlers)
+    public IRouter Trace(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethod.Trace, path, handlers);
     }
 
     public bool Match(Context ctx) => Route.Match(ctx);
-    public Handle Handler { get; }
+    public HttpHandler Handler { get; }
     
     private async Task HandleInner(Context ctx, Action next, Exception? exception = null)
     {
@@ -112,7 +117,7 @@ public class Router : IRouter
         next();
     }
 
-    private Router AddRoutes(HttpMethod method, string path, params Handle[] handlers)
+    private Router AddRoutes(HttpMethod method, string path, params HttpHandler[] handlers)
     {
         foreach (var handler in handlers)
         {

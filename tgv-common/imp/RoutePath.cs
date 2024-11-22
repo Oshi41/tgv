@@ -1,11 +1,15 @@
-﻿using System.Text.RegularExpressions;
-using tgv.extensions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using tgv_common.api;
+using tgv_common.extensions;
 
-namespace tgv.core;
+namespace tgv_common.imp;
 
 public class RoutePath : IMatch
 {
-    public RoutePath(HttpMethod method, string path, Handle handler, RouterConfig config, bool isRouterPath = false)
+    public RoutePath(HttpMethod method, string path, HttpHandler handler, RouterConfig config, bool isRouterPath = false)
     {
         Method = method;
         Path = path;
@@ -25,7 +29,7 @@ public class RoutePath : IMatch
     public string Path { get; }
     public bool IsRouterPath { get; }
 
-    public Handle Handler { get; }
+    public HttpHandler Handler { get; }
     public RouterConfig Config { get; }
     public List<PathSegment> Segments { get; }
 

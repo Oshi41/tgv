@@ -1,6 +1,7 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
-namespace tgv.core;
+namespace tgv_common.imp;
 
 public class HttpException(HttpStatusCode code, string message) : Exception(message)
 {

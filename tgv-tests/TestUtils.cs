@@ -1,47 +1,51 @@
-﻿using System.Collections.Specialized;
+﻿using System.Net;
 using System.Runtime.CompilerServices;
 using Flurl.Http;
 using HtmlParserDotNet;
+using tgv_common.api;
+using tgv_common.imp;
 using tgv;
-using tgv.core;
-using tgv.imp;
-using Timestamps;
-using WatsonWebserver.Core;
-using WatsonWebserver.Lite;
 using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace tgv_tests;
+
+class TestContext : Context
+{
+    private bool _wasSent = false;
+    
+    public TestContext(HttpMethod method, Uri url) 
+        : base(method, method, Guid.NewGuid(), url, new Logger(), new(), new())
+    {
+    }
+
+    public override string ContentType { get; set; }
+    public override bool WasSent => _wasSent;
+    public override Task<string> Body()
+    {
+        return Task.FromResult(string.Empty);
+    }
+
+    public override Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
+    {
+        return Task.CompletedTask;
+    }
+
+    protected override Task SendRaw(byte[] bytes, int code, string contentType)
+    {
+        return AfterSending();
+    }
+
+    protected override Task SendRaw(Stream stream, int code, string contentType)
+    {
+        return AfterSending();
+    }
+}
 
 public static class TestUtils
 {
     public static Context Create(string path, HttpMethod? method = null)
     {
-        var now = new Timestamp();
-        method ??= HttpMethod.Get;
-
-        var context = new HttpContext
-        {
-            Guid = Guid.NewGuid(),
-            Request = new HttpRequest($"127.0.0.1:80", new MemoryStream(),
-                $"{method.Method} {path} HTTP/1.1"),
-            Timestamp = now,
-            Response = new HttpResponse
-            {
-                StatusCode = 200,
-                Timestamp = now,
-                Headers = new NameValueCollection(),
-                ContentType = "text/plain",
-                ResponseSent = false,
-                ChunkedTransfer = false,
-            },
-            RouteType = RouteTypeEnum.Default,
-        };
-
-        var result = new WatsonContext(context, new Logger())
-        {
-            Stage = method
-        };
-        return result;
+        return new TestContext(method ?? HttpMethod.Get, new Uri("http://localhost:80" + path));
     }
 
     public static bool IsSuccess(int code)

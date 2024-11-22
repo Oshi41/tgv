@@ -1,20 +1,25 @@
-﻿using System.Web;
-using Flurl.Http;
+﻿using Flurl.Http;
 using HtmlParserDotNet;
+using tgv_common.api;
 using tgv_serve_static;
+using tgv_watson_server;
 using tgv;
-using tgv.servers;
 
 namespace tgv_tests;
 
+[TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
 public class TgvServeStatic
 {
-    private App _app;
+    private readonly App _app;
+
+    public TgvServeStatic(Func<ServerHandler, IServer> fn)
+    {
+        _app = new App(fn);
+    }
 
     [SetUp]
     public async Task Setup()
     {
-        _app = new App(h => new WatsonHttpServer(h));
         _app.ServeStatic(new StaticFilesConfig(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "static")))
         {
             FallThrough = true,

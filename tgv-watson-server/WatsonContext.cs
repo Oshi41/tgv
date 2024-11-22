@@ -1,24 +1,23 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.IO;
 using System.Net;
-using System.Text;
-using MimeTypes;
-using Newtonsoft.Json;
-using tgv.extensions;
-using tgv.imp;
+using System.Threading.Tasks;
+using tgv_common.api;
+using tgv_common.extensions;
+using tgv_common.imp;
 using WatsonWebserver.Core;
-using HttpMethod = System.Net.Http.HttpMethod;
 
-namespace tgv.core;
+namespace tgv_watson_server;
 
 public class WatsonContext : Context
 {
-    internal readonly HttpContextBase Ctx;
+    protected readonly HttpContextBase _ctx;
     private string _body;
 
     #region Properties
 
     public override string ContentType { get; set; }
-    public override bool WasSent => Ctx.Response.ResponseSent;
+    public override bool WasSent => _ctx.Response.ResponseSent;
 
     #endregion
 
@@ -30,7 +29,7 @@ public class WatsonContext : Context
     /// <returns></returns>
     public override async Task<string> Body()
     {
-        return Ctx.Request.DataAsString;
+        return _ctx.Request.DataAsString;
     }
 
     /// <summary>
@@ -40,11 +39,11 @@ public class WatsonContext : Context
     /// <param name="code">Redirection code</param>
     public override async Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
     {
-        Ctx.Response.Headers["Location"] = path;
-        Ctx.Response.StatusCode = (int)code;
+        _ctx.Response.Headers["Location"] = path;
+        _ctx.Response.StatusCode = (int)code;
         
         await BeforeSending();
-        await Ctx.Response.Send();
+        await _ctx.Response.Send();
         await AfterSending();
     }
 
@@ -56,27 +55,27 @@ public class WatsonContext : Context
 
         foreach (string responseHeader in ResponseHeaders)
         {
-            Ctx.Response.Headers[responseHeader] = Ctx.Response.Headers[responseHeader];
+            _ctx.Response.Headers[responseHeader] = ResponseHeaders[responseHeader];
         }
     }
 
     protected override async Task SendRaw(byte[] bytes, int code, string contentType)
     {
         ContentType = contentType;
-        Ctx.Response.StatusCode = code;
+        _ctx.Response.StatusCode = code;
         
         await BeforeSending();
-        await Ctx.Response.Send(bytes);
+        await _ctx.Response.Send(bytes);
         await AfterSending();
     }
 
     protected override async Task SendRaw(Stream stream, int code, string contentType)
     {
         ContentType = contentType;
-        Ctx.Response.StatusCode = code;
+        _ctx.Response.StatusCode = code;
         
         await BeforeSending();
-        await Ctx.Response.Send(stream.Length, stream);
+        await _ctx.Response.Send(stream.Length, stream);
         await AfterSending();
     }
 
@@ -90,5 +89,6 @@ public class WatsonContext : Context
             ctx.Request.Url.Parameters)
     {
         Logger.Debug("Start handling request");
+        _ctx = ctx;
     }
 }

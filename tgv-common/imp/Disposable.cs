@@ -1,4 +1,6 @@
-﻿namespace tgv.imp;
+﻿using System;
+
+namespace tgv_common.imp;
 
 public class Disposable : IDisposable
 {
@@ -8,6 +10,8 @@ public class Disposable : IDisposable
     {
         _action = action;
     }
+
+    public static IDisposable Create(Action action) => new Disposable(action);
 
     public void Dispose() => _action?.Invoke();
 }

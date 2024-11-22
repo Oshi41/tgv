@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using Flurl.Http;
+using tgv_common.api;
+using tgv_common.imp;
+using tgv_watson_server;
 using tgv;
-using tgv.imp;
-using tgv.servers;
 
 namespace tgv_tests;
 
@@ -20,10 +21,16 @@ class User
     public Details Details { get; set; }
 }
 
+[TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
 public class AppTests
 {
     private readonly List<User> _users = new();
-    private App _app;
+    private readonly App _app;
+
+    public AppTests(Func<ServerHandler, IServer> fn)
+    {
+        _app = new App(fn);
+    }
 
     [SetUp]
     public async Task Setup()
@@ -44,7 +51,6 @@ public class AppTests
             });
         }
 
-        _app = new App(handler => new WatsonHttpServer(handler));
         _app.After((context, next, exception) =>
         {
             if (exception != null)

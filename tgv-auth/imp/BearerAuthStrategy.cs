@@ -7,8 +7,9 @@ using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
 using JWT.Serializers;
-using tgv.core;
-using tgv.imp;
+using tgv_common.api;
+using tgv_common.imp;
+
 
 namespace tgv_auth.imp;
 

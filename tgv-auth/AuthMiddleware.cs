@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using tgv.core;
+using tgv_common.api;
 
 namespace tgv_auth;
 
@@ -26,7 +26,7 @@ public static class AuthMiddleware
         }
     }
     
-    public static Handle Auth(string cookieName, params IAuthStrategy[] strategies) => async (context, next, e) =>
+    public static HttpHandler Auth(string cookieName, params IAuthStrategy[] strategies) => async (context, next, e) =>
     {
         // get identity from context
         var identity = context.GetIdentity();

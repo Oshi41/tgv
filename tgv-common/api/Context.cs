@@ -1,12 +1,21 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using MimeTypes;
 using Newtonsoft.Json;
-using tgv.extensions;
-using tgv.imp;
+using tgv_common.extensions;
+using tgv_common.imp;
 
-namespace tgv.core;
+[assembly: InternalsVisibleTo("tgv")]
+[assembly: InternalsVisibleTo("tgv-tests")]
+namespace tgv_common.api;
 
 public abstract class Context : IDisposable
 {
@@ -25,24 +34,24 @@ public abstract class Context : IDisposable
     /// <summary>
     /// Current context HTTP method stage
     /// </summary>
-    public HttpMethod Stage { get; internal set; }
+    public virtual HttpMethod Stage { get; internal set; }
 
     /// <summary>
     /// Original response HTTP method. Will not change in any ctx stage
     /// </summary>
-    public HttpMethod Method { get; }
+    public virtual HttpMethod Method { get; }
 
     /// <summary>
     /// Current route parameters
     /// </summary>
     public IDictionary<string, string>? Parameters { get; set; }
 
-    public Guid TraceId { get; }
+    public virtual Guid TraceId { get; }
 
     /// <summary>
     /// Current URL
     /// </summary>
-    public Uri Url { get; }
+    public virtual  Uri Url { get; }
 
     public Logger Logger { get; }
 
@@ -189,7 +198,7 @@ public abstract class Context : IDisposable
         ClientHeaders = headers ?? new NameValueCollection();
         Query = query ?? new NameValueCollection();
 
-        Cookies.Parse(ClientHeaders["Cookies"] ?? string.Empty);
+        Cookies.Parse(ClientHeaders["Cookie"] ?? string.Empty);
         _original.Add(Cookies);
     }
 

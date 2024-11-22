@@ -1,8 +1,7 @@
-using tgv_benchmark;
 using tgv_benchmark.Apps;
 
 IApp? app = args.Contains("asp") ? new AspNetApp()
-    : args.Contains("tgv") ? new TgvApp()
+    : args.Contains("tgv") ? new TgvApp(args)
     : null;
 
 if (app == null)

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>tgv_watson_server</RootNamespace>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x64</Platforms>
+        <LangVersion>13</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <OutputPath>..\bin\x64\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+      <OutputPath>..\bin\x64\Release\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Watson.Lite" Version="6.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\tgv-common\tgv-common.csproj" />
+    </ItemGroup>
+
+</Project>

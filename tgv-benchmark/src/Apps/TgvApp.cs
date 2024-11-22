@@ -1,17 +1,36 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
+using tgv_common.api;
+using tgv_common.imp;
+using tgv_kestrel_server;
+using tgv_watson_server;
 using tgv;
-using tgv.servers;
 
 namespace tgv_benchmark.Apps;
 
 public class TgvApp : IApp
 {
     private readonly App _app;
-    
-    public TgvApp()
+
+    public TgvApp(string[] args)
     {
-        _app = new App(handler => new WatsonHttpServer(handler));
+        Func<ServerHandler, IServer> createServer = handler =>
+        {
+            if (args.Contains("watson"))
+            {
+                return new WatsonServer(handler);
+            }
+
+            if (args.Contains("kestrel"))
+            {
+                return new KestrelServer(handler, _app!.Logger);
+            }
+
+            throw new Exception("Unknown server implementation");
+        };
+
+
+        _app = new App(createServer);
         _app.Logger.WriteLog = _ => { };
         var users = Enumerable.Range(0, 20).Select(i => new User(i.ToString())).ToList();
 
@@ -26,7 +45,7 @@ public class TgvApp : IApp
                 await ctx.Send(HttpStatusCode.NotFound);
                 return;
             }
-            
+
             await ctx.Json(user);
         });
         _app.Post("/users", async (ctx, _, _) =>
@@ -36,8 +55,9 @@ public class TgvApp : IApp
             {
                 throw ctx.Throw(HttpStatusCode.BadRequest, "already exists");
             }
+
             users.Add(user);
-            
+
             ctx.Logger.Info($"User added: {JsonConvert.SerializeObject(user, Formatting.Indented)}");
             await ctx.Send(HttpStatusCode.OK);
         });
@@ -46,7 +66,7 @@ public class TgvApp : IApp
             var id = ctx.Parameters!["id"];
             var user = users.FirstOrDefault(x => x.Id == id);
             if (user == null) throw ctx.Throw(HttpStatusCode.NotFound);
-            
+
             ctx.Logger.Info($"User deleted: {id}");
             users.Remove(user);
             await ctx.Send(HttpStatusCode.OK);
@@ -56,7 +76,7 @@ public class TgvApp : IApp
             var user = await ctx.Body<User>();
             var source = users.FirstOrDefault(x => x.Id == user.Id);
             if (source == null) throw ctx.Throw(HttpStatusCode.NotFound);
-            
+
             users.Remove(source);
             users.Add(user);
             ctx.Logger.Info($"Old user: {JsonConvert.SerializeObject(source, Formatting.Indented)}");

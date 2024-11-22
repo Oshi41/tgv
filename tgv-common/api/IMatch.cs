@@ -1,4 +1,6 @@
-﻿namespace tgv.core;
+﻿using tgv_common.imp;
+
+namespace tgv_common.api;
 
 public interface IMatch
 {
@@ -10,5 +12,5 @@ public interface IMatch
     /// <summary>
     /// Handler assigned with this entity
     /// </summary>
-    Handle Handler { get; }
+    HttpHandler Handler { get; }
 }

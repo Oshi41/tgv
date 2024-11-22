@@ -5,9 +5,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>tgv_benchmark</RootNamespace>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\tgv-kestrel-server\tgv-kestrel-server.csproj" />
+      <ProjectReference Include="..\tgv-watson-server\tgv-watson-server.csproj" />
       <ProjectReference Include="..\tgv\tgv.csproj" />
     </ItemGroup>
 

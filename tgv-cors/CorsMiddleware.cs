@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 using System.Net.Http;
-using tgv.core;
+using tgv_common.api;
 
 namespace tgv_cors;
 
 public static class CorsMiddleware
 {
-    public static Handle Cors(CorsSettings? settings = null) => async (ctx, next, _) =>
+    public static HttpHandler Cors(CorsSettings? settings = null) => async (ctx, next, _) =>
     {
         settings ??= new CorsSettings(["*"]);
         var origin = ctx.ClientHeaders["Origin"];

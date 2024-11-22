@@ -1,8 +1,10 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System;
+using System.Diagnostics.Tracing;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace tgv.imp;
+namespace tgv_common.imp;
 
 public delegate string LogAction(EventLevel level, string message, string? caller, string? member, int? line);
 

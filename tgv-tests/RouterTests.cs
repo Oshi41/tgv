@@ -1,5 +1,6 @@
-﻿using tgv.core;
-using tgv.imp;
+﻿using tgv_common.api;
+using tgv_common.imp;
+
 
 namespace tgv_tests;
 
@@ -9,7 +10,7 @@ public class RouterTests
     public void TestComplicatedHierarchy()
     {
         var calls = new Dictionary<HttpMethod, List<string>>();
-        Handle baseHandler = (context, next, _) =>
+        HttpHandler baseHandler = (context, next, _) =>
         {
             if (!calls.TryGetValue(context.Stage, out var records))
             {

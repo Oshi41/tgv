@@ -2,8 +2,8 @@
 using System.Runtime.Caching;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using tgv.core;
-using tgv.imp;
+using tgv_common.api;
+using tgv_common.imp;
 
 namespace tgv_auth.imp;
 

@@ -1,8 +1,8 @@
 ﻿using WatsonWebserver.Core;
 
-namespace tgv.core;
+namespace tgv_watson_server;
 
-public class AppConfig
+public class WatsonConfig
 {
     public WebserverSettings.IOSettings Io { get; set; } = new();
     public WebserverSettings.SslSettings Ssl { get; set; } = new();

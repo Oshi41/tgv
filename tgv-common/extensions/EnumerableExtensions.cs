@@ -1,4 +1,7 @@
-﻿namespace tgv.extensions;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace tgv_common.extensions;
 
 public static class EnumerableExtensions
 {

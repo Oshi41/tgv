@@ -1,25 +1,19 @@
 ﻿using System.Net;
-using tgv.core;
-using tgv.extensions;
-using tgv.imp;
-using Handle = tgv.core.Handle;
-using Hme = tgv.extensions.HttpMethodExtensions;
+using Hme = tgv_common.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
-using tgv.servers;
-using WatsonWebserver.Core;
+using tgv_common.api;
+using tgv_common.imp;
 
 [assembly: InternalsVisibleTo("tgv-tests")]
 
 namespace tgv;
-
-public delegate Task HttpHandler(Context ctx);
 
 public class App : IRouter
 {
     private IServer _server;
     private IRouter _root;
 
-    public App(Func<HttpHandler, IServer> server, RouterConfig? cfg = null)
+    public App(Func<ServerHandler, IServer> server, RouterConfig? cfg = null)
     {
         Logger = new Logger();
         _root = new Router("*", cfg ?? new RouterConfig());
@@ -135,25 +129,25 @@ public class App : IRouter
 
     public RoutePath Route => _root.Route;
 
-    public IRouter Use(params Handle[] handlers)
+    public IRouter Use(params HttpHandler[] handlers)
     {
         _root.Use(handlers);
         return this;
     }
 
-    public IRouter After(params Handle[] handlers)
+    public IRouter After(params HttpHandler[] handlers)
     {
         _root.After(handlers);
         return this;
     }
 
-    public IRouter Use(string path, params Handle[] handlers)
+    public IRouter Use(string path, params HttpHandler[] handlers)
     {
         _root.Use(path, handlers);
         return this;
     }
 
-    public IRouter After(string path, params Handle[] handlers)
+    public IRouter After(string path, params HttpHandler[] handlers)
     {
         _root.After(path, handlers);
         return this;
@@ -165,67 +159,67 @@ public class App : IRouter
         return this;
     }
 
-    public IRouter Get(string path, params Handle[] handlers)
+    public IRouter Get(string path, params HttpHandler[] handlers)
     {
         _root.Get(path, handlers);
         return this;
     }
 
-    public IRouter Post(string path, params Handle[] handlers)
+    public IRouter Post(string path, params HttpHandler[] handlers)
     {
         _root.Post(path, handlers);
         return this;
     }
 
-    public IRouter Delete(string path, params Handle[] handlers)
+    public IRouter Delete(string path, params HttpHandler[] handlers)
     {
         _root.Delete(path, handlers);
         return this;
     }
 
-    public IRouter Patch(string path, params Handle[] handlers)
+    public IRouter Patch(string path, params HttpHandler[] handlers)
     {
         _root.Patch(path, handlers);
         return this;
     }
 
-    public IRouter Put(string path, params Handle[] handlers)
+    public IRouter Put(string path, params HttpHandler[] handlers)
     {
         _root.Put(path, handlers);
         return this;
     }
 
-    public IRouter Head(string path, params Handle[] handlers)
+    public IRouter Head(string path, params HttpHandler[] handlers)
     {
         _root.Head(path, handlers);
         return this;
     }
 
-    public IRouter Error(string path, params Handle[] handlers)
+    public IRouter Error(string path, params HttpHandler[] handlers)
     {
         _root.Error(path, handlers);
         return this;
     }
 
-    public IRouter Options(string path, params Handle[] handlers)
+    public IRouter Options(string path, params HttpHandler[] handlers)
     {
         _root.Options(path, handlers);
         return this;
     }
 
-    public IRouter Connect(string path, params Handle[] handlers)
+    public IRouter Connect(string path, params HttpHandler[] handlers)
     {
         _root.Connect(path, handlers);
         return this;
     }
 
-    public IRouter Trace(string path, params Handle[] handlers)
+    public IRouter Trace(string path, params HttpHandler[] handlers)
     {
         _root.Trace(path, handlers);
         return this;
     }
 
-    public Handle Handler => _root.Handler;
+    public HttpHandler Handler => _root.Handler;
 
     #endregion
 }

@@ -4,8 +4,8 @@ using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using tgv.core;
-using tgv.extensions;
+using tgv_common.api;
+using tgv_common.extensions;
 
 namespace tgv_cors;
 
