@@ -7,8 +7,8 @@ namespace tgv_kestrel_server;
 
 public class KestrelSettings
 {
-    HttpsConnectionAdapterOptions Https { get; } = new();
-    KestrelServerLimits Limits { get; } = new();
+    public HttpsConnectionAdapterOptions Https { get; } = new();
+    public KestrelServerLimits Limits { get; } = new();
 
     internal KestrelServerOptions Convert()
     {
@@ -42,13 +42,6 @@ public class KestrelSettings
     private void Clone(HttpsConnectionAdapterOptions to)
     {
         CopyTo(Https, to);
-        // to.ServerCertificate = Https.ServerCertificate;
-        // to.HandshakeTimeout = Https.HandshakeTimeout;
-        // to.SslProtocols = Https.SslProtocols;
-        // to.CheckCertificateRevocation = Https.CheckCertificateRevocation;
-        // to.ClientCertificateMode = Https.ClientCertificateMode;
-        // to.ClientCertificateValidation = Https.ClientCertificateValidation;
-        // to.ServerCertificateSelector = Https.ServerCertificateSelector;
     }
 
     private void Clone(KestrelServerLimits to)

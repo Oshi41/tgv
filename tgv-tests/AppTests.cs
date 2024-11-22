@@ -134,7 +134,7 @@ public class AppTests
     public async Task AllUsers()
     {
         var expected = _users.Select(x => x.Id).OrderBy(x => x).ToList();
-        var ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
+        var ids = await (_app.RunningUrl + "users/").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
     }
 

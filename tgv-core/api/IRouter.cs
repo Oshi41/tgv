@@ -4,10 +4,6 @@ namespace tgv_core.api;
 
 public interface IRouter : IMatch
 {
-    /// <summary>
-    /// Base route path
-    /// </summary>
-    RoutePath Route { get; }
     IRouter Use(params HttpHandler[] handlers);
     IRouter After(params HttpHandler[] handlers);
     IRouter Use(string path, params HttpHandler[] handlers);

@@ -17,12 +17,18 @@ public class KestrelContext : Context
             new HttpMethod(ctx.Request.Method.ToUpper()),
             new HttpMethod(ctx.Request.Method.ToUpper()),
             Guid.Empty, // ctx.TraceIdentifier
-            new Uri(ctx.Request.Host.ToString()),
+            CreateUri(ctx.Request),
             logger,
             ctx.Request.Headers.Convert(),
             ctx.Request.Query.Convert())
     {
         _ctx = ctx;
+    }
+
+    private static Uri CreateUri(HttpRequest r)
+    {
+        var txt = $"{r.Scheme}://{r.Host.ToUriComponent()}{r.Path}{r.QueryString}";
+        return new Uri(txt);
     }
 
     public override string ContentType

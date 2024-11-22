@@ -23,7 +23,7 @@ public class Router : IRouter
     public RoutePath Route { get; }
     public IRouter Use(params HttpHandler[] handlers) => Use("*", handlers);
 
-    public IRouter After(params HttpHandler[] handlers)  => After("*", handlers);
+    public IRouter After(params HttpHandler[] handlers) => After("*", handlers);
 
     public IRouter Use(string path, params HttpHandler[] handlers)
     {
@@ -93,7 +93,7 @@ public class Router : IRouter
 
     public bool Match(Context ctx) => Route.Match(ctx);
     public HttpHandler Handler { get; }
-    
+
     private async Task HandleInner(Context ctx, Action next, Exception? exception = null)
     {
         ctx.CurrentPath.Push(this);
