@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        dotnet: [ '2.1.x', '6.x.x', '9.x.x' ]
+        dotnet: ['9.x.x' ]
 
     steps:
     - uses: actions/checkout@v4
