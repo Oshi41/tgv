@@ -5,7 +5,7 @@
     <RootNamespace>tgv_cors</RootNamespace>
     <LangVersion>12</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>0.0.3.0</Version>
+    <Version>0.0.4.0</Version>
     <Title>TGV Cors</Title>
     <Authors>Oshi41</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -16,8 +16,8 @@
     <PackageTags>tgv middleware cors</PackageTags>
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
-    <AssemblyVersion>0.0.3.0</AssemblyVersion>
-    <FileVersion>0.0.3.0</FileVersion>
+    <AssemblyVersion>0.0.4.0</AssemblyVersion>
+    <FileVersion>0.0.4.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <OutputPath>..\bin\x64\Debug\</OutputPath>
