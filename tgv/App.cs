@@ -11,7 +11,7 @@ namespace tgv;
 public class App : IRouter
 {
     private IServer _server;
-    private IRouter _root;
+    internal IRouter _root;
 
     public App(Func<ServerHandler, IServer> server, RouterConfig? cfg = null)
     {

@@ -26,7 +26,7 @@ public class AppTests
     private readonly List<User> _users = new();
     private readonly App _app;
 
-    public AppTests(Func<ServerHandler, IServer> fn)
+    public AppTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
     }

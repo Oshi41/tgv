@@ -58,9 +58,11 @@ public class WatsonContext : Context
         }
     }
 
-    protected override async Task SendRaw(byte[] bytes, int code, string contentType)
+    protected override async Task SendRaw(byte[]? bytes, int code, string? contentType)
     {
-        ContentType = contentType;
+        if (!string.IsNullOrEmpty(contentType))
+            ContentType = contentType;
+        
         _ctx.Response.StatusCode = code;
         
         await BeforeSending();

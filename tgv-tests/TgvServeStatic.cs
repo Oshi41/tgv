@@ -11,7 +11,7 @@ public class TgvServeStatic
 {
     private readonly App _app;
 
-    public TgvServeStatic(Func<ServerHandler, IServer> fn)
+    public TgvServeStatic(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
     }

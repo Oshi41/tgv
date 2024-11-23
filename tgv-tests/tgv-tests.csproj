@@ -32,6 +32,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\tgv-auth\tgv-auth.csproj" />
+      <ProjectReference Include="..\tgv-cors\tgv-cors.csproj" />
       <ProjectReference Include="..\tgv-kestrel-server\tgv-kestrel-server.csproj" />
       <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
       <ProjectReference Include="..\tgv-session\tgv-session.csproj" />

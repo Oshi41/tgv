@@ -17,7 +17,7 @@ public static class CorsMiddleware
             next();
             return;
         }
-        
+
         if (await settings.ValidateOrigin(ctx))
             ctx.ResponseHeaders["Access-Control-Allow-Origin"] = origin;
         if (settings.UseCredentials)
@@ -26,15 +26,16 @@ public static class CorsMiddleware
             ctx.ResponseHeaders["Access-Control-Expose-Headers"] = string.Join(",", settings.ExposedHeaders);
 
         // continue all request except preflight
-        if (ctx.Stage != HttpMethod.Options)
+        if (ctx.Method != HttpMethod.Options)
         {
             next();
             return;
         }
-        
+
         // preflight
         if (settings.Methods?.Any() == true)
-            ctx.ResponseHeaders["Access-Control-Allow-Methods"] = string.Join(",", settings.Methods.Select(x => x.Method));
+            ctx.ResponseHeaders["Access-Control-Allow-Methods"] =
+                string.Join(",", settings.Methods.Select(x => x.Method));
         if (settings.MaxAge != null)
             ctx.ResponseHeaders["Access-Control-Max-Age"] = settings.MaxAge.Value.ToString();
         if (settings.AllowedHeaders?.Any() == true)
@@ -47,7 +48,6 @@ public static class CorsMiddleware
             return;
         }
 
-        ctx.ResponseHeaders["Content-Length"] = "0";
-        await ctx.Send(settings.Code);
+        await ctx.SendCode(settings.Code);
     };
 }

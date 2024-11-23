@@ -9,6 +9,7 @@ namespace tgv_kestrel_server;
 
 public class KestrelContext : Context
 {
+    private static readonly Random _random = new();
     private readonly HttpContext _ctx;
     private string? _body;
 
@@ -16,13 +17,14 @@ public class KestrelContext : Context
         : base(
             new HttpMethod(ctx.Request.Method.ToUpper()),
             new HttpMethod(ctx.Request.Method.ToUpper()),
-            Guid.Empty, // ctx.TraceIdentifier
+            Extensions.ToGuid(_random.NextLong()),
             CreateUri(ctx.Request),
             logger,
             ctx.Request.Headers.Convert(),
             ctx.Request.Query.Convert())
     {
         _ctx = ctx;
+        _ctx.Response.ContentType = ctx.Request.ContentType;
     }
 
     private static Uri CreateUri(HttpRequest r)
@@ -63,18 +65,39 @@ public class KestrelContext : Context
         return _body;
     }
 
+    protected override async Task BeforeSending()
+    {
+        await base.BeforeSending();
+        
+        foreach (string header in ResponseHeaders)
+        {
+            _ctx.Response.Headers[header] = ResponseHeaders[header];
+        }
+    }
+
     public override Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
     {
         throw new NotImplementedException();
     }
 
-    protected override async Task SendRaw(byte[] bytes, int code, string contentType)
+    protected override async Task SendRaw(byte[]? bytes, int code, string? contentType)
     {
-        ContentType = contentType;
+        if (!string.IsNullOrEmpty(contentType))
+            ContentType = contentType;
+        
         _ctx.Response.StatusCode = code;
         
         await BeforeSending();
-        await _ctx.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+
+        if (bytes != null)
+        {
+            await _ctx.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+        }
+        else
+        {
+            await _ctx.Response.Body.FlushAsync();
+        }
+        
         await AfterSending();
     }
 

@@ -10,7 +10,7 @@ public class TgvSession
 {
     private readonly App _app;
 
-    public TgvSession(Func<ServerHandler, IServer> fn)
+    public TgvSession(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
     }

@@ -111,6 +111,9 @@ public abstract class Context : IDisposable
         throw e;
     }
 
+    public Task SendCode(HttpStatusCode code)
+        => SendRaw((byte[])null, (int)code, null);
+
     public virtual Task Send(HttpStatusCode code, string? message = null)
         => Send(message ?? code.ToString(), code, "text/plain");
 
@@ -179,7 +182,7 @@ public abstract class Context : IDisposable
 
     #region Protected Abstract methods
 
-    protected abstract Task SendRaw(byte[] bytes, int code, string contentType);
+    protected abstract Task SendRaw(byte[]? bytes, int code, string? contentType);
     protected abstract Task SendRaw(Stream stream, int code, string contentType);
 
     #endregion

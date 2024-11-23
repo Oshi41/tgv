@@ -94,7 +94,7 @@ public class CorsSettings
 
     private static Func<Context, Task<bool>> Create(string[]? origins)
     {
-        if (origins?.Any() != true)
+        if (origins?.Any() != true || origins.Any(x => x.Contains("*")))
         {
             return _ => Task.FromResult(true);
         }

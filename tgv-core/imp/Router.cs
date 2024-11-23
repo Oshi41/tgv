@@ -10,7 +10,7 @@ namespace tgv_core.imp;
 
 public class Router : IRouter
 {
-    private readonly List<IMatch> _routes = new();
+    internal readonly List<IMatch> _routes = new();
     private readonly RouterConfig _routerConfig;
 
     public Router(string path, RouterConfig? routerConfig = null)
@@ -102,7 +102,7 @@ public class Router : IRouter
         foreach (var match in _routes.Where(x => x.Route.Match(ctx)))
         {
             ctx.Visited.Enqueue(match);
-            if (ctx.Parameters == null && match is RoutePath routePath)
+            if (match is RoutePath routePath)
             {
                 ctx.Parameters = routePath.Parameters(ctx);
             }
