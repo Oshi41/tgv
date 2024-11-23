@@ -3,6 +3,10 @@
 TGV-Cors - middleware for TGV HTTP server. 
 It enables cross-origin resource sharing (CORS) for your application, making it accessible from different origins.
 
+TGV is a fast, simple, and intuitive HTTP server library for C#. 
+Inspired by ExpressJS, TGV is designed to make building 
+web applications straightforward, even for developers with minimal experience
+
 ---
 
 ## **Usage**
@@ -103,4 +107,3 @@ app.Use(Cors(new CorsSettings
     UseCredentials = true
 }));
 ```
-ю
