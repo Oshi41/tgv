@@ -2,9 +2,9 @@
 
 Common code for TGV ecosystem. 
 
-TGV is a fast, simple, and intuitive HTTP server library for C#. 
+_TGV is a fast, simple, and intuitive HTTP server library for C#. 
 Inspired by ExpressJS, TGV is designed to make building web applications straightforward, 
-even for developers with minimal experience.
+even for developers with minimal experience._
 
 ## Content
 
