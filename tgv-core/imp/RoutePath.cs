@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -48,9 +48,6 @@ public class RoutePath : IMatch
             return ".+";
 
         var regex = $"^/{string.Join("/", allSegments.Select(x => x.Regex))}";
-        // router must match onle the start
-        if (!IsRouterPath)
-            regex += "$";
 
         // should ignore trailing slash
         if (!Config.IgnoreTrailingSlashes && regex.EndsWith("/"))
@@ -59,6 +56,10 @@ public class RoutePath : IMatch
         // set trailing slash explicitly if needed
         if (Config.IgnoreTrailingSlashes && ctx.Url.OriginalString.EndsWith("/") && !regex.EndsWith("/"))
             regex += '/';
+
+         // router must match onle the start
+        if (!IsRouterPath)
+            regex += "$";
 
         return regex;
     }
