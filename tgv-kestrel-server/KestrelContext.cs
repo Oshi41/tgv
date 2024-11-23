@@ -75,9 +75,12 @@ public class KestrelContext : Context
         }
     }
 
-    public override Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
+    public override async Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved)
     {
-        throw new NotImplementedException();
+        ResponseHeaders["Location"] = path;
+        if (!((int)code).ToString().StartsWith("3")) throw new Exception("Redirection code must be 3xx");
+        
+        await SendCode(code);
     }
 
     protected override async Task SendRaw(byte[]? bytes, int code, string? contentType)

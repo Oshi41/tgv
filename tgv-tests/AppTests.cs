@@ -64,6 +64,11 @@ public class AppTests
             return Task.CompletedTask;
         });
 
+        _app.Get("/redirect", async (ctx, _, _) =>
+        {
+            await ctx.Redirect("/users");
+        });
+
         var user = new Router("users");
         _app.Use(user);
         user.Get("", (context, next, exception) =>
@@ -135,6 +140,9 @@ public class AppTests
     {
         var expected = _users.Select(x => x.Id).OrderBy(x => x).ToList();
         var ids = await (_app.RunningUrl + "users/").GetJsonAsync<string[]>();
+        Assert.That(ids, Is.EqualTo(expected));
+        
+        ids = await (_app.RunningUrl + "redirect").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
     }
 
