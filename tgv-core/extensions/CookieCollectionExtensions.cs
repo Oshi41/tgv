@@ -60,7 +60,7 @@ public static class CookieCollectionExtensions
 
                 c.Expired = c.Expires != DateTime.MinValue && c.Expires < DateTime.Now;
 
-                if (!c.Expired)
+                if (c.IsValid())
                     cookies.Add(c);
             }
         }
@@ -102,5 +102,14 @@ public static class CookieCollectionExtensions
         
         if (cookie.Expires != DateTime.MinValue)
             yield return $"{nameof(cookie.Expires)}={cookie.Expires:R}";
+    }
+
+    public static bool IsValid(this Cookie? cookie)
+    {
+        if (cookie == null) return false;
+        if (cookie.Expired || cookie.Discard) return false;
+        if (cookie.Expires > DateTime.MinValue && cookie.Expires < DateTime.Now) return false;
+
+        return true;
     }
 }

@@ -26,9 +26,18 @@
     <OutputPath>..\bin\x64\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
     <ProjectReference Include="..\tgv\tgv.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="JWT" Version="11.0.0-beta3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="imp\AuthStrategyBase.cs" />
+    <Compile Remove="imp\BearerAuthStrategy.cs" />
+    <Compile Remove="imp\ClaimsIdentityImp.cs" />
+    <Compile Remove="CompilerServices.cs" />
+    <Compile Remove="IAuthStrategy.cs" />
+    <Compile Remove="IStore.cs" />
   </ItemGroup>
 </Project>

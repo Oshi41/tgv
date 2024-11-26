@@ -1,92 +1,125 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using tgv_auth.api;
+using tgv_auth.api.storage;
+using tgv_auth.imp;
 using tgv_core.api;
+using ICredentials = tgv_auth.api.ICredentials;
 
 namespace tgv_auth;
 
 public static class AuthMiddleware
 {
-    private static ConditionalWeakTable<Context, ClaimsIdentity> _identities = new();
+    private static readonly ConditionalWeakTable<Context, IUserSession> _sessions = new();
 
-    private static IEnumerable<string> GetAuthHeaders(Context ctx, string? cookieName)
+    public static HttpHandler UseAuth<TCreds, TSession>(ICredentialProvider<TCreds> credentialProvider,
+        ISessionStorage<TCreds, TSession> sessionStorage,
+        ICookieStorage<TSession>? cookieStorage = null)
+        where TCreds : ICredentials
+        where TSession : IUserSession
     {
-        var header = ctx.ClientHeaders["Authorization"];
-        if (!string.IsNullOrEmpty(header))
-            yield return header;
+        async Task<bool> TryAuth(Context ctx, TSession? session)
+        {
+            if (session == null) return false;
 
-        if (!string.IsNullOrEmpty(cookieName))
-        {
-            header = ctx.Cookies[cookieName]?.Value;
-            if (!string.IsNullOrEmpty(header) && header != null)
-                    yield return header;
-        }
-    }
-    
-    public static HttpHandler Auth(string cookieName, params IAuthStrategy[] strategies) => async (context, next, e) =>
-    {
-        // get identity from context
-        var identity = context.GetIdentity();
-        if (identity is { IsAuthenticated: true })
-        {
-            next();
-            return;
-        }
-        
-        foreach (var header in GetAuthHeaders(context, cookieName))
-        {
-            foreach (var strategy in strategies)
+            switch (await sessionStorage.GetStatus(session))
             {
-                if (header.StartsWith(strategy.Scheme))
-                {
-                    identity = await strategy.GetIdentity(header, true);
-                    if (identity is { IsAuthenticated: true })
+                // user was not found
+                case SessionStatus.NotFound:
+                    ctx.Logger.Debug($"No user session found for {session}");
+                    return false;
+
+                // user session expired, need to refresh
+                case SessionStatus.Expired:
+                    var other = await sessionStorage.Refresh(session);
+                    if (other == null || !other.IsValid())
                     {
-                        _identities.Add(context, identity);
-                        
-                        // remember auth in cookie
-                        if (!string.IsNullOrEmpty(cookieName))
-                        {
-                            context.Cookies.Add(new Cookie(cookieName, header)
-                            {
-                                Expires = DateTime.Now.AddHours(1),
-                                HttpOnly = true,
-                                Secure = true,
-                            });
-                        }
-                        
+                        ctx.Logger.Debug($"Refresh failed for {session}");
+                        return false;
+                    }
+
+                    ctx.Logger.Debug($"Session was refreshed {session} => {other}");
+                    session = other;
+                    break;
+
+                // session is active
+                case SessionStatus.Active:
+                    ctx.Logger.Debug($"Session confirmed as active: {session}");
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            // store session in local storage / cookies
+            StoreSession(ctx, session);
+            return true;
+        }
+
+        void StoreSession(Context ctx, TSession session)
+        {
+            _sessions.Add(ctx, session);
+
+            var cookie = cookieStorage?.CreateCookie(ctx, session);
+            if (cookie != null)
+                ctx.Cookies.Add(cookie);
+        }
+
+        return async (ctx, next, _) =>
+        {
+            // first priority - local cache
+            if (await TryAuth(ctx, ctx.GetAuthSession<TSession>()))
+            {
+                next();
+                return;
+            }
+
+            // second priority - cookies
+            if (await TryAuth(ctx, cookieStorage?.GetUserSession(ctx)))
+            {
+                next();
+                return;
+            }
+
+            Exception e = null;
+
+            try
+            {
+                // obtaining credentials
+                var creds = credentialProvider.GetCredentials(ctx);
+                if (creds != null)
+                {
+                    var session = await sessionStorage.Login(creds);
+                    if (session != null && session.IsValid())
+                    {
+                        ctx.Logger.Debug($"Login successful for {session}");
+                        StoreSession(ctx, session);
                         next();
                         return;
                     }
                 }
+                else
+                {
+                    ctx.Logger.Debug($"Auth credential not found");
+                }
             }
-        }
-
-        var challenge = string.Join(", ", strategies.Select(x => x.Challenge(context)));
-        context.ResponseHeaders["WWW-Authenticate"] = challenge;
-
-        // clear cookie
-        if (!string.IsNullOrEmpty(cookieName))
-        {
-            context.Cookies.Add(new Cookie(cookieName, "")
+            catch (Exception ex)
             {
-                Expired = true,
-                Discard = true,
-                Expires = DateTime.UtcNow.AddDays(-7)
-            });
-        }
-        
-        await context.Send(HttpStatusCode.Unauthorized);
-    };
+                e = ex;
+            }
 
-    public static ClaimsIdentity? GetIdentity(this Context ctx)
+            ctx.ResponseHeaders["WWW-Authenticate"] = credentialProvider.GetChallenge(ctx, e);
+        };
+    }
+
+    public static T? GetAuthSession<T>(this Context ctx)
+        where T : IUserSession
     {
-        if (_identities.TryGetValue(ctx, out var result))
-            return result;
-        
-        return null;
+        return _sessions.TryGetValue(ctx, out var userSession) && userSession is T authSession
+            ? authSession
+            : null;
     }
 }
