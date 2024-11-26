@@ -37,7 +37,6 @@
       <ProjectReference Include="..\tgv-kestrel-server\tgv-kestrel-server.csproj" />
       <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
       <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
-      <ProjectReference Include="..\tgv-watson-server\tgv-watson-server.csproj" />
       <ProjectReference Include="..\tgv\tgv.csproj" />
     </ItemGroup>
 

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
 using tgv_core.api;
+using tgv_core.imp;
 using tgv_kestrel_server;
-using tgv_watson_server;
 using tgv;
 
 namespace tgv_benchmark.Apps;
@@ -13,24 +13,16 @@ public class TgvApp : IApp
 
     public TgvApp(string[] args)
     {
-        Func<ServerHandler, IServer> createServer = handler =>
+        var logger = new Logger();
+        Func<ServerHandler, IServer> createServer = handler => new KestrelServer(handler, logger);
+
+        _app = new App(createServer)
         {
-            if (args.Contains("watson"))
+            Logger =
             {
-                return new WatsonServer(handler);
+                WriteLog = logger.WriteLog
             }
-
-            if (args.Contains("kestrel"))
-            {
-                return new KestrelServer(handler, _app!.Logger);
-            }
-
-            throw new Exception("Unknown server implementation");
         };
-
-
-        _app = new App(createServer);
-        _app.Logger.WriteLog = _ => { };
         var users = Enumerable.Range(0, 20).Select(i => new User(i.ToString())).ToList();
 
         _app.Get("/say_hello", (ctx, _, _) => ctx.Text("Hello World!"));

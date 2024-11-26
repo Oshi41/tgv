@@ -18,8 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-kestrel-server", "tgv-k
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-core", "tgv-core\tgv-core.csproj", "{2CC3C978-393B-497F-BC7B-27F13CDDF276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-watson-server", "tgv-watson-server\tgv-watson-server.csproj", "{91D93549-D725-465A-A9E9-3659E1A1C7DB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-release", "tgv-release\tgv-release.csproj", "{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}"
 EndProject
 Global
@@ -64,10 +62,6 @@ Global
 		{2CC3C978-393B-497F-BC7B-27F13CDDF276}.Release|x64.Build.0 = Release|x64
 		{2CC3C978-393B-497F-BC7B-27F13CDDF276}.Debug|x64.ActiveCfg = Debug|x64
 		{2CC3C978-393B-497F-BC7B-27F13CDDF276}.Debug|x64.Build.0 = Debug|x64
-		{91D93549-D725-465A-A9E9-3659E1A1C7DB}.Release|x64.ActiveCfg = Release|x64
-		{91D93549-D725-465A-A9E9-3659E1A1C7DB}.Release|x64.Build.0 = Release|x64
-		{91D93549-D725-465A-A9E9-3659E1A1C7DB}.Debug|x64.ActiveCfg = Debug|x64
-		{91D93549-D725-465A-A9E9-3659E1A1C7DB}.Debug|x64.Build.0 = Debug|x64
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Debug|x64.ActiveCfg = Debug|x64
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Debug|x64.Build.0 = Debug|x64
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Release|x64.ActiveCfg = Release|x64

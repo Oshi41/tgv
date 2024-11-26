@@ -11,7 +11,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\tgv-kestrel-server\tgv-kestrel-server.csproj" />
-      <ProjectReference Include="..\tgv-watson-server\tgv-watson-server.csproj" />
       <ProjectReference Include="..\tgv\tgv.csproj" />
     </ItemGroup>
 

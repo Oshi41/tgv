@@ -14,25 +14,19 @@ namespace tgv_kestrel_server;
 
 public class KestrelServer : IServer, IApplicationLifetime
 {
-    private readonly FieldInfo _hasStartedField = typeof(HttpServer)
-        !.GetField("_hasStarted", BindingFlags.Instance | BindingFlags.NonPublic)!;
-
     private int _port = -1;
     private readonly KestrelSettings _cgf;
     private HttpServer? _httpServer;
+    private bool _started;
 
     public KestrelServer(ServerHandler handler, Logger? logger = null, KestrelSettings? cgf = null)
         : base(handler, logger ?? new Logger())
     {
         _cgf = cgf ?? new KestrelSettings();
 
-        if (_hasStartedField == null)
-        {
-            throw new NullReferenceException("_hasStarted field is not found");
-        }
     }
 
-    public override bool IsListening => _httpServer != null && Equals(_hasStartedField.GetValue(_httpServer), true);
+    public override bool IsListening => _httpServer != null && _started;
 
     public override bool IsHttps => _cgf.Https.ServerCertificateSelector != null
                                     || _cgf.Https.ServerCertificate != null;
@@ -71,10 +65,12 @@ public class KestrelServer : IServer, IApplicationLifetime
 
         await _httpServer.StartAsync(new HttpApp(_handler, Logger), CancellationToken.None);
         _port = port;
+        _started = true;
     }
 
     public override void Stop()
     {
+        _started = false;
         if (_httpServer == null) return;
 
         Logger.Info("Stopping KestrelServer");
