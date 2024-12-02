@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Flurl.Http;
 using HtmlParserDotNet;
 using tgv_core.api;
+using tgv_core.extensions;
 using tgv_core.imp;
 using tgv;
 using HttpMethod = System.Net.Http.HttpMethod;
@@ -12,14 +13,15 @@ namespace tgv_tests;
 class TestContext : Context
 {
     private bool _wasSent = false;
-    
-    public TestContext(HttpMethod method, Uri url) 
-        : base(method, method, Guid.NewGuid(), url, new Logger(), new(), new())
+
+    public TestContext(HttpMethod method, Uri url)
+        : base(method, Guid.NewGuid(), url, new Logger(), new(), new())
     {
+        Stage = method;
     }
 
-    public override string ContentType { get; set; }
     public override bool WasSent => _wasSent;
+
     public override Task<string> Body()
     {
         return Task.FromResult(string.Empty);
@@ -30,12 +32,12 @@ class TestContext : Context
         return Task.CompletedTask;
     }
 
-    protected override Task SendRaw(byte[]? bytes, int code, string? contentType)
+    protected override Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType)
     {
         return AfterSending();
     }
 
-    protected override Task SendRaw(Stream stream, int code, string contentType)
+    protected override Task SendRaw(Stream stream, HttpStatusCode code, string contentType)
     {
         return AfterSending();
     }

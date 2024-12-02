@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
@@ -27,7 +28,7 @@ public class BearerCredentialProvider: ICredentialProvider<BearerCredentials>
     public AuthSchemes Scheme => AuthSchemes.Bearer;
     public BearerCredentials? GetCredentials(Context ctx)
     {
-        var auth = ctx.ClientHeaders["Authorization"];
+        var auth = ctx.ClientHeaders[HttpRequestHeader.Authorization.ToString()];
         if (auth?.StartsWith(Scheme.ToString()) != true) return null;
         
         var token = auth.Replace($"{Scheme.ToHeader()} ", "");

@@ -73,35 +73,25 @@ public class AppTests
         _app.Use(user);
         user.Get("", (context, next, exception) =>
         {
-            context.Json(_users.Select(x => x.Id).OrderBy(x => x));
-            return Task.CompletedTask;
+            return context.Json(_users.Select(x => x.Id).OrderBy(x => x));
         });
         user.Get("/:user", (context, next, exception) =>
         {
             var id = context.Parameters["user"];
             var user = _users.FirstOrDefault(x => x.Id == id);
             if (user == null)
-                context.Send(HttpStatusCode.NotFound);
-            else
-            {
-                context.Json(new { user.FullName });
-            }
-
-            return Task.CompletedTask;
+                return context.Send(HttpStatusCode.NotFound);
+            
+            return context.Json(new { user.FullName });
         });
         user.Delete("/:user", (context, next, exception) =>
         {
             var id = context.Parameters["user"];
             var user = _users.FirstOrDefault(x => x.Id == id);
             if (user == null)
-                context.Send(HttpStatusCode.NotFound);
-            else
-            {
-                _users.Remove(user);
-                context.Send(HttpStatusCode.OK);
-            }
-
-            return Task.CompletedTask;
+                return context.Send(HttpStatusCode.NotFound);
+            _users.Remove(user);
+            return context.Send(HttpStatusCode.OK);
         });
         user.Post("", async (context, next, exception) =>
         {
@@ -121,8 +111,7 @@ public class AppTests
             if (user == null)
                 throw context.Throw(HttpStatusCode.NotFound, "User does not exist");
 
-            context.Json(user.Details);
-            return Task.CompletedTask;
+            return context.Json(user.Details);
         });
 
         await _app.Start(TestUtils.RandPort());
@@ -189,7 +178,7 @@ public class AppTests
     {
         async Task Contains(string id)
         {
-            var ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
+            var ids = await (_app.RunningUrl + "users").AllowHttpStatus("2xx").GetJsonAsync<string[]>();
             Assert.That(ids.Contains(id));
         }
 
@@ -208,8 +197,7 @@ public class AppTests
                 }
             };
 
-            var result = await (_app.RunningUrl + "users").PostJsonAsync(user);
-            Assert.That(TestUtils.IsSuccess(result.StatusCode));
+            await (_app.RunningUrl + "users").AllowHttpStatus("2xx").PostJsonAsync(user);
             count++;
             await Contains(user.Id);
             Assert.That(_users.Count, Is.EqualTo(count));

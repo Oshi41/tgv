@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text;
 using tgv_auth.api;
 using tgv_auth.extensions;
@@ -21,7 +22,7 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
         }
 
         // Second priority - header
-        return Parse(ctx.ClientHeaders["Authorization"]);
+        return Parse(ctx.ClientHeaders[HttpRequestHeader.Authorization.ToString()]);
     }
     
     private BasicCredentials? Parse(string? header)

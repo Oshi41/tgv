@@ -15,6 +15,7 @@ using tgv_core.imp;
 
 [assembly: InternalsVisibleTo("tgv")]
 [assembly: InternalsVisibleTo("tgv-tests")]
+
 namespace tgv_core.api;
 
 public abstract class Context : IDisposable
@@ -34,7 +35,7 @@ public abstract class Context : IDisposable
     /// <summary>
     /// Current context HTTP method stage
     /// </summary>
-    public virtual HttpMethod Stage { get; internal set; }
+    public virtual HttpMethod Stage { get; internal set; } = HttpMethodExtensions.Before;
 
     /// <summary>
     /// Original response HTTP method. Will not change in any ctx stage
@@ -51,7 +52,7 @@ public abstract class Context : IDisposable
     /// <summary>
     /// Current URL
     /// </summary>
-    public virtual  Uri Url { get; }
+    public virtual Uri Url { get; }
 
     public Logger Logger { get; }
 
@@ -79,7 +80,11 @@ public abstract class Context : IDisposable
     /// <summary>
     /// Request content type
     /// </summary>
-    public abstract string ContentType { get; set; }
+    public string ContentType
+    {
+        get => ResponseHeaders["Content-Type"];
+        set => ResponseHeaders["Content-Type"] = value;
+    }
 
     public abstract bool WasSent { get; }
 
@@ -112,7 +117,7 @@ public abstract class Context : IDisposable
     }
 
     public Task SendCode(HttpStatusCode code)
-        => SendRaw((byte[])null, (int)code, null);
+        => SendRaw((byte[])null, code, null);
 
     public virtual Task Send(HttpStatusCode code, string? message = null)
         => Send(message ?? code.ToString(), code, "text/plain");
@@ -132,7 +137,7 @@ public abstract class Context : IDisposable
         if (!File.Exists(filename)) throw new FileNotFoundException(filename);
         await SendRaw(
             File.OpenRead(filename),
-            (int)HttpStatusCode.OK,
+            HttpStatusCode.OK,
             MimeTypeMap.GetMimeType(Path.GetExtension(filename))
         );
     }
@@ -155,7 +160,7 @@ public abstract class Context : IDisposable
     public abstract Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved);
 
     public virtual Task Send(string text, HttpStatusCode code, string contentType)
-        => SendRaw(Encoding.UTF8.GetBytes(text), (int)code, contentType);
+        => SendRaw(Encoding.UTF8.GetBytes(text), code, contentType);
 
     #endregion
 
@@ -182,18 +187,17 @@ public abstract class Context : IDisposable
 
     #region Protected Abstract methods
 
-    protected abstract Task SendRaw(byte[]? bytes, int code, string? contentType);
-    protected abstract Task SendRaw(Stream stream, int code, string contentType);
+    protected abstract Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType);
+    protected abstract Task SendRaw(Stream stream, HttpStatusCode code, string contentType);
 
     #endregion
 
     public event EventHandler RequestFinished;
     private readonly CookieCollection _original = new();
 
-    protected Context(HttpMethod stage, HttpMethod method, Guid traceId, Uri url, Logger logger,
+    protected Context(HttpMethod method, Guid traceId, Uri url, Logger logger,
         NameValueCollection? headers, NameValueCollection? query)
     {
-        Stage = stage;
         Method = method;
         TraceId = traceId;
         Url = url;
@@ -201,7 +205,7 @@ public abstract class Context : IDisposable
         ClientHeaders = headers ?? new NameValueCollection();
         Query = query ?? new NameValueCollection();
 
-        Cookies.Parse(ClientHeaders["Cookie"] ?? string.Empty);
+        Cookies.Parse(ClientHeaders[HttpRequestHeader.Cookie.ToString()] ?? string.Empty);
         _original.Add(Cookies);
     }
 
