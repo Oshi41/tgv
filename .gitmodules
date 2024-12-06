@@ -1,0 +1,4 @@
+﻿[submodule "netcoreserver"]
+	path = netcoreserver
+	url = https://github.com/Oshi41/NetCoreServer.git
+	branch = netstandard2.0
