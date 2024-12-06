@@ -21,9 +21,4 @@
       <ProjectReference Include="..\tgv-core\tgv-core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="System.IO.Pipelines" Version="4.5.2" />
-      <PackageReference Include="System.Memory" Version="4.5.5" />
-    </ItemGroup>
-
 </Project>

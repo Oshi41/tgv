@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-aspnet-app", "tgv-aspne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-server", "tgv-server\tgv-server.csproj", "{4F6A259E-5296-4CAE-820E-22E6A70B84B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-server-kestrel", "tgv-server-kestrel\tgv-server-kestrel.csproj", "{F7334D31-265A-4CBE-90D5-69B6F658EE16}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -68,9 +66,5 @@ Global
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Debug|x64.Build.0 = Debug|x64
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Release|x64.ActiveCfg = Release|x64
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Release|x64.Build.0 = Release|x64
-		{F7334D31-265A-4CBE-90D5-69B6F658EE16}.Release|x64.ActiveCfg = Release|Any CPU
-		{F7334D31-265A-4CBE-90D5-69B6F658EE16}.Release|x64.Build.0 = Release|Any CPU
-		{F7334D31-265A-4CBE-90D5-69B6F658EE16}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F7334D31-265A-4CBE-90D5-69B6F658EE16}.Debug|x64.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

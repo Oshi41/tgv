@@ -11,13 +11,13 @@ namespace tgv;
 public class App : IRouter
 {
     private IServer _server;
-    internal IRouter _root;
+    internal Router _root;
 
-    public App(Func<ServerHandler, IServer> server, RouterConfig? cfg = null)
+    public App(Func<Router, IServer> server, RouterConfig? cfg = null)
     {
         Logger = new Logger();
         _root = new Router("*", cfg ?? new RouterConfig());
-        _server = server(Handle);
+        _server = server(_root);
         _server.Logger.WriteLog = Logger.WriteLog;
     }
 

@@ -15,6 +15,7 @@ using tgv_core.imp;
 
 [assembly: InternalsVisibleTo("tgv")]
 [assembly: InternalsVisibleTo("tgv-tests")]
+[assembly: InternalsVisibleTo("tgv-server-kestrel")]
 
 namespace tgv_core.api;
 

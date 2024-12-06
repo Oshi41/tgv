@@ -29,11 +29,7 @@ public class AppTests
     public AppTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
-    }
-
-    [SetUp]
-    public async Task Setup()
-    {
+        
         var rand = new Random();
 
         for (int i = 0; i < 20; i++)
@@ -50,32 +46,17 @@ public class AppTests
             });
         }
 
-        _app.After((context, next, exception) =>
-        {
-            if (exception != null)
-            {
-                context.Send(HttpStatusCode.InternalServerError);
-            }
-            else
-            {
-                context.Send(HttpStatusCode.NotFound);
-            }
+        _app.After((context, _, exception) =>
+            context.Send(exception != null ? HttpStatusCode.InternalServerError : HttpStatusCode.NotFound));
 
-            return Task.CompletedTask;
-        });
-
-        _app.Get("/redirect", async (ctx, _, _) =>
-        {
-            await ctx.Redirect("/users");
-        });
+        _app.Get("/redirect", async (ctx, _, _) => await ctx.Redirect("/users"));
 
         var user = new Router("users");
         _app.Use(user);
-        user.Get("", (context, next, exception) =>
-        {
-            return context.Json(_users.Select(x => x.Id).OrderBy(x => x));
-        });
-        user.Get("/:user", (context, next, exception) =>
+        user.Get("", (context, _, _) => 
+            context.Json(_users.Select(x => x.Id).OrderBy(x => x)));
+        
+        user.Get("/:user", (context, _, _) =>
         {
             var id = context.Parameters["user"];
             var user = _users.FirstOrDefault(x => x.Id == id);
@@ -84,7 +65,7 @@ public class AppTests
             
             return context.Json(new { user.FullName });
         });
-        user.Delete("/:user", (context, next, exception) =>
+        user.Delete("/:user", (context, _, _) =>
         {
             var id = context.Parameters["user"];
             var user = _users.FirstOrDefault(x => x.Id == id);
@@ -93,7 +74,7 @@ public class AppTests
             _users.Remove(user);
             return context.Send(HttpStatusCode.OK);
         });
-        user.Post("", async (context, next, exception) =>
+        user.Post("", async (context, _, _) =>
         {
             var user = await context.Body<User>();
             if (_users.Any(x => x.Id == user.Id))
@@ -103,9 +84,9 @@ public class AppTests
             await context.Send(HttpStatusCode.OK);
         });
 
-        var details = new Router("/:user");
+        var details = new Router("/:user/details");
         user.Use(details);
-        details.Get("", (context, next, exception) =>
+        details.Get("", (context, _, _) =>
         {
             var user = _users.FirstOrDefault(x => x.Id == context.Parameters["user"]);
             if (user == null)
@@ -113,7 +94,11 @@ public class AppTests
 
             return context.Json(user.Details);
         });
+    }
 
+    [SetUp]
+    public async Task Setup()
+    {
         await _app.Start(TestUtils.RandPort());
         Assert.That(_app.RunningUrl, Is.Not.Null.Or.Empty);
     }
@@ -128,7 +113,7 @@ public class AppTests
     public async Task AllUsers()
     {
         var expected = _users.Select(x => x.Id).OrderBy(x => x).ToList();
-        var ids = await (_app.RunningUrl + "users/").GetJsonAsync<string[]>();
+        var ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
         
         ids = await (_app.RunningUrl + "redirect").GetJsonAsync<string[]>();

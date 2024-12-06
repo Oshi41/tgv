@@ -1,42 +1,52 @@
-﻿using Flurl.Http;
+﻿using System.Net;
+using Flurl.Http;
 using Microsoft.AspNetCore.Builder;
-using tgv_core.imp;
-using tgv_server;
-using tgv;
 
 namespace tgv_tests;
 
 [TestFixture, TestFixtureSource(typeof(Benchmarks), nameof(Cases))]
 public class Benchmarks
 {
-    public static string[] Cases() => ["asp", "tgv"];
-
+    public static readonly string[] Cases = ["asp", "tgv", "simple", "netcoreserver"];
     private static readonly string[] Users = Enumerable.Range(0, 20).Reverse().Select(x => "Id_" + x).ToArray();
     private readonly Uri _url;
 
-
     public Benchmarks(string srv)
     {
-        if (srv == "asp")
+        switch (srv)
         {
-            _url = new("http://localhost:7000/");
+            case "asp":
+                _url = new("http://localhost:4000/");
+                var builder = WebApplication.CreateBuilder();
+                var asp = builder.Build();
 
-            var builder = WebApplication.CreateBuilder();
-            var app = builder.Build();
-
-            app.MapGet("/users", () => Users.OrderBy(x => x));
-            app.Urls.Add(_url.ToString());
-            app.StartAsync().Wait();
-            return;
+                asp.MapGet("", () => "Hello world!");
+                asp.MapGet("/users", () => Users.OrderBy(x => x));
+                asp.Urls.Add(_url.ToString());
+                asp.StartAsync().Wait();
+                break;
+            
+            case "simple":
+                _url = new("http://localhost:4002/");
+                var simple = new TcpSocketListener();
+                simple.Start(4002);
+                break;
+            
+            case "netcoreserver":
+                _url = new("http://localhost:4003/");
+                var httpserver = new CoreServer(new IPEndPoint(IPAddress.Any, 4003));
+                httpserver.Start();
+                break;
         }
+    }
 
-        if (srv == "tgv")
+    [Test]
+    public async Task GetHello()
+    {
+        for (int i = 0; i < 10_000; i++)
         {
-            _url = new("http://localhost:7001/");
-
-            var app = new App(x => new Server(new Settings(), x, new Logger()));
-            app.Get("/users", (ctx, next, _) => ctx.Json(Users.OrderBy(x => x)));
-            app.Start(_url.Port).Wait();
+            var text = await (_url).AllowHttpStatus("2xx").GetStringAsync();
+            Assert.That(text, Is.EqualTo("Hello world!"));
         }
     }
 

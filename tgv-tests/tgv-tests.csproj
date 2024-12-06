@@ -23,6 +23,7 @@
       <PackageReference Include="HtmlParserDotNet" Version="1.0.0" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
       <PackageReference Include="Moq.AutoMock" Version="3.6.0-ci0596" />
+      <PackageReference Include="NetCoreServer" Version="8.0.7" />
       <PackageReference Include="NUnit" Version="4.2.2" />
       <PackageReference Include="NUnit.Analyzers" Version="4.4.0">
         <PrivateAssets>all</PrivateAssets>
@@ -36,7 +37,6 @@
       <ProjectReference Include="..\tgv-auth\tgv-auth.csproj" />
       <ProjectReference Include="..\tgv-cors\tgv-cors.csproj" />
       <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />
-      <ProjectReference Include="..\tgv-server-kestrel\tgv-server-kestrel.csproj" />
       <ProjectReference Include="..\tgv-server\tgv-server.csproj" />
       <ProjectReference Include="..\tgv-session\tgv-session.csproj" />
       <ProjectReference Include="..\tgv\tgv.csproj" />
