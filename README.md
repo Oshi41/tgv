@@ -35,6 +35,4 @@ Routing system similar to Express server.
 
 HTTP helper function (redirecting, sending files, JSON, etc.)
 
-Cross-platform (special thanks for [Watson.Lite](https://github.com/dotnet/WatsonWebserver) http server implementation)
-
 For more information [follow Wiki](https://github.com/Oshi41/tgv/wiki)
