@@ -5,19 +5,6 @@ using tgv;
 
 namespace tgv_tests;
 
-class Details
-{
-    public int Age { get; set; }
-    public string Name { get; set; }
-    public string Surname { get; set; }
-}
-
-class User
-{
-    public string Id { get; set; }
-    public string FullName => $"{Details?.Name} {Details?.Surname}";
-    public Details Details { get; set; }
-}
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
 public class AppTests
@@ -50,49 +37,7 @@ public class AppTests
 
         _app.Get("/redirect", async (ctx, _, _) => await ctx.Redirect("/users"));
 
-        var user = new Router("users");
-        _app.Use(user);
-        user.Get("", (context, _, _) => 
-            context.Json(_users.Select(x => x.Id).OrderBy(x => x)));
-        
-        user.Get("/:user", (context, _, _) =>
-        {
-            var id = context.Parameters["user"];
-            var user = _users.FirstOrDefault(x => x.Id == id);
-            if (user == null)
-                return context.Send(HttpStatusCode.NotFound);
-            
-            return context.Json(new { user.FullName });
-        });
-        user.Delete("/:user", (context, _, _) =>
-        {
-            var id = context.Parameters["user"];
-            var user = _users.FirstOrDefault(x => x.Id == id);
-            if (user == null)
-                return context.Send(HttpStatusCode.NotFound);
-            _users.Remove(user);
-            return context.Send(HttpStatusCode.OK);
-        });
-        user.Post("", async (context, _, _) =>
-        {
-            var user = await context.Body<User>();
-            if (_users.Any(x => x.Id == user.Id))
-                throw context.Throw(HttpStatusCode.BadRequest, "User already exists");
-
-            _users.Add(user);
-            await context.Send(HttpStatusCode.OK);
-        });
-
-        var details = new Router("/:user/details");
-        user.Use(details);
-        details.Get("", (context, _, _) =>
-        {
-            var user = _users.FirstOrDefault(x => x.Id == context.Parameters["user"]);
-            if (user == null)
-                throw context.Throw(HttpStatusCode.NotFound, "User does not exist");
-
-            return context.Json(user.Details);
-        });
+        _app.Use(TestUtils.CreateSimpleCRUD(_users));
     }
 
     [SetUp]
@@ -116,7 +61,7 @@ public class AppTests
         ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
         
-        ids = await (_app.RunningUrl + "redirect").GetJsonAsync<string[]>();
+        ids = await (_app.RunningUrl + "users/redirected").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
     }
 
@@ -182,7 +127,7 @@ public class AppTests
                 }
             };
 
-            await (_app.RunningUrl + "users").AllowHttpStatus("2xx").PostJsonAsync(user);
+            await (_app.RunningUrl + "users").AllowHttpStatus("2xx").PutJsonAsync(user);
             count++;
             await Contains(user.Id);
             Assert.That(_users.Count, Is.EqualTo(count));

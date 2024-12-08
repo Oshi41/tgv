@@ -47,9 +47,15 @@ public class TgvServer : IServer
 
         var endpoint = new IPEndPoint(IPAddress.Any, port);
         if (_tgvSettings.Certificate != null)
-            _server = new HttpsServerImp(_handler, Logger, new SslContext(SslProtocols.Default, _tgvSettings.Certificate), endpoint, _tgvSettings);
+        {
+            _server = new HttpsServerImp(_handler, Logger,
+                new SslContext(SslProtocols.Tls12, _tgvSettings.Certificate, _tgvSettings.CertificateValidation),
+                endpoint, _tgvSettings);
+        }
         else
+        {
             _server = new HttpServerImp(_handler, Logger, endpoint, _tgvSettings);
+        }
 
         if (!_server.Start())
         {
