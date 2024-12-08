@@ -19,6 +19,9 @@ using tgv_core.imp;
 
 namespace tgv_core.api;
 
+/// <summary>
+/// Represents an abstract context for handling HTTP requests and responses within an application.
+/// </summary>
 public abstract class Context : IDisposable
 {
     #region Public props
@@ -48,6 +51,9 @@ public abstract class Context : IDisposable
     /// </summary>
     public IDictionary<string, string>? Parameters { get; set; }
 
+    /// <summary>
+    /// Unique identifier for tracing requests through the system.
+    /// </summary>
     public virtual Guid TraceId { get; }
 
     /// <summary>
@@ -55,8 +61,14 @@ public abstract class Context : IDisposable
     /// </summary>
     public virtual Uri Url { get; }
 
+    /// <summary>
+    /// Provides functionality for logging messages with different verbosity levels.
+    /// </summary>
     public Logger Logger { get; }
 
+    /// <summary>
+    /// Collection of cookies associated with the current context.
+    /// </summary>
     public CookieCollection Cookies { get; } = new();
 
     /// <summary>
@@ -78,6 +90,9 @@ public abstract class Context : IDisposable
 
     #region Public Abstract props
 
+    /// <summary>
+    /// Indicates whether the response is sending / has been sent.
+    /// </summary>
     public abstract bool WasSent { get; }
 
     #endregion
@@ -102,27 +117,67 @@ public abstract class Context : IDisposable
         throw Throw(code, e?.Message ?? code.ToString());
     }
 
+    /// <summary>
+    /// Throws an HTTP exception with the specified status code and message.
+    /// </summary>
+    /// <param name="code">The HTTP status code to associate with the exception.</param>
+    /// <param name="message">The message to associate with the exception.</param>
+    /// <returns>The thrown exception.</returns>
+    /// <exception cref="HttpException">Thrown when the method is called with the specified arguments.</exception>
     public Exception Throw(HttpStatusCode code, string message)
     {
         var e = new HttpException(code, message);
         throw e;
     }
 
-    public Task SendCode(HttpStatusCode code)
-        => SendRaw((byte[])null, code, null);
+    /// <summary>
+    /// Sends an HTTP response with the specified status code.
+    /// </summary>
+    /// <param name="code">The HTTP status code to send in the response.</param>
+    /// <returns>A task that represents the asynchronous send operation.</returns>
+    public Task SendCode(HttpStatusCode code) => SendRaw((byte[]?)null, code, null);
 
+    /// <summary>
+    /// Sends a response with the specified HTTP status code and optional message.
+    /// </summary>
+    /// <param name="code">The HTTP status code to be sent in the response.</param>
+    /// <param name="message">Optional message to include in the response body. Defaults to the string representation of the status code if not provided.</param>
+    /// <returns>A task representing the asynchronous send operation.</returns>
     public virtual Task Send(HttpStatusCode code, string? message = null)
         => Send(message ?? code.ToString(), code, "text/plain");
 
+    /// <summary>
+    /// Converts the provided response object to a JSON string and sends it
+    /// with an HTTP status code of OK and a content type of "application/json".
+    /// </summary>
+    /// <param name="resp">The response object to be serialized into JSON format.</param>
+    /// <returns>A task that represents the asynchronous send operation.</returns>
     public virtual Task Json(object resp)
     {
         var json = JsonConvert.SerializeObject(resp);
         return Send(json, HttpStatusCode.OK, "application/json");
     }
 
+    /// <summary>
+    /// Sends the specified HTML content with an HTTP status code of OK (200).
+    /// </summary>
+    /// <param name="html">The HTML content to send as part of the response.</param>
+    /// <returns>A task representing the asynchronous operation of sending the HTML content.</returns>
     public virtual Task Html(string html) => Send(html, HttpStatusCode.OK, "text/html");
+
+    /// <summary>
+    /// Sends a text response with the specified content.
+    /// </summary>
+    /// <param name="txt">The text content to be sent in the response.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public virtual Task Text(string txt) => Send(txt, HttpStatusCode.OK, "text/plain");
 
+    /// <summary>
+    /// Sends a file to the client with the appropriate MIME type based on the file extension.
+    /// </summary>
+    /// <param name="filename">The name of the file to be sent.</param>
+    /// <param name="content">The binary content of the file.</param>
+    /// <returns>An asynchronous task representing the operation.</returns>
     public virtual async Task SendFile(string filename, byte[] content)
     {
         await SendRaw(
@@ -149,13 +204,26 @@ public abstract class Context : IDisposable
     /// <param name="code">Redirection code</param>
     public abstract Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved);
 
+    /// <summary>
+    /// Sends a response with specified text, HTTP status code, and content type.
+    /// </summary>
+    /// <param name="text">The text content to be sent in the response.</param>
+    /// <param name="code">The HTTP status code for the response.</param>
+    /// <param name="contentType">The MIME type of the content being sent.</param>
+    /// <returns>A task representing the asynchronous operation of sending the response.</returns>
     public virtual Task Send(string text, HttpStatusCode code, string contentType)
-        => SendRaw(string.IsNullOrEmpty(text)? null : Encoding.UTF8.GetBytes(text), code, contentType);
+        => SendRaw(string.IsNullOrEmpty(text) ? null : Encoding.UTF8.GetBytes(text), code, contentType);
 
     #endregion
 
     #region Protected methods
 
+    /// <summary>
+    /// Executes operations that should occur before sending a response.
+    /// Writing cookies to header list
+    /// </summary>
+    /// <returns>A completed task if executed successfully.</returns>
+    /// <exception cref="Exception">Thrown if a response has already been sent.</exception>
     protected virtual Task BeforeSending()
     {
         if (WasSent)
@@ -167,6 +235,10 @@ public abstract class Context : IDisposable
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Invokes the RequestFinished event after the request has been sent and processed.
+    /// </summary>
+    /// <returns>A completed task representing the operation.</returns>
     protected virtual Task AfterSending()
     {
         RequestFinished?.Invoke(this, EventArgs.Empty);
@@ -177,12 +249,34 @@ public abstract class Context : IDisposable
 
     #region Protected Abstract methods
 
+    /// <summary>
+    /// Sends raw byte data as a response.
+    /// </summary>
+    /// <param name="bytes">The byte array data to be sent. Can be null to indicate no body content.</param>
+    /// <param name="code">The HTTP status code for the response.</param>
+    /// <param name="contentType">The content type of the response. Can be null if not applicable.</param>
+    /// <returns>A task that represents the asynchronous operation of sending a raw response.</returns>
     protected abstract Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType);
+
+    /// <summary>
+    /// Sends raw data over a network connection using the specified HTTP status code and content type.
+    /// </summary>
+    /// <param name="stream">Stream need to be sent.</param>
+    /// <param name="code">The HTTP status code that indicates the response's status.</param>
+    /// <param name="contentType">The MIME type of the content being sent.</param>
+    /// <returns>A task that represents the asynchronous send operation.</returns>
     protected abstract Task SendRaw(Stream stream, HttpStatusCode code, string contentType);
 
     #endregion
 
+    /// <summary>
+    /// Event triggered when the request has finished processing.
+    /// </summary>
     public event EventHandler RequestFinished;
+
+    /// <summary>
+    /// Stores the original cookies received.
+    /// </summary>
     private readonly CookieCollection _original = new();
 
     /// <summary>

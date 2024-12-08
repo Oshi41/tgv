@@ -5,12 +5,12 @@ namespace tgv_core.extensions;
 
 public static class HttpMethodExtensions
 {
-    public static HttpMethod Before = new("BEFORE");
-    public static HttpMethod After = new("AFTER");
-    public static HttpMethod Error = new("ERROR");
-    public static HttpMethod Patch = new("PATCH");
-    public static HttpMethod Connect = new("CONNECT");
-    public static HttpMethod Unknown = new("UNKNOWN");
+    public static readonly HttpMethod Before = new("BEFORE");
+    public static readonly HttpMethod After = new("AFTER");
+    public static readonly HttpMethod Error = new("ERROR");
+    public static readonly HttpMethod Patch = new("PATCH");
+    public static readonly HttpMethod Connect = new("CONNECT");
+    public static readonly HttpMethod Unknown = new("UNKNOWN");
 
     public static bool IsStandardMethod(this HttpMethod method)
     {

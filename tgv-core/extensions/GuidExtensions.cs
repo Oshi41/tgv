@@ -4,6 +4,14 @@ namespace tgv_core.extensions;
 
 public static class GuidExtensions
 {
+    /// <summary>
+    /// Creates a new Guid by embedding a specified long identifier and an optional DateTime value.
+    /// </summary>
+    /// <param name="id">The long identifier to include in the Guid.</param>
+    /// <param name="dateTime">
+    /// An optional DateTime value to include in the Guid. If not specified, the current DateTime is used.
+    /// </param>
+    /// <returns>A new Guid containing the long identifier and the DateTime value.</returns>
     public static Guid CreateId(this long id, DateTime? dateTime = null)
     {
         dateTime ??= DateTime.Now;
@@ -13,6 +21,11 @@ public static class GuidExtensions
         return new Guid(guidData);
     }
 
+    /// <summary>
+    /// Extracts a long identifier and a DateTime value from the specified Guid.
+    /// </summary>
+    /// <param name="guid">The Guid to extract the data from.</param>
+    /// <returns>A tuple containing the extracted DateTime and long identifier.</returns>
     public static (DateTime dateTime, long id) FromId(this Guid guid)
     {
         var bytes = guid.ToByteArray();
