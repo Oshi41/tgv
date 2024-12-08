@@ -7,6 +7,14 @@
         <Platforms>x64</Platforms>
         <LangVersion>13</LangVersion>
         <Nullable>enable</Nullable>
+        <Version>0.0.1</Version>
+        <Title>TGV server</Title>
+        <Authors>Oshi41</Authors>
+        <Description>Http(s) server based on NetCoreServer implementation</Description>
+        <Copyright>MIT</Copyright>
+        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+        <PackageTags>http;https;server</PackageTags>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">

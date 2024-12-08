@@ -78,15 +78,6 @@ public abstract class Context : IDisposable
 
     #region Public Abstract props
 
-    /// <summary>
-    /// Request content type
-    /// </summary>
-    public string ContentType
-    {
-        get => ResponseHeaders["Content-Type"];
-        set => ResponseHeaders["Content-Type"] = value;
-    }
-
     public abstract bool WasSent { get; }
 
     #endregion
@@ -125,7 +116,6 @@ public abstract class Context : IDisposable
 
     public virtual Task Json(object resp)
     {
-        ContentType = "application/json";
         var json = JsonConvert.SerializeObject(resp);
         return Send(json, HttpStatusCode.OK, "application/json");
     }
