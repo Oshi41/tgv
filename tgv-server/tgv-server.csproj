@@ -1,37 +1,36 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <RootNamespace>tgv_server</RootNamespace>
-        <Configurations>Release;Debug</Configurations>
-        <Platforms>x64</Platforms>
-        <LangVersion>13</LangVersion>
-        <Nullable>enable</Nullable>
-        <Version>0.0.1</Version>
-        <Title>TGV server</Title>
-        <Authors>Oshi41</Authors>
-        <Description>Http(s) server based on NetCoreServer implementation</Description>
-        <Copyright>MIT</Copyright>
-        <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
-        <PackageTags>http;https;server</PackageTags>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <OutputPath>..\bin\x64\Debug\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-      <OutputPath>..\bin\x64\Release\</OutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\netcoreserver\source\NetCoreServer\NetCoreServer.csproj" />
-      <ProjectReference Include="..\tgv-core\tgv-core.csproj" />
-      <NetCoreServerOutput Include="..\netcoreserver\source\NetCoreServer\bin\$(Configuration)\**\*.*" />  
-    </ItemGroup>
-    
-<!--    <Target Name="Copy" AfterTargets="Build">-->
-<!--        <Copy SourceFiles="@(NetCoreServerOutput)" DestinationFolder="$(OutputPath)"/>-->
-<!--    </Target>-->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>tgv_server</RootNamespace>
+    <Configurations>Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
+    <LangVersion>13</LangVersion>
+    <Nullable>enable</Nullable>
+    <Version>0.0.5.0</Version>
+    <Title>TGV server</Title>
+    <Authors>Oshi41</Authors>
+    <Description>Http(s) server based on NetCoreServer implementation</Description>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl>https://github.com/Oshi41/tgv</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Oshi41/tgv</RepositoryUrl>
+    <PackageTags>http;https;server</PackageTags>
+    <AssemblyVersion>0.0.5.0</AssemblyVersion>
+    <FileVersion>0.0.5.0</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>..\bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>..\bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netcoreserver\source\NetCoreServer\NetCoreServer.csproj" />
+    <ProjectReference Include="..\tgv-core\tgv-core.csproj" />
+    <NetCoreServerOutput Include="..\netcoreserver\source\NetCoreServer\bin\$(Configuration)\**\*.*" />
+  </ItemGroup>
+  <!--    <Target Name="Copy" AfterTargets="Build">-->
+  <!--        <Copy SourceFiles="@(NetCoreServerOutput)" DestinationFolder="$(OutputPath)"/>-->
+  <!--    </Target>-->
 </Project>
