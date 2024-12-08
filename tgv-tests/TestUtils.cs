@@ -59,9 +59,9 @@ public static class TestUtils
         return 5000 + new Random().Next(500) + (int)(DateTime.Now.ToFileTimeUtc()) % 200;
     }
 
-    public static IFlurlClient CreateAgent(this App app, string prefix, [CallerMemberName] string method = "")
+    public static IFlurlClient CreateAgent(this App app, string prefix, [CallerMemberName] string method = "", [CallerFilePath] string file = "")
     {
-        return FlurlHttp.Clients.GetOrAdd($"{method}_{prefix}", app.RunningUrl);
+        return FlurlHttp.Clients.GetOrAdd($"{file}_{method}_{prefix}", app.RunningUrl);
     }
 
     public static async Task<HtmlElement> GetHtmlAsync(this IFlurlRequest request)
