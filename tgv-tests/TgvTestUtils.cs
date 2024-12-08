@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace tgv_tests;
+﻿namespace tgv_tests;
 
 [TestFixture]
 public class TgvTestUtils

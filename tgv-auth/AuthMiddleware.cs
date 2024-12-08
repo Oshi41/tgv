@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using tgv_auth.api;
 using tgv_auth.api.storage;
-using tgv_auth.imp;
 using tgv_core.api;
 using ICredentials = tgv_auth.api.ICredentials;
 

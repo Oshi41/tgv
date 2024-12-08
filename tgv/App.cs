@@ -13,11 +13,11 @@ public class App : IRouter
     private IServer _server;
     internal Router _root;
 
-    public App(Func<Router, IServer> server, RouterConfig? cfg = null)
+    public App(Func<ServerHandler, IServer> server, RouterConfig? cfg = null)
     {
         Logger = new Logger();
         _root = new Router("*", cfg ?? new RouterConfig());
-        _server = server(_root);
+        _server = server(Handle);
         _server.Logger.WriteLog = Logger.WriteLog;
     }
 
@@ -61,7 +61,12 @@ public class App : IRouter
     public event EventHandler<IServer> Started;
     public event EventHandler<IServer> Closed;
 
-    private async Task Handle(Context ctx)
+    private Task Handle(Context ctx, Exception? error = null)
+    {
+        return error != null ? HandleError(ctx, error) : HandleCommon(ctx);
+    }
+
+    private async Task HandleCommon(Context ctx)
     {
         try
         {
@@ -86,11 +91,11 @@ public class App : IRouter
         {
             // handling error routes
             ctx.Logger.Warn($"Exception during route handling: {e.Message}");
-            await Handle(ctx, e);
+            await HandleError(ctx, e);
         }
     }
 
-    private async Task Handle(Context ctx, Exception error)
+    private async Task HandleError(Context ctx, Exception error)
     {
         try
         {

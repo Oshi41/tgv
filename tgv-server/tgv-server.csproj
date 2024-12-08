@@ -18,7 +18,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\netcoreserver\source\NetCoreServer\NetCoreServer.csproj" />
       <ProjectReference Include="..\tgv-core\tgv-core.csproj" />
+      <NetCoreServerOutput Include="..\netcoreserver\source\NetCoreServer\bin\$(Configuration)\**\*.*" />  
     </ItemGroup>
-
+    
+<!--    <Target Name="Copy" AfterTargets="Build">-->
+<!--        <Copy SourceFiles="@(NetCoreServerOutput)" DestinationFolder="$(OutputPath)"/>-->
+<!--    </Target>-->
 </Project>

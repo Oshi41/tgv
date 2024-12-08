@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Flurl.Http;
-using tgv_core.api;
 using tgv_core.imp;
 using tgv;
 
@@ -112,8 +111,9 @@ public class AppTests
     [Test]
     public async Task AllUsers()
     {
+        string[] ids;
         var expected = _users.Select(x => x.Id).OrderBy(x => x).ToList();
-        var ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
+        ids = await (_app.RunningUrl + "users").GetJsonAsync<string[]>();
         Assert.That(ids, Is.EqualTo(expected));
         
         ids = await (_app.RunningUrl + "redirect").GetJsonAsync<string[]>();

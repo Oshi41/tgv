@@ -161,7 +161,7 @@ public abstract class Context : IDisposable
     public abstract Task Redirect(string path, HttpStatusCode code = HttpStatusCode.Moved);
 
     public virtual Task Send(string text, HttpStatusCode code, string contentType)
-        => SendRaw(Encoding.UTF8.GetBytes(text), code, contentType);
+        => SendRaw(string.IsNullOrEmpty(text)? null : Encoding.UTF8.GetBytes(text), code, contentType);
 
     #endregion
 
@@ -196,18 +196,37 @@ public abstract class Context : IDisposable
     public event EventHandler RequestFinished;
     private readonly CookieCollection _original = new();
 
+    /// <summary>
+    /// Base context constructor
+    /// </summary>
+    /// <param name="method">HTTP method</param>
+    /// <param name="traceId">Uniq request ID</param>
+    /// <param name="url">Current URL</param>
+    /// <param name="logger">Logger</param>
+    /// <param name="headers">Request headers. May be null if no headers provided.</param>
+    /// <param name="query">Query parameters. Pass null to automatically parse from URL</param>
+    /// <param name="cookies">Request cookies. Pass null to parse from header</param>
     protected Context(HttpMethod method, Guid traceId, Uri url, Logger logger,
-        NameValueCollection? headers, NameValueCollection? query)
+        NameValueCollection? headers = null, NameValueCollection? query = null, CookieCollection? cookies = null)
     {
         Method = method;
         TraceId = traceId;
         Url = url;
         Logger = logger;
         ClientHeaders = headers ?? new NameValueCollection();
-        Query = query ?? new NameValueCollection();
 
-        Cookies.Parse(ClientHeaders[HttpRequestHeader.Cookie.ToString()] ?? string.Empty);
-        _original.Add(Cookies);
+        Query = query ?? System.Web.HttpUtility.ParseQueryString(url.Query);
+
+        if (cookies != null)
+        {
+            Cookies.Add(cookies);
+            _original.Add(cookies);
+        }
+        else
+        {
+            Cookies.Parse(ClientHeaders[HttpRequestHeader.Cookie.ToString()] ?? string.Empty);
+            _original.Add(Cookies);
+        }
     }
 
     public virtual void Dispose()

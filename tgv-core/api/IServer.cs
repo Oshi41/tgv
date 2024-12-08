@@ -12,7 +12,7 @@ public delegate Task HttpHandler(Context ctx, Action next, Exception? e = null);
 /// <summary>
 /// Delegate handling HTTP call
 /// </summary>
-public delegate Task ServerHandler(Context ctx);
+public delegate Task ServerHandler(Context ctx, Exception? e = null);
 
 /// <summary>
 /// Server interface

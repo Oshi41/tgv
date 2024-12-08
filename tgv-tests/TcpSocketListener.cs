@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -26,8 +25,8 @@ public static class HttpParser
     public static ParsedHttp? Parse(byte[]? bytes)
     {
         HttpMethod method;
-        Uri url;
-        Version protocol;
+        Uri url = null;
+        Version protocol = default;
         NameValueCollection headers = new();
         byte[] body;
         int i = 0;

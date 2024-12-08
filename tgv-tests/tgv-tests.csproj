@@ -34,6 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\netcoreserver\source\NetCoreServer\NetCoreServer.csproj" />
       <ProjectReference Include="..\tgv-auth\tgv-auth.csproj" />
       <ProjectReference Include="..\tgv-cors\tgv-cors.csproj" />
       <ProjectReference Include="..\tgv-serve-static\tgv-serve-static.csproj" />

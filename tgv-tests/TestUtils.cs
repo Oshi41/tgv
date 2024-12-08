@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using Flurl.Http;
 using HtmlParserDotNet;
 using tgv_core.api;
-using tgv_core.extensions;
 using tgv_core.imp;
 using tgv;
 using HttpMethod = System.Net.Http.HttpMethod;
@@ -15,7 +14,7 @@ class TestContext : Context
     private bool _wasSent = false;
 
     public TestContext(HttpMethod method, Uri url)
-        : base(method, Guid.NewGuid(), url, new Logger(), new(), new())
+        : base(method, Guid.NewGuid(), url, new Logger(), new(), new(), new())
     {
         Stage = method;
     }
