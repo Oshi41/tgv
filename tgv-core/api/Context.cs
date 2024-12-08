@@ -123,11 +123,10 @@ public abstract class Context : IDisposable
     public virtual Task Html(string html) => Send(html, HttpStatusCode.OK, "text/html");
     public virtual Task Text(string txt) => Send(txt, HttpStatusCode.OK, "text/plain");
 
-    public virtual async Task SendFile(string filename)
+    public virtual async Task SendFile(string filename, byte[] content)
     {
-        if (!File.Exists(filename)) throw new FileNotFoundException(filename);
         await SendRaw(
-            File.OpenRead(filename),
+            content,
             HttpStatusCode.OK,
             MimeTypeMap.GetMimeType(Path.GetExtension(filename))
         );

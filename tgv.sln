@@ -16,8 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-core", "tgv-core\tgv-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-release", "tgv-release\tgv-release.csproj", "{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-aspnet-app", "tgv-aspnet-app\tgv-aspnet-app.csproj", "{724A267E-AF3B-4C97-9950-5F429B66F293}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-server", "tgv-server\tgv-server.csproj", "{4F6A259E-5296-4CAE-820E-22E6A70B84B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreServer", "netcoreserver\source\NetCoreServer\NetCoreServer.csproj", "{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}"
@@ -60,10 +58,6 @@ Global
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Debug|x64.Build.0 = Debug|x64
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Release|x64.ActiveCfg = Release|x64
 		{C45D0A83-2B1C-4D36-9471-10C4E8CE39DC}.Release|x64.Build.0 = Release|x64
-		{724A267E-AF3B-4C97-9950-5F429B66F293}.Debug|x64.ActiveCfg = Debug|x64
-		{724A267E-AF3B-4C97-9950-5F429B66F293}.Debug|x64.Build.0 = Debug|x64
-		{724A267E-AF3B-4C97-9950-5F429B66F293}.Release|x64.ActiveCfg = Release|x64
-		{724A267E-AF3B-4C97-9950-5F429B66F293}.Release|x64.Build.0 = Release|x64
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Debug|x64.ActiveCfg = Debug|x64
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Debug|x64.Build.0 = Debug|x64
 		{4F6A259E-5296-4CAE-820E-22E6A70B84B3}.Release|x64.ActiveCfg = Release|x64
