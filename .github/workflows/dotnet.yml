@@ -24,6 +24,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet }}     
+    - name: Update submodule
+      run: |
+        git submodule update  --init --recursive --remote -f
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
