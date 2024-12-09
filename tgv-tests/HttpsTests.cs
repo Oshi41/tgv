@@ -1,4 +1,5 @@
-﻿using System.Net.Security;
+﻿using System.Net;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Flurl.Http;
 using tgv_core.imp;
@@ -12,11 +13,12 @@ public class HttpsTests
 {
     private readonly List<User> _users = new();
     private App _app;
-    private X509Certificate2 _cert;
 
     [SetUp]
     public void Setup()
     {
+        
+        
         var rand = new Random();
 
         for (int i = 0; i < 20; i++)
@@ -33,20 +35,24 @@ public class HttpsTests
             });
         }
 
-        _cert = TestUtils.MakeDebugCert();
+        var root = TestUtils.MakeDebugCert();
+        var client = TestUtils.MakeDebugCert(root);
+        
 
         var cfg = new TgvSettings
         {
-            Certificate = _cert,
+            Certificate = root,
             CertificateValidation = (_, _, _, _) => true,
             AddServerHeader = true
         };
+        
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
         FlurlHttp.Clients.WithDefaults(builder =>
         {
             builder.ConfigureInnerHandler(clientHandler =>
             {
-                clientHandler.ClientCertificates.Add(_cert);
+                clientHandler.ClientCertificates.Add(client);
                 clientHandler.ServerCertificateCustomValidationCallback =
                     new Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool>(
                         (_, _, _, _) => true);
@@ -64,7 +70,13 @@ public class HttpsTests
     {
         _app?.Stop();
         _users.Clear();
-        _cert.Dispose();
+    }
+
+    [Test]
+    public async Task FlurlWorks()
+    {
+        var resp = await "https://google.com".AllowHttpStatus("2xx").GetStringAsync();
+        Assert.That(resp, Is.Not.Null.And.Not.Empty);
     }
 
     [Test]

@@ -49,7 +49,7 @@ public class TgvServer : IServer
         if (_tgvSettings.Certificate != null)
         {
             _server = new HttpsServerImp(_handler, Logger,
-                new SslContext(SslProtocols.Tls12, _tgvSettings.Certificate, _tgvSettings.CertificateValidation),
+                new SslContext(_tgvSettings.Protocols, _tgvSettings.Certificate, _tgvSettings.CertificateValidation),
                 endpoint, _tgvSettings);
         }
         else

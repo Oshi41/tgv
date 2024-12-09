@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -87,11 +89,25 @@ public static class TestUtils
         return html.DocumentElement;
     }
     
-    public static X509Certificate2 MakeDebugCert()
+    public static X509Certificate2 MakeDebugCert(X509Certificate2? root = null)
     {
+        var file = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.pfx");
+        Process.GetCurrentProcess().Exited += (sender, args) =>
+        {
+            if (File.Exists(file))
+                File.Delete(file);
+        };
+        
         var ecdsa = ECDsa.Create(); // generate asymmetric key pair
         var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
-        return req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+        req.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, true, 1, true));
+        var generated =  root != null
+            ? req.Create(root, DateTimeOffset.Now, DateTimeOffset.Now.AddYears(1), Guid.NewGuid().ToByteArray())
+            : req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+
+        var data = generated.Export(X509ContentType.Pfx);
+        File.WriteAllBytes(file, data);
+        return new X509Certificate2(file);
     }
 
     public static IRouter CreateSimpleCRUD(List<User> users)

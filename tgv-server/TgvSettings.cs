@@ -1,4 +1,5 @@
 ﻿using System.Net.Security;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
 namespace tgv_server;
@@ -15,6 +16,11 @@ public class TgvSettings
     /// Otherwise will use regular HTTP connection
     /// </summary>
     public X509Certificate2? Certificate { get; set; }
+
+    /// <summary>
+    /// Default SSL protocol
+    /// </summary>
+    public SslProtocols Protocols { get; set; } = SslProtocols.Tls12;
 
     /// <summary>
     /// Callback method to validate server certificates during authentication.
