@@ -20,7 +20,7 @@ public class TgvSettings
     /// <summary>
     /// Default SSL protocol
     /// </summary>
-    public SslProtocols Protocols { get; set; } = SslProtocols.Tls12;
+    public SslProtocols Protocols { get; set; } = SslProtocols.None;
 
     /// <summary>
     /// Callback method to validate server certificates during authentication.
