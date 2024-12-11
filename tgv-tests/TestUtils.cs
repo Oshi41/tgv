@@ -36,7 +36,7 @@ class TestContext : Context
         return Task.CompletedTask;
     }
 
-    protected override Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType)
+    public override Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType)
     {
         return AfterSending();
     }

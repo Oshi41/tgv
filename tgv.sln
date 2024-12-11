@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-server", "tgv-server\tg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreServer", "netcoreserver\source\NetCoreServer\NetCoreServer.csproj", "{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-large-files", "tgv-large-files\tgv-large-files.csproj", "{32A0FCE7-7CD5-4CCF-A9B4-0D4AF23F3039}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -66,5 +68,9 @@ Global
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Release|x64.Build.0 = Release|Any CPU
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{32A0FCE7-7CD5-4CCF-A9B4-0D4AF23F3039}.Release|x64.ActiveCfg = Release|Any CPU
+		{32A0FCE7-7CD5-4CCF-A9B4-0D4AF23F3039}.Release|x64.Build.0 = Release|Any CPU
+		{32A0FCE7-7CD5-4CCF-A9B4-0D4AF23F3039}.Debug|x64.ActiveCfg = Release|x64
+		{32A0FCE7-7CD5-4CCF-A9B4-0D4AF23F3039}.Debug|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal

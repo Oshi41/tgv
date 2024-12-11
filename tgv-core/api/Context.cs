@@ -256,7 +256,7 @@ public abstract class Context : IDisposable
     /// <param name="code">The HTTP status code for the response.</param>
     /// <param name="contentType">The content type of the response. Can be null if not applicable.</param>
     /// <returns>A task that represents the asynchronous operation of sending a raw response.</returns>
-    protected abstract Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType);
+    public abstract Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType);
 
     /// <summary>
     /// Sends raw data over a network connection using the specified HTTP status code and content type.

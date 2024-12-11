@@ -61,7 +61,7 @@ public class TgvContext : Context
             throw new Exception("Response cannot be sent");
     }
 
-    protected override async Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType)
+    public override async Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType)
     {
         if (contentType != null)
             ResponseHeaders["Content-Type"] = contentType;
