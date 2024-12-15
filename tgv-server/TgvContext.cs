@@ -2,8 +2,9 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Threading.Tasks;
+using MimeTypes;
 using NetCoreServer;
 using tgv_core.api;
 using tgv_core.imp;
@@ -12,13 +13,14 @@ namespace tgv_server;
 
 public class TgvContext : Context
 {
+    private static readonly byte[] _newLine = "\r\n"u8.ToArray(); 
     private readonly IHttpSession _session;
     private readonly TgvSettings _settings;
     private bool _wasSent;
 
-    public TgvContext(IHttpSession session, Logger logger, TgvSettings settings, ref EventHandler afterSent) 
+    public TgvContext(IHttpSession session, Logger logger, TgvSettings settings, ref EventHandler afterSent)
         : base(new HttpMethod(session.Request.Method.ToUpperInvariant()),
-            session.Id, 
+            session.Id,
             GetUri(session.Request),
             logger,
             new(session.Request.Headers),
@@ -38,15 +40,15 @@ public class TgvContext : Context
     {
         if (_settings.AddServerHeader)
             ResponseHeaders["Server"] = "netcoreserver-tgv";
-        
+
         await BeforeSending();
         var resp = _session.Response;
-        
+
         resp.Clear();
         resp.SetBegin((int)code);
         foreach (var key in ResponseHeaders.AllKeys)
             resp.SetHeader(key, ResponseHeaders[key]);
-        
+
         // rising a flag that response was sent so no more data can be sent to client
         _wasSent = true;
         return resp;
@@ -65,9 +67,9 @@ public class TgvContext : Context
     {
         if (contentType != null)
             ResponseHeaders["Content-Type"] = contentType;
-        
+
         var resp = await CreateResponse(code);
-        
+
         if (bytes != null)
             resp.SetBody(bytes);
         else
@@ -75,22 +77,25 @@ public class TgvContext : Context
 
         if (!_session.SendResponseAsync(resp))
             throw new Exception("Response cannot be sent");
-
     }
 
-    protected override async Task SendRaw(Stream stream, HttpStatusCode code, string contentType)
+    public override async Task SendFile(Stream stream, string filename)
     {
-        if (contentType != null)
-            ResponseHeaders["Content-Type"] = contentType;
+        ResponseHeaders["Content-Length"] = stream.Length.ToString();
+        ResponseHeaders["Content-Type"] = MimeTypeMap.GetMimeType(filename);
+        ResponseHeaders["Content-Disposition"] = $"attachment; filename=\"{filename}\"";
         
-        var resp = await CreateResponse(code);
+        var buff = (await CreateResponse(HttpStatusCode.OK)).Cache!;
+        buff.Append(_newLine);
+        using var socket = new NetworkStream(_session.Socket);
+        await socket.WriteAsync(buff.Data, (int)buff.Offset, (int)buff.Size);
+        await stream.CopyToAsync(socket, 4096);
 
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-        resp.SetBody(ms.ToArray());
+        // End Of Message
+        for (int i = 0; i < 2; i++) await socket.WriteAsync(_newLine, 0, _newLine.Length);
         
-        if (!_session.SendResponseAsync(resp))
-            throw new Exception("Response cannot be sent");
+        await socket.FlushAsync();
+        await AfterSending();
     }
 
     private static Uri GetUri(HttpRequest request)

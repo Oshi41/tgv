@@ -259,13 +259,12 @@ public abstract class Context : IDisposable
     public abstract Task SendRaw(byte[]? bytes, HttpStatusCode code, string? contentType);
 
     /// <summary>
-    /// Sends raw data over a network connection using the specified HTTP status code and content type.
+    /// Send file from stream over the HTTP
     /// </summary>
-    /// <param name="stream">Stream need to be sent.</param>
-    /// <param name="code">The HTTP status code that indicates the response's status.</param>
-    /// <param name="contentType">The MIME type of the content being sent.</param>
+    /// <param name="stream">Stream need to be sent. Must support "Length" property!</param>
+    /// <param name="filename">possible filename, otherwise will use system file name</param>
     /// <returns>A task that represents the asynchronous send operation.</returns>
-    protected abstract Task SendRaw(Stream stream, HttpStatusCode code, string contentType);
+    public abstract Task SendFile(Stream stream, string filename);
 
     #endregion
 

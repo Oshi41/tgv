@@ -41,7 +41,7 @@ class TestContext : Context
         return AfterSending();
     }
 
-    protected override Task SendRaw(Stream stream, HttpStatusCode code, string contentType)
+    public override Task SendFile(Stream stream, string? filename)
     {
         return AfterSending();
     }

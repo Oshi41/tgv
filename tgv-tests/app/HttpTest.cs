@@ -1,4 +1,6 @@
-﻿using Flurl.Http;
+﻿using System.Diagnostics;
+using System.Text;
+using Flurl.Http;
 using tgv_core.imp;
 using tgv_server;
 using tgv;
@@ -8,11 +10,11 @@ namespace tgv_tests.app;
 [TestFixture]
 public class HttpTest
 {
+    protected string _dir;
     protected readonly TgvSettings _settings;
     protected readonly List<User> _users = new();
     protected App _app;
     protected IFlurlClient _client;
-
 
     public HttpTest() : this(new TgvSettings())
     {
@@ -26,6 +28,8 @@ public class HttpTest
     [SetUp]
     public void Setup()
     {
+        Directory.CreateDirectory(_dir = Path.Join(Path.GetTempPath(), $"tgv_{Guid.NewGuid()}"));
+
         var rand = new Random();
 
         for (int i = 0; i < 20; i++)
@@ -45,13 +49,29 @@ public class HttpTest
         _app = new App(x => new TgvServer(_settings, x, new Logger()));
         _app.Use(TestUtils.CreateSimpleCRUD(_users));
         _app.Start(TestUtils.RandPort()).Wait();
-        
+
         _client = _app.CreateAgent(Guid.NewGuid().ToString());
     }
 
     [TearDown]
-    public void Teardown()
+    public async Task Teardown()
     {
+        while (true)
+        {
+            try
+            {
+                if (Directory.Exists(_dir))
+                    Directory.Delete(_dir, true);
+                
+                break;
+            }
+            catch (Exception e)
+            {
+                // ignore. repeat
+                await Task.Delay(200);
+            }
+        }
+
         _users.Clear();
         _app.Stop();
         _client.Dispose();
@@ -85,6 +105,7 @@ public class HttpTest
     public async Task Delete()
     {
         var count = _users.Count;
+
         async Task CheckCount(int amount, string? deleted = null)
         {
             var ids = await _client.Request("users").GetJsonAsync<string[]>();
@@ -175,5 +196,48 @@ public class HttpTest
             // amount shuold not change
             Assert.That(ids.Length, Is.EqualTo(count));
         }
+    }
+
+    [Test(Description = "Download file as stream")]
+    public async Task DownloadFile()
+    {
+        var fileName = Path.Join(_dir, $"served_{Guid.NewGuid()}.txt");
+        using (var fs = File.OpenWrite(fileName))
+        {
+            var line = Encoding.UTF8.GetBytes(string.Join("\r\n", Enumerable.Repeat("1234567890qwerty", 100_000)));
+            Enumerable.Repeat('\0', 1000).AsParallel().ForAll(_ => fs.Write(line, 0, line.Length));
+            fs.Flush();
+            fs.Close();
+        }
+
+        var info = new FileInfo(fileName);
+        // file >= 10MB
+        Assert.That(info.Length, Is.GreaterThan(Math.Pow(2, 20) * 10));
+        Console.WriteLine("Served file size: {0:F}MB", info.Length / Math.Pow(2, 20));
+
+        _app.Get("/download_file", async (ctx, _, _) =>
+        {
+            await using var stream = File.OpenRead(fileName);
+            await ctx.SendFile(stream, "download.txt");
+        });
+
+        using var client = _app.CreateAgent("");
+        var downloaded = $"download_{Guid.NewGuid()}.txt";
+        var downloadedFilePath = Path.Join(_dir, downloaded);
+
+        var sw = Stopwatch.StartNew();
+        await client.Request("download_file")
+            .AllowHttpStatus("2xx")
+            .DownloadFileAsync(_dir, downloaded);
+        sw.Stop();
+        var seconds = sw.ElapsedMilliseconds / 1000.0;
+        var mbs = info.Length / Math.Pow(2, 20);
+        var speed = mbs / seconds;
+        Console.WriteLine("Transfer speed: {0:F}MB/s", mbs / seconds);
+
+        if (speed < 50) Assert.Warn($"Download file speed was too slow: {speed:F} MB/s");
+        if (speed < 5) Assert.Fail($"Download file speed was way too slow: {speed:F} MB/s");
+        
+        Assert.That(File.Exists(downloadedFilePath), Is.True);
     }
 }
