@@ -24,7 +24,7 @@ public class ServerLargeFile
         var filepath = Path.Combine(_folder, $"static_{Guid.NewGuid()}.txt");
         File.WriteAllText(filepath, _content);
 
-        _app = new App(h => new TgvServer(new TgvSettings(), h, new Logger()));
+        _app = new App(new TgvServer(new TgvSettings()));
         _app.ServeFile("/file", filepath, 4096);
         _app.Start(TestUtils.RandPort()).Wait();
     }

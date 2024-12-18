@@ -36,7 +36,7 @@ public class Benchmarks
                 break;
             
             case "tgv":
-                var app = new App(handler => new TgvServer(new TgvSettings(), handler, new Logger()));
+                var app = new App(new TgvServer(new TgvSettings()));
                 app.Get("/users", (ctx, _, _) => ctx.Json(Users.OrderBy(x => x)));
                 app.Get("", (context, _, _) => context.Text("Hello world!"));
                 app.Start(port).Wait();

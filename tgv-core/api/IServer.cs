@@ -25,13 +25,7 @@ public delegate Task ServerHandler(Context ctx, Exception? e = null);
 /// </summary>
 public abstract class IServer
 {
-    protected readonly ServerHandler _handler;
-
-    protected IServer(ServerHandler handler, Logger logger)
-    {
-        Logger = logger;
-        _handler = handler;
-    }
+    public ServerHandler Handler { get; internal set; }
 
     /// <summary>
     /// Gets a value indicating whether the server is currently listening for incoming connections.
@@ -63,7 +57,7 @@ public abstract class IServer
     /// <value>
     /// The <see cref="Logger"/> instance used to handle logging operations for the server.
     /// </value>
-    public Logger Logger { get; }
+    public Logger Logger { get; internal set; }
 
     /// <summary>
     /// Starts the server asynchronously on the specified port.

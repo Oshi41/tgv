@@ -26,12 +26,28 @@ public class Router : IRouter
 
     public RoutePath Route { get; }
     public IRouter Use(params HttpHandler[] handlers) => Use("*", handlers);
+    public IRouter Use<T>(params ExtensionFactory<T>[] extensions) where T : class => Use("*", extensions);
 
     public IRouter After(params HttpHandler[] handlers) => After("*", handlers);
 
     public IRouter Use(string path, params HttpHandler[] handlers)
     {
         return AddRoutes(HttpMethodExtensions.Before, path, handlers);
+    }
+
+    public IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions) where T : class
+    {
+        foreach (var ext in extensions)
+        {
+            _routes.Add(new MiddlewareExtension(
+                HttpMethodExtensions.Before,
+                path,
+                ext,
+                _routerConfig
+                ));
+        }
+
+        return this;
     }
 
     public IRouter After(string path, params HttpHandler[] handlers)

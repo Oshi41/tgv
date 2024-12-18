@@ -1,5 +1,6 @@
 ﻿using Flurl.Http;
 using tgv_session;
+using tgv_session.imp;
 using tgv;
 
 namespace tgv_tests;
@@ -23,7 +24,7 @@ public class TgvSession
             return Task.CompletedTask;
         });
 
-        _app.UseSession(new SessionConfig());
+        _app.UseSession(new InMemoryStore(), "_test");
         await _app.Start(TestUtils.RandPort());
     }
 
@@ -39,7 +40,7 @@ public class TgvSession
         var resp = await _app.CreateAgent("1").Request("hello").GetStringAsync();
         Assert.That(resp, Is.EqualTo("world"));
 
-        var sessions = await _app.GetSessionStore()!.GetAllSessions();
+        var sessions = await _app.GetStore()!.ToListAsync();
         Assert.That(sessions.Count(), Is.EqualTo(1));
     }
 
@@ -53,14 +54,14 @@ public class TgvSession
         Assert.That(await resp.GetStringAsync(), Is.EqualTo("world"));
         Assert.That(jar.Count, Is.AtLeast(1));
 
-        var sessions = await _app.GetSessionStore()!.GetAllSessions();
+        var sessions = await _app.GetStore()!.ToListAsync();
         Assert.That(sessions.Count, Is.EqualTo(1));
         var oldId = sessions.First().Id;
 
         resp = await client.Request("hello").WithCookies(jar).GetAsync();
         Assert.That(await resp.GetStringAsync(), Is.EqualTo("world"));
         
-        sessions = await _app.GetSessionStore()!.GetAllSessions();
+        sessions = await _app.GetStore()!.ToListAsync();
         Assert.That(sessions.Count(), Is.EqualTo(1));
         
         Assert.That(sessions.First().Id, Is.EqualTo(oldId));
@@ -84,7 +85,7 @@ public class TgvSession
             Assert.That(jar2.Count, Is.AtLeast(1));
         }
 
-        var sessions = await _app.GetSessionStore()!.GetAllSessions();
+        var sessions = await _app.GetStore()!.ToListAsync();
         Assert.That(sessions.Count(), Is.EqualTo(2));
     }
 }

@@ -4,30 +4,33 @@ using System.Threading.Tasks;
 
 namespace tgv_session;
 
-public interface IStore
+public interface IStore : IAsyncEnumerable<SessionContext>
 {
     /// <summary>
-    /// Retrieves session
+    /// open new session.
+    /// <remarks>Guid may be changed, see <see cref="SessionContext.Id"/> for actual data</remarks>
     /// </summary>
-    /// <param name="id">Session ID</param>
-    /// <returns>Session or null if no session founded</returns>
-    Task<SessionContext?> FindAsync(Guid id);
+    /// <param name="id">probable GUID</param>
+    Task<SessionContext> CreateNew(Guid id);
 
     /// <summary>
-    /// Find all opened sessions
+    /// Try to close open session
     /// </summary>
-    /// <returns></returns>
-    Task<IEnumerable<SessionContext>> FindAllAsync();
+    /// <param name="id">session ID</param>
+    Task<bool> TryRemove(Guid id);
+
+    /// <summary>
+    /// Called on session changed
+    /// </summary>
+    event EventHandler<SessionContext> OnSessionChanged;
     
     /// <summary>
-    /// Removes session from store
+    /// Called on creating new session
     /// </summary>
-    /// <param name="id">Session ID</param>
-    Task RemoveAsync(Guid id);
+    event EventHandler<SessionContext> OnNewSession;
     
     /// <summary>
-    /// Stores current session
+    /// Called after session removal
     /// </summary>
-    /// <param name="context">Session context with ID provided</param>
-    Task PutAsync(SessionContext context);
+    event EventHandler<Guid> OnRemovedSession;
 }

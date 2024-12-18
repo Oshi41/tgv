@@ -46,7 +46,7 @@ public class HttpTest
             });
         }
 
-        _app = new App(x => new TgvServer(_settings, x, new Logger()));
+        _app = new App(new TgvServer(_settings));
         _app.Use(TestUtils.CreateSimpleCRUD(_users));
         _app.Start(TestUtils.RandPort()).Wait();
 

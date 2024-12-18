@@ -16,6 +16,16 @@ public interface IRouter : IMatch
     /// <param name="handlers">An array of <c>HttpHandler</c> delegates representing the handlers to be used.</param>
     /// <returns>An instance of <c>IRouter</c> for method chaining.</returns>
     IRouter Use(params HttpHandler[] handlers);
+    
+    /// <summary>
+    /// Register on or more Handler extensions to the routing process. This method allows
+    /// addition middleware to create payload assotiated with current HTTP request.
+    /// </summary>
+    /// <param name="extensions">An array of <see cref="ExtensionFactory"/> of context extension</param>
+    /// <typeparam name="T">Payload type</typeparam>
+    /// <returns>An instance of <c>IRouter</c> for method chaining</returns>
+    IRouter Use<T>(params ExtensionFactory<T>[] extensions)
+        where T : class;
 
     /// <summary>
     /// Registers one or more HTTP handlers to be executed after each request. This method allows
@@ -34,6 +44,17 @@ public interface IRouter : IMatch
     /// <param name="handlers">An array of <c>HttpHandler</c> delegates representing the handlers to be used.</param>
     /// <returns>An instance of <c>IRouter</c> for method chaining.</returns>
     IRouter Use(string path, params HttpHandler[] handlers);
+
+    /// <summary>
+    /// Register on or more Handler extensions to the routing process. This method allows
+    /// addition middleware to create payload assotiated with current HTTP request.
+    /// </summary>
+    /// <param name="path">The path pattern where the handlers will be applied</param>
+    /// <param name="extensions">An array of <see cref="ExtensionFactory"/> of context extension</param>
+    /// <typeparam name="T">Payload type</typeparam>
+    /// <returns>An instance of <c>IRouter</c> for method chaining</returns>
+    IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions)
+        where T : class;
 
     /// <summary>
     /// Registers one or more HTTP handlers to be executed after routing. This method allows the

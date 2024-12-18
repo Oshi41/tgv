@@ -12,19 +12,12 @@ using ITransportServer = NetCoreServer.IServer;
 
 namespace tgv_server;
 
-public class TgvServer : IServer
+public class TgvServer(TgvSettings tgvSettings) : IServer
 {
-    private readonly TgvSettings _tgvSettings;
     private ITransportServer? _server;
-    
-    public TgvServer(TgvSettings tgvSettings, ServerHandler handler, Logger logger)
-        : base(handler, logger)
-    {
-        _tgvSettings = tgvSettings;
-    }
 
     public override bool IsListening => _server?.IsStarted == true;
-    public override bool IsHttps => _tgvSettings.Certificate != null;
+    public override bool IsHttps => tgvSettings.Certificate != null;
 
     public override int Port
     {
@@ -46,15 +39,15 @@ public class TgvServer : IServer
         Stop();
 
         var endpoint = new IPEndPoint(IPAddress.Any, port);
-        if (_tgvSettings.Certificate != null)
+        if (tgvSettings.Certificate != null)
         {
-            _server = new HttpsServerImp(_handler, Logger,
-                new SslContext(_tgvSettings.Protocols, _tgvSettings.Certificate, _tgvSettings.CertificateValidation),
-                endpoint, _tgvSettings);
+            _server = new HttpsServerImp(Handler, Logger,
+                new SslContext(tgvSettings.Protocols, tgvSettings.Certificate, tgvSettings.CertificateValidation),
+                endpoint, tgvSettings);
         }
         else
         {
-            _server = new HttpServerImp(_handler, Logger, endpoint, _tgvSettings);
+            _server = new HttpServerImp(Handler, Logger, endpoint, tgvSettings);
         }
 
         if (!_server.Start())

@@ -13,12 +13,15 @@ public class App : IRouter
     private IServer _server;
     internal Router _root;
 
-    public App(Func<ServerHandler, IServer> server, RouterConfig? cfg = null)
+    public App(IServer server, RouterConfig? cfg = null)
     {
         Logger = new Logger();
         _root = new Router("*", cfg ?? new RouterConfig());
-        _server = server(Handle);
-        _server.Logger.WriteLog = Logger.WriteLog;
+        _server = server;
+        
+        // some internals
+        _server.Handler = Handle;
+        _server.Logger = Logger;
     }
 
     public string? RunningUrl
@@ -63,6 +66,7 @@ public class App : IRouter
 
     private Task Handle(Context ctx, Exception? error = null)
     {
+        this.Associate(ctx);
         return error != null ? HandleError(ctx, error) : HandleCommon(ctx);
     }
 
@@ -140,6 +144,11 @@ public class App : IRouter
         return this;
     }
 
+    public IRouter Use<T>(params ExtensionFactory<T>[] extensions) where T : class
+    {
+        return _root.Use(extensions);
+    }
+
     public IRouter After(params HttpHandler[] handlers)
     {
         _root.After(handlers);
@@ -150,6 +159,11 @@ public class App : IRouter
     {
         _root.Use(path, handlers);
         return this;
+    }
+
+    public IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions) where T : class
+    {
+        return _root.Use(path, extensions);
     }
 
     public IRouter After(string path, params HttpHandler[] handlers)

@@ -2,47 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace tgv_session.imp;
 
 public class InMemoryStore : IStore
 {
-    private readonly SessionConfig _config;
-    private readonly ObjectCache _cache;
-    
-    public InMemoryStore(SessionConfig config)
+    private readonly ObjectCache _cache = new MemoryCache("sessions");
+    public async IAsyncEnumerator<SessionContext> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
     {
-        _config = config;
-        _cache = new MemoryCache("Session");
-    }
-
-    public Task<SessionContext?> FindAsync(Guid id)
-    {
-        return Task.FromResult((SessionContext?)_cache.Get(id.ToString()));
-    }
-
-    public Task<IEnumerable<SessionContext>> FindAllAsync()
-    {
-        var snapshot = _cache.Select(x => x.Value)
-            .OfType<SessionContext>()
-            .ToList();
-        return Task.FromResult(snapshot.AsEnumerable());
-    }
-
-    public Task RemoveAsync(Guid id)
-    {
-        _cache.Remove(id.ToString());
-        return Task.CompletedTask;
-    }
-
-    public Task PutAsync(SessionContext context)
-    {
-        _cache.Add(new CacheItem(context.Id.ToString(), context), new CacheItemPolicy
+        foreach (var context in _cache.Select(x => x.Value).OfType<SessionContext>())
         {
-            AbsoluteExpiration = DateTimeOffset.Now + _config.Expire,
-        });
-
-        return Task.CompletedTask;
+            yield return context;
+        }
     }
+
+    public Task<SessionContext> CreateNew(Guid id)
+    {
+        var session = new SessionContext(Guid.NewGuid(), DateTime.Now.AddHours(1));
+        _cache.Add(session.Id.ToString(), session, session.Expires);
+        OnNewSession?.Invoke(this, session);
+        return Task.FromResult(session);
+    }
+
+    public async Task<bool> TryRemove(Guid id)
+    {
+        var result = _cache.Remove(id.ToString()) != null;
+        if (result) OnRemovedSession?.Invoke(this, id);
+        return result;
+    }
+
+    public event EventHandler<SessionContext>? OnSessionChanged;
+    public event EventHandler<SessionContext>? OnNewSession;
+    public event EventHandler<Guid>? OnRemovedSession;
 }
