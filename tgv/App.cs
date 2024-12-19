@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections;
+using System.Net;
 using Hme = tgv_core.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
 using tgv_core.api;
@@ -144,7 +145,7 @@ public class App : IRouter
         return this;
     }
 
-    public IRouter Use<T>(params ExtensionFactory<T>[] extensions) where T : class
+    public IRouter Use<T, T1>(params ExtensionFactory<T, T1>[] extensions) where T : class where T1 : IEquatable<T1>
     {
         return _root.Use(extensions);
     }
@@ -161,7 +162,7 @@ public class App : IRouter
         return this;
     }
 
-    public IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions) where T : class
+    public IRouter Use<T, T1>(string path, params ExtensionFactory<T, T1>[] extensions) where T : class where T1 : IEquatable<T1>
     {
         return _root.Use(path, extensions);
     }
@@ -241,4 +242,14 @@ public class App : IRouter
     public HttpHandler Handler => _root.Handler;
 
     #endregion
+
+    public IEnumerator<IMatch> GetEnumerator()
+    {
+        return _root.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 }

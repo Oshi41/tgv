@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -26,7 +27,13 @@ public class Router : IRouter
 
     public RoutePath Route { get; }
     public IRouter Use(params HttpHandler[] handlers) => Use("*", handlers);
-    public IRouter Use<T>(params ExtensionFactory<T>[] extensions) where T : class => Use("*", extensions);
+
+    public IRouter Use<T, T1>(params ExtensionFactory<T, T1>[] extensions)
+        where T : class
+        where T1 : IEquatable<T1>
+    {
+        return Use("*", extensions);
+    }
 
     public IRouter After(params HttpHandler[] handlers) => After("*", handlers);
 
@@ -34,8 +41,10 @@ public class Router : IRouter
     {
         return AddRoutes(HttpMethodExtensions.Before, path, handlers);
     }
-
-    public IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions) where T : class
+    
+    public IRouter Use<T, T1>(string path, params ExtensionFactory<T, T1>[] extensions)
+        where T : class
+        where T1 : IEquatable<T1>
     {
         foreach (var ext in extensions)
         {
@@ -169,5 +178,15 @@ public class Router : IRouter
         }
 
         return this;
+    }
+
+    public IEnumerator<IMatch> GetEnumerator()
+    {
+        return _routes.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

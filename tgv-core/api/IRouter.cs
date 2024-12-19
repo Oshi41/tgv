@@ -1,4 +1,7 @@
-﻿namespace tgv_core.api;
+﻿using System;
+using System.Collections.Generic;
+
+namespace tgv_core.api;
 
 /// <summary>
 /// Defines a contract for an HTTP router, which is responsible for handling HTTP request routing
@@ -6,7 +9,7 @@
 /// It allows registration of handlers for various HTTP methods and path-specific or global handlers,
 /// as well as post-processing and error-handling capabilities.
 /// </summary>
-public interface IRouter : IMatch
+public interface IRouter : IMatch, IEnumerable<IMatch>
 {
     /// <summary>
     /// Registers one or more HTTP handlers to be used in the routing process. This method allows
@@ -16,16 +19,18 @@ public interface IRouter : IMatch
     /// <param name="handlers">An array of <c>HttpHandler</c> delegates representing the handlers to be used.</param>
     /// <returns>An instance of <c>IRouter</c> for method chaining.</returns>
     IRouter Use(params HttpHandler[] handlers);
-    
+
     /// <summary>
     /// Register on or more Handler extensions to the routing process. This method allows
     /// addition middleware to create payload assotiated with current HTTP request.
     /// </summary>
     /// <param name="extensions">An array of <see cref="ExtensionFactory"/> of context extension</param>
     /// <typeparam name="T">Payload type</typeparam>
+    /// <typeparam name="T1">Payload ID type</typeparam>
     /// <returns>An instance of <c>IRouter</c> for method chaining</returns>
-    IRouter Use<T>(params ExtensionFactory<T>[] extensions)
-        where T : class;
+    IRouter Use<T, T1>(params ExtensionFactory<T, T1>[] extensions)
+        where T : class
+        where T1 : IEquatable<T1>;
 
     /// <summary>
     /// Registers one or more HTTP handlers to be executed after each request. This method allows
@@ -52,9 +57,11 @@ public interface IRouter : IMatch
     /// <param name="path">The path pattern where the handlers will be applied</param>
     /// <param name="extensions">An array of <see cref="ExtensionFactory"/> of context extension</param>
     /// <typeparam name="T">Payload type</typeparam>
+    /// <typeparam name="T1"></typeparam>
     /// <returns>An instance of <c>IRouter</c> for method chaining</returns>
-    IRouter Use<T>(string path, params ExtensionFactory<T>[] extensions)
-        where T : class;
+    IRouter Use<T, T1>(string path, params ExtensionFactory<T, T1>[] extensions)
+        where T : class
+        where T1 : IEquatable<T1>;
 
     /// <summary>
     /// Registers one or more HTTP handlers to be executed after routing. This method allows the

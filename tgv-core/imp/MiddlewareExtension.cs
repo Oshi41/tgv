@@ -3,13 +3,16 @@ using tgv_core.api;
 
 namespace tgv_core.imp;
 
-internal class MiddlewareExtension : IMatch
+public class MiddlewareExtension : IMatch
 {
-    internal MiddlewareExtension(HttpMethod method, string path, IExtensionFactoryInternal factory, RouterConfig config)
+   
+
+    public MiddlewareExtension(HttpMethod method, string path, IExtensionFactoryInternal factory, RouterConfig config)
     {
+        Factory = factory;
         Handler = async (ctx, next, _) =>
         {
-            await factory.FillContext(ctx);
+            await Factory.FillContext(ctx);
             next();
         };
         Route = new RoutePath(method, path, Handler, config, true);
@@ -17,4 +20,5 @@ internal class MiddlewareExtension : IMatch
 
     public RoutePath Route { get; }
     public HttpHandler Handler { get; }
+    public IExtensionFactoryInternal Factory { get; }
 }

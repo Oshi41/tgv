@@ -4,6 +4,7 @@ using Flurl.Http;
 using tgv_auth;
 using tgv_auth.api;
 using tgv_auth.api.storage;
+using tgv_auth.extensions;
 using tgv_auth.imp.basic;
 using tgv_core.imp;
 using tgv;
@@ -82,39 +83,35 @@ public class TgvAuth
         _app.Get("/everyone", (ctx, next, exception) => ctx.Text("Hello!"));
 
         var router = new Router("/authorized");
-        router.Use(AuthMiddleware.UseAuth(
+        router.UseAuth(
             new BasicCredentialProvider(),
             new TestStorage(
                 new("user", "pass"),
                 new("admin", "pass")
             ),
             new BasicCookieStorage("_test_cookie")
-        ));
+            );
         _app.Use(router);
 
-        router.Get("/any",
-            (ctx, next, _) =>
+        router.Get("/any", async (ctx, next, _) =>
             {
-                if (ctx.GetAuthSession<BasicSession>() is { } session && session.IsValid())
+                if (await ctx.Auth<BasicSession>() is { } session && session.IsValid())
                 {
                     next();
-                    return Task.CompletedTask;
                 }
 
-                return ctx.Send(HttpStatusCode.Unauthorized);
+                await ctx.Send(HttpStatusCode.Unauthorized);
             },
             (ctx, next, exception) => ctx.Text("Hello!"));
 
-        router.Get("/admin",
-            (ctx, next, _) =>
+        router.Get("/admin", async (ctx, next, _) =>
             {
-                if (ctx.GetAuthSession<BasicSession>() is { } session && session.IsValid() && session.Name == "admin")
+                if (await ctx.Auth<BasicSession>() is { } session && session.IsValid() && session.Name == "admin")
                 {
                     next();
-                    return Task.CompletedTask;
                 }
 
-                return ctx.Send(HttpStatusCode.Unauthorized);
+                await ctx.Send(HttpStatusCode.Unauthorized);
             },
             (ctx, next, exception) => ctx.Text("Hello!"));
     }

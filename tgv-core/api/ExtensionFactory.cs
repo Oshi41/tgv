@@ -12,44 +12,62 @@ using tgv_core.imp;
 
 namespace tgv_core.api;
 
-internal interface IExtensionFactoryInternal
+public interface IExtensionFactoryInternal
 {
-    internal Task FillContext(Context ctx);
+    /// <summary>
+    /// Create or refresh extension.
+    /// Called on regular route chain
+    /// </summary>
+    /// <param name="ctx">HTTP request</param>
+    /// <returns></returns>
+    Task FillContext(Context ctx);
+}
+
+public interface IExtensionProvider<T> : IExtensionFactoryInternal, IAsyncEnumerable<(Context, T)>
+{
+    /// <summary>
+    /// Provide extension from HTTP request.
+    /// </summary>
+    /// <param name="context">HTTP request</param>
+    /// <returns></returns>
+    Task<T?> GetOrCreate(Context context);
 }
 
 /// <summary>
 /// Simple extension implementation. 
 /// </summary>
-/// <typeparam name="T">Any addition payload class</typeparam>
-public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IExtensionFactoryInternal
-    where T : class
+/// <typeparam name="TKey">Key type</typeparam>
+/// <typeparam name="TExtension">Any addition payload class</typeparam>
+public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TExtension>
+    where TExtension : class
+    where TKey : IEquatable<TKey>
 {
     /// <summary>
     /// <see cref="GetKey"/> => pending tasks to track context generation
     /// </summary>
-    private readonly ConcurrentDictionary<IComparable, Task<T?>> _tasks = new();
+    private readonly ConcurrentDictionary<TKey, Task<TExtension?>> _tasks = new();
 
     /// <summary>
     /// <see cref="GetKey"/> -> context storage
     /// </summary>
-    private readonly ConcurrentDictionary<IComparable, T?> _payloads = new();
+    private readonly ConcurrentDictionary<TKey, TExtension?> _payloads = new();
 
     /// <summary>
     /// <see cref="GetKey"/> -> cache policy storage
     /// </summary>
-    private readonly ConcurrentDictionary<IComparable, CachePolicy<T>> _policies = new();
+    private readonly ConcurrentDictionary<TKey, CachePolicy<TExtension>> _policies = new();
 
     /// <summary>
     /// <see cref="GetKey"/> => context reference storage
     /// </summary>
-    private readonly ConcurrentDictionary<IComparable, WeakReference<Context>> _refs = new();
+    private readonly ConcurrentDictionary<TKey, WeakReference<Context>> _refs = new();
 
     /// <summary>
     /// return all active extensions
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async IAsyncEnumerator<(Context, T?)> GetAsyncEnumerator(
+    public async IAsyncEnumerator<(Context, TExtension)> GetAsyncEnumerator(
         CancellationToken cancellationToken = new CancellationToken())
     {
         // local copy of keys
@@ -80,13 +98,13 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// Calls rapidly, good perfomace required
     /// </summary>
     /// <param name="context">HTTP request</param>
-    protected abstract IComparable GetKey(Context context);
+    protected abstract TKey? GetKey(Context context);
     
     /// <summary>
     /// Returns uniq key for extension. Should match with <see cref="GetKey(Context)"/>
     /// </summary>
     /// <param name="context">Extension object</param>
-    protected abstract IComparable GetKey(T context);
+    protected abstract TKey GetKey(TExtension context);
 
     /// <summary>
     /// Creates new context for HTTP request. Called once for generated key (<see cref="GetKey(Context)"/>)
@@ -94,7 +112,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// <param name="context">HTTP request</param>
     /// <param name="key">Generated key</param>
     /// <returns></returns>
-    protected abstract Task<T?> GetOrCreateInternal(Context context, IComparable key);
+    protected abstract Task<TExtension?> GetOrCreateInternal(Context context, TKey key);
 
     /// <summary>
     /// Creates default cache policy for payload. <p/>
@@ -105,17 +123,20 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// <param name="context">HTTP request</param>
     /// <param name="payload">Created additional context</param>
     /// <returns></returns>
-    protected virtual CachePolicy<T>? CreateCachePolicy(Context context, T payload) => new(StoreType.Assign2Context);
+    protected virtual CachePolicy<TExtension>? CreateCachePolicy(Context context, TExtension payload) => new(StoreType.Assign2Context);
 
     /// <summary>
     /// Creates context from current request
     /// </summary>
     /// <param name="context">HTTP request</param>
-    public async Task<T?> GetOrCreate(Context context)
+    public async Task<TExtension?> GetOrCreate(Context context)
     {
-        T? extension = default;
-        CachePolicy<T>? policy = default;
-        IComparable key = GetKey(context);
+        TExtension? extension = default;
+        CachePolicy<TExtension>? policy = default;
+        TKey? key = GetKey(context);
+
+        // error handling
+        if (key == null) return null;
 
         // if any task pending exists
         if (_tasks.TryGetValue(key, out var task))
@@ -170,7 +191,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// <param name="http">HTTP request</param>
     /// <returns>True - can use provided context. <p/>
     /// False - must create new context</returns>
-    protected virtual async Task<bool> CheckPolicies(IComparable key, T context, Context http)
+    protected virtual async Task<bool> CheckPolicies(TKey key, TExtension context, Context http)
     {
         if (!_policies.TryGetValue(key, out var policy)) return true;
 
@@ -196,7 +217,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// Removes key from all storages
     /// </summary>
     /// <param name="key">comparable key</param>
-    protected virtual bool RemoveKey(IComparable key)
+    protected virtual bool RemoveKey(TKey key)
     {
         bool res = _tasks.TryRemove(key, out _);
         if (_payloads.TryRemove(key, out _)) res = true; 
@@ -219,7 +240,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
         _refs.Clear();
     }
 
-    protected virtual async Task<bool> Add(IComparable key, T? context = null, CachePolicy<T>? policy = null, Context? http = null)
+    protected virtual async Task<bool> Add(TKey key, TExtension? context = null, CachePolicy<TExtension>? policy = null, Context? http = null)
     {
         // removing pending task
         _tasks.TryRemove(key, out _);
@@ -254,7 +275,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// <param name="context">Extension context</param>
     /// <param name="policy">Cache policy</param>
     /// <param name="http">HTTP request</param>
-    protected virtual void AfterAdd(IComparable key, T? context = null, CachePolicy<T>? policy = null,
+    protected virtual void AfterAdd(TKey key, TExtension? context = null, CachePolicy<TExtension>? policy = null,
         Context? http = null)
     {
         
@@ -264,7 +285,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// Called after removal
     /// </summary>
     /// <param name="key">Comparable key</param>
-    protected virtual void AfterRemoval(IComparable key)
+    protected virtual void AfterRemoval(TKey key)
     {
         
     }
@@ -277,7 +298,7 @@ public abstract class ExtensionFactory<T> : IAsyncEnumerable<(Context, T?)>, IEx
     /// <param name="http">HTTP request</param>
     /// <param name="context">Extension object</param>
     /// <returns></returns>
-    protected virtual T? OnResolved(IComparable key, Context http, T? context) => context;
+    protected virtual TExtension? OnResolved(TKey key, Context http, TExtension? context) => context;
 
     Task IExtensionFactoryInternal.FillContext(Context ctx) => GetOrCreate(ctx);
 }

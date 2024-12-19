@@ -1,4 +1,6 @@
-﻿using tgv_auth.api;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using tgv_auth.api;
 
 namespace tgv_auth.imp.basic;
 
@@ -33,5 +35,12 @@ public class BasicCredentials(string username, string password) : ICredentials
         {
             return (Username.GetHashCode() * 397) ^ Password.GetHashCode();
         }
+    }
+
+    public int CompareTo(object obj)
+    {
+        return Equals(obj) 
+            ? 0 
+            : 1;
     }
 }
