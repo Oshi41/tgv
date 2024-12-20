@@ -41,13 +41,13 @@ public class TgvServer(TgvSettings tgvSettings) : IServer
         var endpoint = new IPEndPoint(IPAddress.Any, port);
         if (tgvSettings.Certificate != null)
         {
-            _server = new HttpsServerImp(Handler, Logger,
+            _server = new HttpsServerImp(Handler,
                 new SslContext(tgvSettings.Protocols, tgvSettings.Certificate, tgvSettings.CertificateValidation),
                 endpoint, tgvSettings);
         }
         else
         {
-            _server = new HttpServerImp(Handler, Logger, endpoint, tgvSettings);
+            _server = new HttpServerImp(Handler, endpoint, tgvSettings);
         }
 
         if (!_server.Start())

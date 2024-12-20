@@ -1,7 +1,12 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Net;
 using Hme = tgv_core.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
+using NLog;
+using NLog.Fluent;
+using NLog.Layouts;
+using NLog.Targets;
 using tgv_core.api;
 using tgv_core.imp;
 
@@ -16,13 +21,14 @@ public class App : IRouter
 
     public App(IServer server, RouterConfig? cfg = null)
     {
-        Logger = new Logger();
+        Logger = LogManager.GetCurrentClassLogger();
         _root = new Router("*", cfg ?? new RouterConfig());
         _server = server;
         
         // some internals
         _server.Handler = Handle;
-        _server.Logger = Logger;
+
+        Process.GetCurrentProcess().Exited += (_, _) => LogManager.Shutdown();
     }
 
     public string? RunningUrl
@@ -49,7 +55,7 @@ public class App : IRouter
         }
 
         Started?.Invoke(this, _server);
-        Logger.Debug($"Server started on port {_server.Port}");
+        Logger.Debug("Server started on port {port}", _server.Port);
     }
 
     public bool Stop()
@@ -58,7 +64,7 @@ public class App : IRouter
 
         _server.Stop();
         Closed?.Invoke(this, _server);
-        Logger.Debug($"Server stopped");
+        Logger.Debug("Server stopped");
         return true;
     }
 
@@ -95,7 +101,7 @@ public class App : IRouter
         catch (Exception e)
         {
             // handling error routes
-            ctx.Logger.Warn($"Exception during route handling: {e.Message}");
+            ctx.Logger.Warn("Exception during route handling: {error}", e);
             await HandleError(ctx, e);
         }
     }
@@ -115,7 +121,7 @@ public class App : IRouter
         catch (Exception ex)
         {
             error = ex;
-            ctx.Logger.Fatal($"Exception: {ex.Message}");
+            ctx.Logger.Fatal("Exception: {error}", ex);
         }
         finally
         {
@@ -240,9 +246,7 @@ public class App : IRouter
     }
 
     public HttpHandler Handler => _root.Handler;
-
-    #endregion
-
+    
     public IEnumerator<IMatch> GetEnumerator()
     {
         return _root.GetEnumerator();
@@ -252,4 +256,6 @@ public class App : IRouter
     {
         return GetEnumerator();
     }
+
+    #endregion
 }

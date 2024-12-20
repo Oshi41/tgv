@@ -163,7 +163,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
         }
         catch (Exception e)
         {
-            context.Logger.Error($"Error during context calculation: {e}");
+            context.Logger.Error("Error during context calculation: {e}", e);
             RemoveKey(key);
             return OnResolved(key, context, null);
         }

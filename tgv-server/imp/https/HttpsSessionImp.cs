@@ -1,23 +1,24 @@
 ﻿using System;
 using NetCoreServer;
+using NLog;
 using tgv_core.api;
-using tgv_core.imp;
 
 namespace tgv_server.imp.https;
 
 public class HttpsSessionImp: HttpsSession
 {
-    private readonly ServerHandler _handler;
     private readonly Logger _logger;
+    
+    private readonly ServerHandler _handler;
     private readonly TgvSettings _settings;
     private Context _ctx;
 
-    public HttpsSessionImp(HttpsServer server, ServerHandler handler, Logger logger, TgvSettings settings)
+    public HttpsSessionImp(HttpsServer server, ServerHandler handler, TgvSettings settings)
         : base(server)
     {
         _handler = handler;
-        _logger = logger;
         _settings = settings;
+        _logger = LogManager.LogFactory.GetLogger("HttpsSessionImp");
     }
     
     public event EventHandler OnWasSent;
@@ -25,7 +26,7 @@ public class HttpsSessionImp: HttpsSession
     private Context CreateContext()
     {
         _ctx?.Dispose();
-        return _ctx = new TgvContext(this, _logger, _settings, ref OnWasSent);
+        return _ctx = new TgvContext(this, _settings, ref OnWasSent);
     }
 
     protected override async void OnReceivedRequest(HttpRequest request)
@@ -36,7 +37,7 @@ public class HttpsSessionImp: HttpsSession
         }
         catch (Exception e)
         {
-            _logger.Error($"Error during request receive: {e}");
+            _logger.Error("Error during request receive: {e}", e);
         }
     }
 
@@ -48,7 +49,7 @@ public class HttpsSessionImp: HttpsSession
         }
         catch (Exception e)
         {
-            _logger.Error($"Error during request error handling: {e}");
+            _logger.Error("Error during request error handling: {e}", e);
         }
     }
 

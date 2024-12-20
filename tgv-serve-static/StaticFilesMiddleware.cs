@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using NLog;
 using tgv_core.api;
 using tgv_core.imp;
 using tgv;
@@ -27,10 +28,10 @@ class FileWatcher
     // working watcher
     private readonly FileSystemWatcher _watcher;
 
-    public FileWatcher(StaticFilesConfig cfg, Logger logger)
+    public FileWatcher(StaticFilesConfig cfg)
     {
         _cfg = cfg;
-        _logger = logger;
+        _logger = LogManager.LogFactory.GetLogger("FileWatcher");
         _watcher = new FileSystemWatcher(cfg.SourceDirectory);
         _cache = new ConcurrentDictionary<string, byte[]>();
         _watcher.IncludeSubdirectories = true;
@@ -47,14 +48,14 @@ class FileWatcher
         if (_cache.TryRemove(e.OldFullPath, out var content))
         {
             _cache[e.FullPath] = content;
-            _logger.Debug($"File renamed {e.OldFullPath} => {e.FullPath}");
+            _logger.Debug("File renamed {old} => {path}", e.OldFullPath, e.FullPath);
         }
     }
 
     private void WatcherOnDeleted(object sender, FileSystemEventArgs e)
     {
         if (_cache.TryRemove(e.FullPath, out _))
-            _logger.Debug($"File {e.FullPath} was deleted");
+            _logger.Debug("File {path} was deleted", e.FullPath);
     }
 
     private void WatcherOnChanged(object sender, FileSystemEventArgs e)
@@ -63,7 +64,7 @@ class FileWatcher
         {
             lock (_watcher)
             {
-                _logger.Debug($"File {e.FullPath} was changed, reloading");
+                _logger.Debug("File {path} was changed, reloading", e.FullPath);
                 _cache[e.FullPath] = File.ReadAllBytes(e.FullPath);
             }
         }
@@ -96,7 +97,7 @@ public static class StaticFilesMiddleware
         if (!Directory.Exists(cfg.SourceDirectory))
             throw new Exception("Source directory does not exist");
 
-        var cache = new FileWatcher(cfg, app.Logger);
+        var cache = new FileWatcher(cfg);
         
         async Task Middleware(Context ctx, Action next, Exception? e)
         {
@@ -116,7 +117,7 @@ public static class StaticFilesMiddleware
 
             if (!Directory.Exists(cfg.SourceDirectory))
             {
-                ctx.Logger.Fatal($"Source directory {cfg.SourceDirectory} does not exist");
+                ctx.Logger.Fatal("Source directory {dir} does not exist", cfg.SourceDirectory);
                 throw ctx.Throw(HttpStatusCode.InternalServerError);
             }
 

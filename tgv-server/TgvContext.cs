@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using MimeTypes;
 using NetCoreServer;
+using NLog;
 using tgv_core.api;
 using tgv_core.imp;
 
@@ -18,11 +21,10 @@ public class TgvContext : Context
     private readonly TgvSettings _settings;
     private bool _wasSent;
 
-    public TgvContext(IHttpSession session, Logger logger, TgvSettings settings, ref EventHandler afterSent)
+    public TgvContext(IHttpSession session, TgvSettings settings, ref EventHandler afterSent)
         : base(new HttpMethod(session.Request.Method.ToUpperInvariant()),
             session.Id,
             GetUri(session.Request),
-            logger,
             new(session.Request.Headers),
             null,
             session.Request.Cookies)
@@ -30,6 +32,19 @@ public class TgvContext : Context
         _session = session;
         _settings = settings;
         afterSent += (_, _) => AfterSending();
+        
+        var meta = new List<string>();
+        if (string.IsNullOrEmpty(_session.Request.Body))
+            meta.Add("no-body");
+        if (Cookies.Count > 0)
+            meta.Add($"cookies={Cookies.Count}");
+        if (ClientHeaders.Count > 0)
+            meta.Add($"headers={ClientHeaders.Count}");
+
+        if (meta.Any())
+        {
+            Logger.WithProperty("meta", string.Join(", ", meta));
+        }
     }
 
 

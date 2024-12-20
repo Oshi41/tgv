@@ -1,5 +1,6 @@
 ﻿using System;
 using NetCoreServer;
+using NLog;
 using tgv_core.api;
 using tgv_core.imp;
 
@@ -12,11 +13,11 @@ public class HttpSessionImp : HttpSession
     private readonly TgvSettings _settings;
     private Context _ctx;
 
-    public HttpSessionImp(HttpServer server, ServerHandler handler, Logger logger, TgvSettings settings)
+    public HttpSessionImp(HttpServer server, ServerHandler handler, TgvSettings settings)
         : base(server)
     {
         _handler = handler;
-        _logger = logger;
+        _logger = LogManager.LogFactory.GetLogger("HttpSessionImp");
         _settings = settings;
     }
 
@@ -25,7 +26,7 @@ public class HttpSessionImp : HttpSession
     private Context CreateContext()
     {
         _ctx?.Dispose();
-        return _ctx = new TgvContext(this, _logger, _settings, ref OnWasSent);
+        return _ctx = new TgvContext(this, _settings, ref OnWasSent);
     }
 
     protected override async void OnReceivedRequest(HttpRequest request)
@@ -36,7 +37,7 @@ public class HttpSessionImp : HttpSession
         }
         catch (Exception e)
         {
-            _logger.Error($"Error during request receive: {e}");
+            _logger.Error("Error during request receive: {e}", e);
         }
     }
 
@@ -48,7 +49,7 @@ public class HttpSessionImp : HttpSession
         }
         catch (Exception e)
         {
-            _logger.Error($"Error during request error handling: {e}");
+            _logger.Error("Error during request error handling: {e}", e);
         }
     }
 

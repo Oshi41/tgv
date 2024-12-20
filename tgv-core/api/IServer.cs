@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using NLog;
 using tgv_core.imp;
 
 namespace tgv_core.api;
@@ -57,7 +58,7 @@ public abstract class IServer
     /// <value>
     /// The <see cref="Logger"/> instance used to handle logging operations for the server.
     /// </value>
-    public Logger Logger { get; internal set; }
+    public Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Starts the server asynchronously on the specified port.

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MimeTypes;
 using Newtonsoft.Json;
+using NLog;
 using tgv_core.extensions;
 using tgv_core.imp;
 
@@ -284,19 +285,16 @@ public abstract class Context : IDisposable
     /// <param name="method">HTTP method</param>
     /// <param name="traceId">Uniq request ID</param>
     /// <param name="url">Current URL</param>
-    /// <param name="logger">Logger</param>
     /// <param name="headers">Request headers. May be null if no headers provided.</param>
     /// <param name="query">Query parameters. Pass null to automatically parse from URL</param>
     /// <param name="cookies">Request cookies. Pass null to parse from header</param>
-    protected Context(HttpMethod method, Guid traceId, Uri url, Logger logger,
-        NameValueCollection? headers = null, NameValueCollection? query = null, CookieCollection? cookies = null)
+    protected Context(HttpMethod method, Guid traceId, Uri url, NameValueCollection? headers = null,
+        NameValueCollection? query = null, CookieCollection? cookies = null)
     {
         Method = method;
         TraceId = traceId;
         Url = url;
-        Logger = logger;
         ClientHeaders = headers ?? new NameValueCollection();
-
         Query = query ?? System.Web.HttpUtility.ParseQueryString(url.Query);
 
         if (cookies != null)
@@ -309,6 +307,10 @@ public abstract class Context : IDisposable
             Cookies.Parse(ClientHeaders[HttpRequestHeader.Cookie.ToString()] ?? string.Empty);
             _original.Add(Cookies);
         }
+
+        Logger = LogManager.LogFactory.GetLogger("HTTP request")
+            .WithProperty("method", method.ToString().ToUpper())
+            .WithProperty("url", Url.PathAndQuery);
     }
 
     public virtual void Dispose()

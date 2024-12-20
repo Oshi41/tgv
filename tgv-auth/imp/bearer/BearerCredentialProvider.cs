@@ -53,7 +53,7 @@ public class BearerCredentialProvider: ICredentialProvider<BearerCredentials>
         }
         catch (Exception ex)
         {
-            ctx.Logger.Error($"Unknown error: {ex}");
+            ctx.Logger.Error("Unknown error: {ex}", ex);
         }
 
         return null;

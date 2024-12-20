@@ -18,7 +18,6 @@ even for developers with minimal experience._
   Automatically creates and manages sessions for every user.
 
 - **Customizable**
-    - Define your own GUID generation function.
     - Implement custom session storage using the `IStore` interface.
     - Control session lifecycle, including expiration and manual management.
 
@@ -31,25 +30,7 @@ even for developers with minimal experience._
 using tgv_session;
 
 var app = new App();
-app.UseSession(new SessionConfig(
-  CreateStore,
-  GenerateId,
-  "_app_cookie",
-  TimeSpan.FromMinutes(60)
-));
-
-async Task<Guid> GenerateId()
-{
-    var id = await _dbProvider.GetNewId();
-    return id;
-}
-
-async Task<IStore> CreateStore()
-{
-  var dbProvider = new SqlProvider();
-  await dbProvider.Init();
-  return new SqlStore(dbProvider);
-}
+app.UseSession(new SqlStore(...), "_session");
 
 class SqlStore : IStore
 {

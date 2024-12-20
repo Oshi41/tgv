@@ -84,13 +84,13 @@ public class AuthMiddleware<TCreds, TSession> : ExtensionFactory<TSession, AuthK
     {
         if (key.Session is TSession session)
         {
-            context.Logger.Debug($"Requesting session {session} status");
+            context.Logger.Debug("Requesting session {session} status", session);
             var status = await _sessionStorage.GetStatus(session);
 
             // all works
             if (status == SessionStatus.Active)
             {
-                context.Logger.Debug($"Session {session} is active");
+                context.Logger.Debug("Session {session} is active", session);
                 Put(session, context);
                 return session;
             }
@@ -101,39 +101,39 @@ public class AuthMiddleware<TCreds, TSession> : ExtensionFactory<TSession, AuthK
             // re-auth
             if (status == SessionStatus.Expired)
             {
-                context.Logger.Debug($"Session {session} is expired, refreshing...");
+                context.Logger.Debug("Session {session} is expired, refreshing...", session);
                 var res = await _sessionStorage.Refresh(session);
                 if (res != null)
                 {
                     Put(session, context);
-                    context.Logger.Debug($"Session {session} refreshed");
+                    context.Logger.Debug("Session {session} refreshed", session);
                     return res;
                 }
                 
-                context.Logger.Debug($"Session {session} was not refreshed");
+                context.Logger.Debug("Session {session} was not refreshed", session);
             }
 
             if (status == SessionStatus.NotFound)
             {
-                context.Logger.Debug($"Session {session} not found");
+                context.Logger.Debug("Session {session} not found", session);
             }
         }
 
         if (key.Credentials is TCreds credentials)
         {
-            context.Logger.Debug($"Auth with credentials");
+            context.Logger.Debug("Auth with credentials");
             // remove obsolete credentials key
             RemoveKey(key);
 
             var sessionNew = await _sessionStorage.Login(credentials);
             if (sessionNew?.IsValid() == true)
             {
-                context.Logger.Debug($"Session {sessionNew} logged in");
+                context.Logger.Debug("Session {sessionNew} logged in", sessionNew);
                 Put(sessionNew, context);
                 return sessionNew;
             }
 
-            context.Logger.Debug($"Session {sessionNew} failed to log in");
+            context.Logger.Debug("Session {sessionNew} failed to log in", sessionNew);
         }
 
         return null;

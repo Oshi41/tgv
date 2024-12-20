@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using NLog;
 using tgv_core.api;
 using tgv_core.extensions;
 using tgv_core.imp;
@@ -14,6 +15,7 @@ namespace tgv_session;
 
 class ContextExtension : ExtensionFactory<SessionContext, Guid>
 {
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     public IStore Store { get; }
     private readonly string _cookieName;
     private bool _loaded;
@@ -41,7 +43,7 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error during adding session: {e}");
+            _logger.Error("Error during adding session: {e}", e);
         }
     }
 
@@ -78,16 +80,16 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
                     return guid;
                 }
 
-                ctx.Logger.Debug($"Wrong session cookie format: {cookie.Value}");
+                ctx.Logger.Debug("Wrong session cookie format: {cookie}", cookie.Value);
             }
             else
             {
-                ctx.Logger.Debug($"Session cookie was expired: {cookie.Value}");
+                ctx.Logger.Debug("Session cookie was expired: {cookie}", cookie.Value);
             }
         }
         else
         {
-            ctx.Logger.Debug($"Session cookie was not found");
+            ctx.Logger.Debug("Session cookie was not found");
         }
 
         return ctx.TraceId;
@@ -100,10 +102,10 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
         // not loaded yet
         if (!_loaded) return null;
 
-        context.Logger.Debug($"Opening new session [{key}]: {context}");
+        context.Logger.Debug("Opening new session [{key}]: {context}", key, context);
 
         var result = await Store.CreateNew(key as Guid? ?? Guid.NewGuid());
-        context.Logger.Debug($"Session {GetKey(result)} created");
+        context.Logger.Debug("Session {result} created", GetKey(result));
         return result;
     }
 
