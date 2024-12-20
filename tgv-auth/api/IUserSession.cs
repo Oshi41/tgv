@@ -44,8 +44,11 @@ public abstract class IUserSession : IEnumerable<KeyValuePair<string, object>>
     /// Is current session valid
     /// </summary>
     /// <returns></returns>
-    public virtual bool IsValid() => Expired == DateTime.MinValue || Start == DateTime.MinValue
-                                                                  || Expired < DateTime.Now;
+    public virtual bool IsValid() => Start > DateTime.MinValue
+                                     // expired is swithed off
+                                     && (Expired == DateTime.MinValue 
+                                         // or somewhere in a future
+                                        || Expired > DateTime.Now);
 
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
     {

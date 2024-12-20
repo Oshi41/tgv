@@ -46,7 +46,7 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
             .Select(Logout)
             .ToArray());
 
-        var session = new BasicSession(DateTime.Now, DateTime.Now.AddHours(1), credentials.Username);
+        var session = new BasicSession(DateTime.Now.AddHours(1), DateTime.Now, credentials.Username);
         _active.Add(session.Name, session);
         return session;
     }
@@ -98,6 +98,7 @@ public class TgvAuth
                 if (await ctx.Auth<BasicSession>() is { } session && session.IsValid())
                 {
                     next();
+                    return;
                 }
 
                 await ctx.Send(HttpStatusCode.Unauthorized);
@@ -109,6 +110,7 @@ public class TgvAuth
                 if (await ctx.Auth<BasicSession>() is { } session && session.IsValid() && session.Name == "admin")
                 {
                     next();
+                    return;
                 }
 
                 await ctx.Send(HttpStatusCode.Unauthorized);
