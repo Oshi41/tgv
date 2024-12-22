@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using Flurl.Http;
 using tgv_server;
+using tgv_session;
 using tgv;
 
 namespace tgv_tests.app;

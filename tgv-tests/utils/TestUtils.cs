@@ -5,8 +5,10 @@ using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Flurl.Http;
 using HtmlParserDotNet;
+using tgv_auth.imp.basic;
 using tgv_core.api;
 using tgv_core.imp;
 using tgv_server;
@@ -191,5 +193,13 @@ public static class TestUtils
         });
 
         return router;
+    }
+
+    public static string ToHeader(this BasicCredentials credentials)
+    {
+        var text = $"{credentials.Username}:{credentials.Password}";
+        var bytes = Encoding.UTF8.GetBytes(text);
+        var base64 = Convert.ToBase64String(bytes);
+        return $"Basic {base64}";
     }
 }

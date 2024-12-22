@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.Metrics;
 using System.Net;
-using System.Text;
 using Flurl.Http;
 using tgv_auth.api;
 using tgv_auth.api.storage;
@@ -11,7 +10,7 @@ using tgv;
 
 namespace tgv_tests;
 
-class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
+public class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
 {
     private readonly BasicCredentials[] _users;
     private readonly Dictionary<string, BasicSession> _active = new();
@@ -21,7 +20,7 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
         _users = users;
     }
 
-    public async Task<BasicSession?> Refresh(BasicSession prev)
+    public virtual async Task<BasicSession?> Refresh(BasicSession prev)
     {
         if (!_active.TryGetValue(prev.Name, out var original))
         {
@@ -37,7 +36,7 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
         return session;
     }
 
-    public async Task<BasicSession?> Login(BasicCredentials credentials)
+    public virtual async Task<BasicSession?> Login(BasicCredentials credentials)
     {
         if (!_users.Contains(credentials)) return null;
 
@@ -51,13 +50,13 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
         return session;
     }
 
-    public Task Logout(BasicSession session)
+    public virtual Task Logout(BasicSession session)
     {
         _active.Remove(session.Name);
         return Task.CompletedTask;
     }
 
-    public async Task<SessionStatus> GetStatus(BasicSession session)
+    public virtual async Task<SessionStatus> GetStatus(BasicSession session)
     {
         if (!_active.TryGetValue(session.Name, out var status)) return SessionStatus.NotFound;
 
@@ -65,7 +64,7 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
         return SessionStatus.Active;
     }
 
-    public Task<List<BasicSession>> GetSessions()
+    public virtual Task<List<BasicSession>> GetSessions()
     {
         return Task.FromResult(_active.Values.ToList());
     }
@@ -115,14 +114,6 @@ public class TgvAuth
                 await ctx.Send(HttpStatusCode.Unauthorized);
             },
             (ctx, next, exception) => ctx.Text("Hello!"));
-    }
-
-    private string ToHeader(BasicCredentials credentials)
-    {
-        var text = $"{credentials.Username}:{credentials.Password}";
-        var bytes = Encoding.UTF8.GetBytes(text);
-        var base64 = Convert.ToBase64String(bytes);
-        return $"Basic {base64}";
     }
 
     [SetUp]
@@ -196,7 +187,7 @@ public class TgvAuth
             foreach (var (endpoint, httpMask) in requests)
             {
                 var resp = await client.Request(endpoint)
-                    .WithHeader("Authorization", ToHeader(credentials))
+                    .WithHeader("Authorization", credentials.ToHeader())
                     .AllowHttpStatus(httpMask)
                     .GetAsync();
 

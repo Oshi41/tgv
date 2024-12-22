@@ -23,13 +23,10 @@ public static class MetricExtensions
     
     public static TagList ToTagsFull(this Context ctx, Exception? e = null)
     {
-        var tag = ctx.ToTagsLight(e);
-        
-        tag.Add(new("url", ctx.Url));
-        tag.Add(new("method", ctx.Method));
-        tag.Add(new("headers", ctx.ClientHeaders));
-        
-        return tag;
+        return ctx.ToTagsLight(e)
+                .With("url", ctx.Url)
+                .With("method", ctx.Method)
+                .With("headers", ctx.ClientHeaders);
     }
 
     public static TagList With(this TagList tag, string key, object? value)

@@ -11,6 +11,7 @@ using System.Web;
 using MimeTypes;
 using NetCoreServer;
 using tgv_core.api;
+using tgv_core.extensions;
 using tgv_server.api;
 using HttpClient = System.Net.Http.HttpClient;
 
@@ -135,6 +136,24 @@ public class TgvContext : Context
         
         await socket.FlushAsync();
         await AfterSending();
+    }
+
+    protected override async Task AfterSending()
+    {
+        await base.AfterSending();
+
+        Statics.GetMetric().CreateCounter<long>("response_sent", description: "HTTP response sent")
+            .Add(1, this.ToTagsFull()
+                .With("elapsed", _watch.Elapsed)
+                .With("code", _session.Response.Status)
+                .With("status", _session.Response.StatusPhrase)
+                .With("sent_headers", _session.Response.Headers)
+                .With("request_body", _session.Request.Body)
+                .With("response_body", _session.Response.Body)
+                .With("content_type", _session.Response.Headers["Content-Type"])
+                .With("bytes_received", _session.BytesReceived)
+                .With("bytes_sent", _session.BytesSent)
+            );
     }
 
     private static Uri GetUri(HttpRequest request)

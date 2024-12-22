@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
@@ -257,6 +258,7 @@ public abstract class Context : IDisposable
     /// <returns>A completed task representing the operation.</returns>
     protected virtual Task AfterSending()
     {
+        _watch.Stop();
         RequestFinished?.Invoke(this, EventArgs.Empty);
         return Task.CompletedTask;
     }
@@ -289,10 +291,13 @@ public abstract class Context : IDisposable
     /// </summary>
     public event EventHandler RequestFinished;
 
+    protected readonly Stopwatch _watch;
+
     /// <summary>
     /// Stores the original cookies received.
     /// </summary>
     private readonly CookieCollection _original = new();
+    
 
     /// <summary>
     /// Base context constructor
@@ -329,6 +334,7 @@ public abstract class Context : IDisposable
             .WithProperty("_02url", Url.PathAndQuery);
         
         Logger.Debug("TraceID={0}", traceId);
+        _watch = Stopwatch.StartNew();
     }
 
     public virtual void Dispose()

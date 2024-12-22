@@ -6,7 +6,7 @@ namespace tgv_auth.api;
 
 public abstract class IUserSession : IEnumerable<KeyValuePair<string, object>>
 {
-    private IDictionary<string, object> _data;
+    private Dictionary<string, object> _data = new();
 
     protected IUserSession(DateTime expired, DateTime start)
     {

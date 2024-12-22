@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-server", "tgv-server\tg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreServer", "netcoreserver\source\NetCoreServer\NetCoreServer.csproj", "{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-validation", "tgv-validation\tgv-validation.csproj", "{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -66,5 +68,9 @@ Global
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Release|x64.Build.0 = Release|Any CPU
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{FB8ABAF0-80C1-45FF-8CBF-16C9FAC2D3FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Debug|x64.ActiveCfg = Debug|x64
+		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Debug|x64.Build.0 = Debug|x64
+		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Release|x64.ActiveCfg = Release|x64
+		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal
