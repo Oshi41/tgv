@@ -43,7 +43,7 @@ public class TgvContext : Context
 
         if (meta.Any())
         {
-            Logger.WithProperty("meta", string.Join(", ", meta));
+            Logger.WithProperty("_meta", string.Join(", ", meta));
         }
     }
 

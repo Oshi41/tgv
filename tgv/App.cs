@@ -4,9 +4,6 @@ using System.Net;
 using Hme = tgv_core.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
 using NLog;
-using NLog.Fluent;
-using NLog.Layouts;
-using NLog.Targets;
 using tgv_core.api;
 using tgv_core.imp;
 
