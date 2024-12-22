@@ -228,7 +228,7 @@ public abstract class Context : IDisposable
     /// <exception cref="Exception">Thrown if a response has already been sent.</exception>
     protected virtual Task BeforeSending()
     {
-        Statics.Metrics.CreateCounter<long>($"{this.GetMetricName()}.before_sending").Add(1);
+         Statics.GetMetric().CreateCounter<long>($"{this.GetMetricName()}.before_sending").Add(1);
         
         if (WasSent)
         {
@@ -239,7 +239,7 @@ public abstract class Context : IDisposable
         
         if (written > 0)
         {
-            Statics.Metrics.CreateHistogram<int>($"{this.GetMetricName()}.cookies_sent")
+             Statics.GetMetric().CreateHistogram<int>($"{this.GetMetricName()}.cookies_sent")
                 .Record(written, this.ToTagsFull());
         }
         

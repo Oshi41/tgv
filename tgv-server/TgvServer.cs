@@ -40,11 +40,11 @@ public class TgvServer(TgvSettings tgvSettings) : IServer
         {
             _server = new HttpsServerImp(Handler,
                 new SslContext(tgvSettings.Protocols, tgvSettings.Certificate, tgvSettings.CertificateValidation),
-                endpoint, tgvSettings, Metric);
+                endpoint, tgvSettings);
         }
         else
         {
-            _server = new HttpServerImp(Handler, endpoint, tgvSettings, Metric);
+            _server = new HttpServerImp(Handler, endpoint, tgvSettings);
         }
 
         if (!_server.Start())

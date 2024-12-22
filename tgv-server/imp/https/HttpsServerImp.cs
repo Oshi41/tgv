@@ -9,19 +9,16 @@ public class HttpsServerImp : HttpsServer
 {
     private readonly ServerHandler _handler;
     private readonly TgvSettings _settings;
-    private readonly Meter _metric;
 
     public HttpsServerImp(ServerHandler handler,
         SslContext context,
         IPEndPoint endpoint,
-        TgvSettings settings,
-        Meter metric) : base(context, endpoint)
+        TgvSettings settings) : base(context, endpoint)
     {
         _handler = handler;
         _settings = settings;
-        _metric = metric;
         OptionKeepAlive = true;
     }
 
-    protected override SslSession CreateSession() => new HttpsSessionImp(this, _handler, _settings, _metric);
+    protected override SslSession CreateSession() => new HttpsSessionImp(this, _handler, _settings);
 }

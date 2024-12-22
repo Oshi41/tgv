@@ -24,7 +24,7 @@ public class InMemoryStore() : IStore
     {
         var session = new SessionContext(Guid.NewGuid(), DateTime.Now.AddHours(1));
         _cache.Add(session.Id.ToString(), session, session.Expires);
-        Statics.Metrics.CreateCounter<int>("memory_store_session_created", description: "Session was created")
+         Statics.GetMetric().CreateCounter<int>("memory_store_session_created", description: "Session was created")
             .Add(1,
                 new KeyValuePair<string, object?>("session_id", session.Id),
                 new KeyValuePair<string, object?>("session_expired", session.Expires));
@@ -38,7 +38,7 @@ public class InMemoryStore() : IStore
         if (result)
         {
             OnRemovedSession?.Invoke(this, id);
-            Statics.Metrics.CreateCounter<int>("memory_store_session_removed", description: "Session was removed")
+             Statics.GetMetric().CreateCounter<int>("memory_store_session_removed", description: "Session was removed")
                 .Add(1,
                     new KeyValuePair<string, object?>("session_id", id));
         }

@@ -128,7 +128,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     /// <param name="context">HTTP request</param>
     public async Task<TExtension?> GetOrCreate(Context context)
     {
-        Statics.Metrics.CreateCounter<long>("get_or_create_extension",
+         Statics.GetMetric().CreateCounter<long>("get_or_create_extension",
                 description: "Request to get/create an HTTP context extension")
             .Add(1, context.ToTagsFull());
 
@@ -142,7 +142,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
         // if any task pending exists
         if (_tasks.TryGetValue(key, out var task))
         {
-            Statics.Metrics.CreateCounter<long>("get_or_create_extension_already_loaded",
+             Statics.GetMetric().CreateCounter<long>("get_or_create_extension_already_loaded",
                     description: "Request's extension is loading already")
                 .Add(1, context.ToTagsFull());
 
@@ -154,7 +154,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             if (extension == null || await CheckPolicies(key, extension, context))
             {
                 context.Logger.Debug("Context expired, created new one");
-                Statics.Metrics.CreateCounter<long>("get_or_create_extension_resolved",
+                 Statics.GetMetric().CreateCounter<long>("get_or_create_extension_resolved",
                         description: "Request's extension was successfully resolved")
                     .Add(1, context.ToTagsFull());
 
@@ -162,7 +162,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             }
 
             context.Logger.Debug("Context expired, created new one");
-            Statics.Metrics.CreateCounter<long>("get_or_create_extension_expired",
+             Statics.GetMetric().CreateCounter<long>("get_or_create_extension_expired",
                     description: "Request's extension was created before and now expired")
                 .Add(1, context.ToTagsFull());
         }
@@ -181,7 +181,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             context.Logger.Error("Error during context calculation: {e}", e);
             RemoveKey(key);
 
-            Statics.Metrics.CreateCounter<long>("get_or_create_extension_created_exception",
+             Statics.GetMetric().CreateCounter<long>("get_or_create_extension_created_exception",
                     description: "Error during creation of HTTP context extension")
                 .Add(1, context.ToTagsFull(e));
 
@@ -198,13 +198,13 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             policy = CreateCachePolicy(context, extension);
             key = GetKey(extension);
 
-            Statics.Metrics.CreateCounter<long>("get_or_create_extension_created",
+             Statics.GetMetric().CreateCounter<long>("get_or_create_extension_created",
                     description: "Request's extension was successfully created")
                 .Add(1, context.ToTagsFull());
         }
         else
         {
-            Statics.Metrics.CreateCounter<long>("get_or_create_extension_created_null",
+             Statics.GetMetric().CreateCounter<long>("get_or_create_extension_created_null",
                     description: "Request's extension was successfully created but it's null")
                 .Add(1, context.ToTagsFull());
         }
@@ -246,7 +246,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             }
         }
         
-        Statics.Metrics.CreateCounter<long>($"get_or_create_extension_check_policies_fail",
+         Statics.GetMetric().CreateCounter<long>($"get_or_create_extension_check_policies_fail",
                 description: "Current extension object cannot be used, need to create other one")
             .Add(1, http.ToTagsFull()
                 .With("policy", policy));

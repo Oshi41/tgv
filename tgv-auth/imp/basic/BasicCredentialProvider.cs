@@ -22,7 +22,7 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
             var arr = ctx.Url.UserInfo.Split([':']);
             if (arr.Length == 2)
             {
-                Statics.Metrics.CreateCounter<int>("basic_cookie_provider_url", description: "Basic auth was resolved from URL")
+                 Statics.GetMetric().CreateCounter<int>("basic_cookie_provider_url", description: "Basic auth was resolved from URL")
                     .Add(1, ctx.ToTagsFull());
                 return new BasicCredentials(arr[0], arr[1]);
             }
@@ -33,7 +33,7 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
 
         if (result == null) return null;
         
-        Statics.Metrics.CreateCounter<int>("basic_cookie_provider_cookie", description: "Basic auth was resolved from cookie")
+         Statics.GetMetric().CreateCounter<int>("basic_cookie_provider_cookie", description: "Basic auth was resolved from cookie")
             .Add(1, ctx.ToTagsFull());
         return result;
     }

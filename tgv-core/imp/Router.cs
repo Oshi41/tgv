@@ -138,7 +138,7 @@ public class Router : IRouter
     /// <returns>A task representing the asynchronous operation of processing the route match.</returns>
     private async Task HandleInner(Context ctx, Action next, Exception? exception = null)
     {
-        Statics.Metrics.CreateCounter<int>("route_visited", description: "Successfully visited routes during route chaining")
+         Statics.GetMetric().CreateCounter<int>("route_visited", description: "Successfully visited routes during route chaining")
             .Add(1, ctx.ToTagsFull()
                 .With("route", GetRoutePath(ctx)));
         
@@ -157,7 +157,7 @@ public class Router : IRouter
 
                 if (ctx.Parameters?.Any() == true)
                 {
-                    Statics.Metrics.CreateHistogram<int>("route_params_parsed", description: "URL Parameters parsed")
+                     Statics.GetMetric().CreateHistogram<int>("route_params_parsed", description: "URL Parameters parsed")
                         .Record(ctx.Parameters.Count, ctx.ToTagsFull()
                             .With("route", GetRoutePath(ctx)));
                 }
@@ -170,7 +170,7 @@ public class Router : IRouter
             {
                 navigateNext = true;
                 
-                Statics.Metrics.CreateCounter<int>("route_next_called", description: "Next function called")
+                 Statics.GetMetric().CreateCounter<int>("route_next_called", description: "Next function called")
                     .Add(1, ctx.ToTagsFull()
                         .With("route", GetRoutePath(ctx)));
             });

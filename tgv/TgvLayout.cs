@@ -17,6 +17,6 @@ public class TgvLayout : LayoutRenderer
             .ToList();
         
         if (ctxProps.Any())
-            builder.Append($" |{string.Join(", ", ctxProps)}|");
+            builder.Append($" [{string.Join(", ", ctxProps)}]");
     }
 }

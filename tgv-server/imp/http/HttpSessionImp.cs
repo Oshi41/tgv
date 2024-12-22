@@ -15,16 +15,14 @@ public class HttpSessionImp : HttpSession, IStreamProvider
     private readonly ServerHandler _handler;
     private readonly Logger _logger;
     private readonly TgvSettings _settings;
-    private readonly Meter _metric;
     private Context _ctx;
 
-    public HttpSessionImp(HttpServer server, ServerHandler handler, TgvSettings settings, Meter metric)
+    public HttpSessionImp(HttpServer server, ServerHandler handler, TgvSettings settings)
         : base(server)
     {
         _handler = handler;
         _logger = LogManager.LogFactory.GetLogger("HttpSessionImp");
         _settings = settings;
-        _metric = metric;
     }
 
     public event EventHandler OnWasSent;
@@ -63,9 +61,9 @@ public class HttpSessionImp : HttpSession, IStreamProvider
     {
         if (sent > 0)
         {
-            _metric.CreateCounter<long>("server_bytes_sent", description: "How much bytes session sent")
+            Statics.GetMetric().CreateCounter<long>("server_bytes_sent", description: "How much bytes session sent")
                 .Add(sent, _ctx.ToTagsFull());
-            _metric.CreateCounter<long>("http_bytes_sent", description: "How much bytes HTTP session sent")
+            Statics.GetMetric().CreateCounter<long>("http_bytes_sent", description: "How much bytes HTTP session sent")
                 .Add(sent, _ctx.ToTagsFull());
         }
         

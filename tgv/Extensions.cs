@@ -26,7 +26,7 @@ public static class Extensions
         if (_ctx.TryGetValue(ctx, out App? app) && app is not null) return app;
         ctx.Logger.Error("Context's Application not found");
         
-        Statics.Metrics.CreateCounter<int>("application_was_not_resolved_from_context", description: "HTTP context is not related with Application")
+         Statics.GetMetric().CreateCounter<int>("application_was_not_resolved_from_context", description: "HTTP context is not related with Application")
             .Add(1, ctx.ToTagsFull());
         
         return null;

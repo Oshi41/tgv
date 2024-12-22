@@ -27,7 +27,6 @@ public delegate Task ServerHandler(Context ctx, Exception? e = null);
 public abstract class IServer
 {
     public ServerHandler Handler { get; internal set; }
-    public Meter Metric { get; internal set; }
 
     /// <summary>
     /// Gets a value indicating whether the server is currently listening for incoming connections.

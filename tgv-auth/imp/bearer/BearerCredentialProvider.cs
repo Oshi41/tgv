@@ -47,25 +47,25 @@ public class BearerCredentialProvider: ICredentialProvider<BearerCredentials>
         {
             ctx.Logger.Debug("Token is not valid yet");
             
-            Statics.Metrics.CreateCounter<int>("bearer_credential_token_not_yet_valid", description: "Bearer Token is not valid yet")
+             Statics.GetMetric().CreateCounter<int>("bearer_credential_token_not_yet_valid", description: "Bearer Token is not valid yet")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (TokenExpiredException)
         {
             ctx.Logger.Debug("Token has expired");
-            Statics.Metrics.CreateCounter<int>("bearer_credential_token_expired", description: "Bearer Token is expired")
+             Statics.GetMetric().CreateCounter<int>("bearer_credential_token_expired", description: "Bearer Token is expired")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (SignatureVerificationException)
         {
             ctx.Logger.Debug("Token has invalid signature");
-            Statics.Metrics.CreateCounter<int>("bearer_credential_token_not_yet_valid", description: "Bearer Token has invalid signtaure")
+             Statics.GetMetric().CreateCounter<int>("bearer_credential_token_not_yet_valid", description: "Bearer Token has invalid signtaure")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (Exception ex)
         {
             ctx.Logger.Error("Unknown error: {ex}", ex);
-            Statics.Metrics.CreateCounter<int>("bearer_credential_token_unknown_error", description: "Bearer Token unknonwn error parse")
+             Statics.GetMetric().CreateCounter<int>("bearer_credential_token_unknown_error", description: "Bearer Token unknonwn error parse")
                 .Add(1, ctx.ToTagsFull(ex).With("algo", _algo));
         }
 
