@@ -53,7 +53,7 @@ public class TgvValidation
             new BasicCookieStorage("_auth"));
         _app.Use(CorsMiddleware.Cors());
 
-        _app.Post("/sensitive", async (ctx, next, _) =>
+        _app.Get("/sensitive", async (ctx, next, _) =>
         {
             var session = (await ctx.Session())?.Id;
             if (session == null || session == Guid.Empty)
