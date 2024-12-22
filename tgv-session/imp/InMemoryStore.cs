@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
+using tgv_core.api;
 
 namespace tgv_session.imp;
 
@@ -23,7 +24,7 @@ public class InMemoryStore() : IStore
     {
         var session = new SessionContext(Guid.NewGuid(), DateTime.Now.AddHours(1));
         _cache.Add(session.Id.ToString(), session, session.Expires);
-        Metrics.CreateCounter<int>("memory_store_session_created", description: "Session was created")
+        Statics.Metrics.CreateCounter<int>("memory_store_session_created", description: "Session was created")
             .Add(1,
                 new KeyValuePair<string, object?>("session_id", session.Id),
                 new KeyValuePair<string, object?>("session_expired", session.Expires));
@@ -37,19 +38,11 @@ public class InMemoryStore() : IStore
         if (result)
         {
             OnRemovedSession?.Invoke(this, id);
-            Metrics.CreateCounter<int>("memory_store_session_removed", description: "Session was removed")
+            Statics.Metrics.CreateCounter<int>("memory_store_session_removed", description: "Session was removed")
                 .Add(1,
                     new KeyValuePair<string, object?>("session_id", id));
         }
         return result;
-    }
-
-    internal Meter Metrics { get; set; }
-
-    Meter IStore.Metrics
-    {
-        get => Metrics;
-        set => Metrics = value;
     }
 
     public event EventHandler<SessionContext>? OnSessionChanged;

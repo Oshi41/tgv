@@ -22,7 +22,7 @@ public class BasicCookieStorage : ICookieStorage<BasicSession>
         
         if (!cookie.IsValid())
         {
-            Metrics.CreateCounter<int>("basic_cookie_storage", description: "Basic cookie expired or invalid")
+            Statics.Metrics.CreateCounter<int>("basic_cookie_storage", description: "Basic cookie expired or invalid")
                 .Add(1, ctx.ToTagsFull().With("session_cookie", cookie));
             return null;
         }
@@ -40,6 +40,4 @@ public class BasicCookieStorage : ICookieStorage<BasicSession>
             Expires = userSession.Expired,
         };
     }
-
-    public Meter Metrics { get; set; }
 }

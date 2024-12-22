@@ -20,7 +20,7 @@ class TestContext : Context
     private bool _wasSent = false;
 
     public TestContext(HttpMethod method, Uri url)
-        : base(method, Guid.NewGuid(), url, new Meter("123"), new(), new(), new())
+        : base(method, Guid.NewGuid(), url, new(), new(), new())
     {
         Stage = method;
     }

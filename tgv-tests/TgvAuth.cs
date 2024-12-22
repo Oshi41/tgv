@@ -69,14 +69,11 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
     {
         return Task.FromResult(_active.Values.ToList());
     }
-
-    public Meter Metrics { get; set; }
 }
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
 public class TgvAuth
 {
-    private const string _cookieName = "_test_cookie";
     private readonly App _app;
 
     public TgvAuth(Servers.ServerCreationCase fn)

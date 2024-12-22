@@ -53,25 +53,25 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
         catch (TokenNotYetValidException)
         {
             ctx.Logger.Debug("Token is not valid yet");
-            Metrics.CreateCounter<int>("bearer_cookie_token_not_yet_valid", description: "Bearer Token is not valid yet")
+            Statics.Metrics.CreateCounter<int>("bearer_cookie_token_not_yet_valid", description: "Bearer Token is not valid yet")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (TokenExpiredException)
         {
             ctx.Logger.Debug("Token has expired");
-            Metrics.CreateCounter<int>("bearer_cookie_token_expired", description: "Bearer Token is expired")
+            Statics.Metrics.CreateCounter<int>("bearer_cookie_token_expired", description: "Bearer Token is expired")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (SignatureVerificationException)
         {
             ctx.Logger.Debug("Token has invalid signature");
-            Metrics.CreateCounter<int>("bearer_cookie_token_invalid_signature", description: "Bearer Token has invalid signature")
+            Statics.Metrics.CreateCounter<int>("bearer_cookie_token_invalid_signature", description: "Bearer Token has invalid signature")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (Exception ex)
         {
             ctx.Logger.Error("Unknown error: {ex}", ex);
-            Metrics.CreateCounter<int>("bearer_cookie_token_unknown_error", description: "Bearer Token unknown error during validation")
+            Statics.Metrics.CreateCounter<int>("bearer_cookie_token_unknown_error", description: "Bearer Token unknown error during validation")
                 .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         
@@ -101,6 +101,4 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
             Expires = jwtSession.Expired,
         };
     }
-
-    public Meter Metrics { get; set; }
 }

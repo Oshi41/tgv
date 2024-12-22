@@ -32,7 +32,7 @@ public class HttpSessionImp : HttpSession, IStreamProvider
     private Context CreateContext()
     {
         _ctx?.Dispose();
-        return _ctx = new TgvContext(this, _settings, ref OnWasSent, _metric);
+        return _ctx = new TgvContext(this, _settings, ref OnWasSent);
     }
 
     protected override async void OnReceivedRequest(HttpRequest request)

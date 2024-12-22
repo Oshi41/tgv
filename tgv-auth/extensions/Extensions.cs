@@ -50,13 +50,6 @@ public static class Extension
         where TSession : IUserSession
         where TCreds : ICredentials
     {
-        if (app is IMetricProvider provider)
-        {
-            credentialProvider.Metrics = sessionStorage.Metrics = provider.Metrics;
-            if (cookieStorage is not null)
-                cookieStorage.Metrics = provider.Metrics;
-        }
-        
         var mw = new AuthMiddleware<TCreds, TSession>(credentialProvider, sessionStorage, cookieStorage);
         app.Use(path, mw);
     }

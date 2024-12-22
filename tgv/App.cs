@@ -13,32 +13,30 @@ using tgv_core.imp;
 
 namespace tgv;
 
-public class App : IRouter, IMetricProvider
+public class App : IRouter
 {
     private IServer _server;
     internal Router _root;
 
 
-    public App(IServer server, RouterConfig? cfg = null, Meter? metrics = null)
+    public App(IServer server, RouterConfig? cfg = null)
     {
         Logger = LogManager.GetCurrentClassLogger();
-        Metrics = metrics ?? new Meter("tgv-app");
 
         _root = new Router("*", cfg ?? new RouterConfig());
         _server = server;
 
         // some internals
         _server.Handler = Handle;
-        _server.Metric = Metrics;
 
         Process.GetCurrentProcess().Exited += (_, _) =>
         {
             LogManager.Shutdown();
             
-            Metrics.CreateCounter<int>("server_shutdown", description: "Server was shut down")
+            Statics.Metrics.CreateCounter<int>("server_shutdown", description: "Server was shut down")
                 .Add(1);
             
-            Metrics.Dispose();
+            Statics.Metrics.Dispose();
         };
     }
 
@@ -54,7 +52,6 @@ public class App : IRouter, IMetricProvider
     }
 
     public Logger Logger { get; }
-    public Meter Metrics { get; set; }
 
     public async Task Start(int port = 7000)
     {
@@ -69,7 +66,7 @@ public class App : IRouter, IMetricProvider
         Started?.Invoke(this, _server);
         Logger.Debug("Server started on port {port}", _server.Port);
         
-        Metrics.CreateCounter<int>("server_started", description: "Server stop counter")
+        Statics.Metrics.CreateCounter<int>("server_started", description: "Server stop counter")
             .Add(1, new KeyValuePair<string, object?>("port", port));
     }
 
@@ -80,7 +77,7 @@ public class App : IRouter, IMetricProvider
         _server.Stop();
         Closed?.Invoke(this, _server);
         Logger.Debug("Server stopped");
-        Metrics.CreateCounter<int>("server_stopped", description: "Server stop counter")
+        Statics.Metrics.CreateCounter<int>("server_stopped", description: "Server stop counter")
             .Add(1);
         return true;
     }
@@ -90,7 +87,7 @@ public class App : IRouter, IMetricProvider
 
     private Task Handle(Context ctx, Exception? error = null)
     {
-        Metrics.CreateCounter<long>("requests_total",
+        Statics.Metrics.CreateCounter<long>("requests_total",
                 description: "Amount of HTTP(S) requests received")
             .Add(1, ctx.ToTagsFull());
 
@@ -118,7 +115,7 @@ public class App : IRouter, IMetricProvider
                 ctx.Logger.Info("Sending default OK response");
                 await ctx.Send(HttpStatusCode.OK);
                 
-                Metrics.CreateCounter<long>("requests_default_message",
+                Statics.Metrics.CreateCounter<long>("requests_default_message",
                         description: "Server didn't answered, sending default response")
                     .Add(1, ctx.ToTagsFull());
             }
@@ -133,7 +130,7 @@ public class App : IRouter, IMetricProvider
 
     private async Task HandleError(Context ctx, Exception error)
     {
-        Metrics.CreateCounter<long>("requests_errors",
+        Statics.Metrics.CreateCounter<long>("requests_errors",
                 description: "Amount of HTTP(S) requests errors occured")
             .Add(1, ctx.ToTagsFull(error));
 
@@ -152,7 +149,7 @@ public class App : IRouter, IMetricProvider
             error = ex;
             ctx.Logger.Fatal("Exception: {error}", ex);
 
-            Metrics.CreateCounter<long>("requests_fatal_errors",
+            Statics.Metrics.CreateCounter<long>("requests_fatal_errors",
                     description: "Fatal error during request routing")
                 .Add(1, ctx.ToTagsFull(error));
         }
@@ -169,10 +166,10 @@ public class App : IRouter, IMetricProvider
                 }
                 else
                 {
-                    Metrics.CreateCounter<long>("requests_default_message",
+                    Statics.Metrics.CreateCounter<long>("requests_default_message",
                             description: "Server didn't answered, sending default response")
                         .Add(1, ctx.ToTagsFull(error));
-                    Metrics.CreateCounter<long>("requests_default_error_message",
+                    Statics.Metrics.CreateCounter<long>("requests_default_error_message",
                             description: "Server didn't answered, sending default 500 response")
                         .Add(1, ctx.ToTagsFull(error));
 

@@ -19,8 +19,6 @@ public interface IStore : IAsyncEnumerable<SessionContext>
     /// </summary>
     /// <param name="id">session ID</param>
     Task<bool> TryRemove(Guid id);
-    
-    Meter Metrics { get; internal set; }
 
     /// <summary>
     /// Called on session changed

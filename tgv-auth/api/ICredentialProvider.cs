@@ -3,7 +3,7 @@ using tgv_core.api;
 
 namespace tgv_auth.api;
 
-public interface ICredentialProvider<out T>: IMetricProvider
+public interface ICredentialProvider<out T>
     where T : ICredentials
 {
     AuthSchemes Scheme { get; }

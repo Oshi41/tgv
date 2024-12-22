@@ -20,11 +20,10 @@ public class TgvContext : Context
     private readonly TgvSettings _settings;
     private bool _wasSent;
 
-    public TgvContext(IHttpSession session, TgvSettings settings, ref EventHandler afterSent, Meter metrics)
+    public TgvContext(IHttpSession session, TgvSettings settings, ref EventHandler afterSent)
         : base(new HttpMethod(session.Request.Method.ToUpperInvariant()),
             session.Id,
             GetUri(session.Request),
-            metrics,
             new(session.Request.Headers),
             null,
             session.Request.Cookies)

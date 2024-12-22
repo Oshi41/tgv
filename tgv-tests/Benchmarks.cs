@@ -5,7 +5,6 @@ using tgv;
 
 namespace tgv_tests;
 
-[TestFixture, TestFixtureSource(typeof(Benchmarks), nameof(Cases))]
 public class Benchmarks
 {
     public static readonly string[] Cases = ["asp", "tgv"];
@@ -52,7 +51,6 @@ public class Benchmarks
         }
     }
 
-    [TestCase(10_000)]
     public async Task GetHello(int amount)
     {
         for (int i = 0; i < amount; i++)
@@ -62,7 +60,6 @@ public class Benchmarks
         }
     }
 
-    [TestCase(10_000)]
     public async Task GetUsers(int amount)
     {
         long items = 0;

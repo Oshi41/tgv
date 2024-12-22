@@ -24,7 +24,7 @@ namespace tgv_core.api;
 /// <summary>
 /// Represents an abstract context for handling HTTP requests and responses within an application.
 /// </summary>
-public abstract class Context : IDisposable, IMetricProvider
+public abstract class Context : IDisposable
 {
     #region Public props
 
@@ -62,8 +62,6 @@ public abstract class Context : IDisposable, IMetricProvider
     /// Current URL
     /// </summary>
     public virtual Uri Url { get; }
-
-    public Meter Metrics { get; set; }
 
     /// <summary>
     /// Provides functionality for logging messages with different verbosity levels.
@@ -230,7 +228,7 @@ public abstract class Context : IDisposable, IMetricProvider
     /// <exception cref="Exception">Thrown if a response has already been sent.</exception>
     protected virtual Task BeforeSending()
     {
-        Metrics.CreateCounter<long>($"{this.GetMetricName()}.before_sending").Add(1);
+        Statics.Metrics.CreateCounter<long>($"{this.GetMetricName()}.before_sending").Add(1);
         
         if (WasSent)
         {
@@ -241,7 +239,7 @@ public abstract class Context : IDisposable, IMetricProvider
         
         if (written > 0)
         {
-            Metrics.CreateHistogram<int>($"{this.GetMetricName()}.cookies_sent")
+            Statics.Metrics.CreateHistogram<int>($"{this.GetMetricName()}.cookies_sent")
                 .Record(written, this.ToTagsFull());
         }
         
@@ -301,13 +299,12 @@ public abstract class Context : IDisposable, IMetricProvider
     /// <param name="headers">Request headers. May be null if no headers provided.</param>
     /// <param name="query">Query parameters. Pass null to automatically parse from URL</param>
     /// <param name="cookies">Request cookies. Pass null to parse from header</param>
-    protected Context(HttpMethod method, Guid traceId, Uri url, Meter metrics, NameValueCollection? headers = null,
+    protected Context(HttpMethod method, Guid traceId, Uri url, NameValueCollection? headers = null,
         NameValueCollection? query = null, CookieCollection? cookies = null)
     {
         Method = method;
         TraceId = traceId;
         Url = url;
-        Metrics = metrics;
         ClientHeaders = headers ?? new NameValueCollection();
         Query = query ?? System.Web.HttpUtility.ParseQueryString(url.Query);
 

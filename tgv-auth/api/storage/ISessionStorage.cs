@@ -10,7 +10,7 @@ namespace tgv_auth.api.storage;
 /// </summary>
 /// <typeparam name="TCreds">Any possible credentials</typeparam>
 /// <typeparam name="TSession"></typeparam>
-public interface ISessionStorage<in TCreds, TSession> : IMetricProvider
+public interface ISessionStorage<in TCreds, TSession>
     where TCreds : ICredentials
     where TSession : IUserSession
 {
