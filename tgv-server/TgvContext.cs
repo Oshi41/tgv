@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using MimeTypes;
 using NetCoreServer;
 using tgv_core.api;
 using tgv_server.api;
+using HttpClient = System.Net.Http.HttpClient;
 
 namespace tgv_server;
 
@@ -43,6 +46,18 @@ public class TgvContext : Context
         if (meta.Any())
         {
             Logger.WithProperty("_03meta", string.Join(", ", meta));
+        }
+
+        if (ClientHeaders["Content-Type"] == "application/x-www-form-urlencoded")
+        {
+            Form = new NameValueCollection();
+            foreach (var strings in HttpUtility.UrlDecode(_session.Request.Body ?? "")
+                         .Split(['&'], StringSplitOptions.RemoveEmptyEntries)
+                         .Select(x => x.Split('='))
+                         .Where(x => x.Length == 2 && x.All(x => !string.IsNullOrEmpty(x))))
+            {
+                Form.Add(strings[0], strings[1]);
+            }
         }
     }
 

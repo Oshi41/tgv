@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Text;
 using Flurl.Http;
 using tgv_server;
@@ -220,12 +221,11 @@ public class HttpTest
             await ctx.SendFile(stream, "download.txt");
         });
 
-        using var client = _app.CreateAgent("");
         var downloaded = $"download_{Guid.NewGuid()}.txt";
         var downloadedFilePath = Path.Join(_dir, downloaded);
 
         var sw = Stopwatch.StartNew();
-        await client.Request("download_file")
+        await _client.Request("download_file")
             .AllowHttpStatus("2xx")
             .DownloadFileAsync(_dir, downloaded);
         sw.Stop();
@@ -238,5 +238,48 @@ public class HttpTest
         if (speed < 5) Assert.Fail($"Download file speed was way too slow: {speed:F} MB/s");
         
         Assert.That(File.Exists(downloadedFilePath), Is.True);
+    }
+
+    [Test(Description = "Simple form handling")]
+    public async Task UrlEncodedForm()
+    {
+        _app.Post("/calc", (ctx, _, _) =>
+        {
+            var x = double.Parse(ctx.Form["x"]);
+            var y = double.Parse(ctx.Form["y"]);
+            var result = ctx.Form["operand"] switch
+            {
+                "+" => x + y,
+                "-" => x - y,
+                "/" => x / y,
+                "*" => x * y,
+            };
+            
+            
+            return ctx.Text(result.ToString());
+        });
+        
+        var f = 5.2;
+        var s = 3.123;
+        var list = new List<string[]>()
+        {
+            new[] { f.ToString(), "+", s.ToString(), (f + s).ToString() },
+            new[] { f.ToString(), "-", s.ToString(), (f - s).ToString() },
+            new[] { f.ToString(), "*", s.ToString(), (f * s).ToString() },
+            new[] { f.ToString(), "/", s.ToString(), (f / s).ToString() },
+        };
+        
+        foreach (var arr in list)
+        {
+            var x = arr[0];
+            var operand = arr[1];
+            var y = arr[2];
+            var expected = arr[3];
+
+            var resp = await _client.Request("calc")
+                .PostUrlEncodedAsync(new { x, operand, y, });
+            var res = await resp.GetStringAsync();
+            Assert.That(res, Is.EqualTo(expected));
+        }
     }
 }

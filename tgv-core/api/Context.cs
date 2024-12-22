@@ -52,6 +52,11 @@ public abstract class Context : IDisposable
     /// Current route parameters
     /// </summary>
     public IDictionary<string, string>? Parameters { get; set; }
+    
+    /// <summary>
+    /// Possible form data
+    /// </summary>
+    public NameValueCollection? Form { get; protected set; }
 
     /// <summary>
     /// Unique identifier for tracing requests through the system.
