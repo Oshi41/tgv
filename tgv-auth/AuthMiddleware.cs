@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http.Features.Authentication;
 using tgv_auth.api;
 using tgv_auth.api.storage;
 using tgv_core.api;
-using tgv;
 
 namespace tgv_auth;
 
@@ -148,8 +145,11 @@ public class AuthMiddleware<TCreds, TSession> : ExtensionFactory<TSession, AuthK
 
     protected override TSession? OnResolved(AuthKey key, Context http, TSession? context)
     {
-        if (_cookieStorage != null && context is TSession session) 
-            http.Cookies.Add(_cookieStorage.CreateCookie(http, session));
+        if (context != null && _cookieStorage != null) 
+            http.Cookies.Add(_cookieStorage.CreateCookie(http, context));
+        
+        if (context != null) 
+            http.Logger.WithProperty("_20auth", $"{_credentialProvider.Scheme},{context}");
 
         return context;
     }

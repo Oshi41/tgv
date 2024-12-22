@@ -309,10 +309,10 @@ public abstract class Context : IDisposable
         }
 
         Logger = LogManager.LogFactory.GetLogger("HTTP request")
-            .WithProperty("_method", method.ToString().ToUpper())
-            .WithProperty("_url", Url.PathAndQuery);
+            .WithProperty("_01method", method.ToString().ToUpper())
+            .WithProperty("_02url", Url.PathAndQuery);
         
-        Logger.Debug("Request assosiated with {0}", traceId);
+        Logger.Debug("TraceID={0}", traceId);
     }
 
     public virtual void Dispose()

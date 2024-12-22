@@ -1,12 +1,16 @@
 ﻿using System;
+using System.IO;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using NetCoreServer;
 using NLog;
 using tgv_core.api;
 using tgv_core.imp;
+using tgv_server.api;
 
 namespace tgv_server.imp.http;
 
-public class HttpSessionImp : HttpSession
+public class HttpSessionImp : HttpSession, IStreamProvider
 {
     private readonly ServerHandler _handler;
     private readonly Logger _logger;
@@ -57,4 +61,6 @@ public class HttpSessionImp : HttpSession
     {
         if (pending == 0) OnWasSent?.Invoke(this, EventArgs.Empty);
     }
+
+    public Stream? GetStream() => new NetworkStream(Socket);
 }

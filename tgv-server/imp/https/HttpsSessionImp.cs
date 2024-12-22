@@ -1,11 +1,14 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using NetCoreServer;
 using NLog;
 using tgv_core.api;
+using tgv_server.api;
 
 namespace tgv_server.imp.https;
 
-public class HttpsSessionImp: HttpsSession
+public class HttpsSessionImp: HttpsSession, IStreamProvider
 {
     private readonly Logger _logger;
     
@@ -57,4 +60,6 @@ public class HttpsSessionImp: HttpsSession
     {
         if (pending == 0) OnWasSent?.Invoke(this, EventArgs.Empty);
     }
+
+    public Stream? GetStream() => _sslStream;
 }

@@ -14,10 +14,10 @@ public class TgvLayout : LayoutRenderer
         var ctxProps = e.Properties
             .Where(x => (x.Key as string)?.StartsWith("_") == true)
             .OrderBy(x => x.Key)
-            .Select(x => string.Format(e.FormatProvider, "{0}={1}", ((string)x.Key).Substring(1), x.Value))
+            .Select(x => string.Format(e.FormatProvider, "{0}", x.Value))
             .ToList();
         
         if (ctxProps.Any())
-            builder.Append($" ({string.Join(", ", ctxProps)}) ");
+            builder.Append($" |{string.Join(", ", ctxProps)}|");
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using MimeTypes;
@@ -11,6 +12,8 @@ using NetCoreServer;
 using NLog;
 using tgv_core.api;
 using tgv_core.imp;
+using tgv_server.api;
+using tgv_server.imp;
 
 namespace tgv_server;
 
@@ -43,7 +46,7 @@ public class TgvContext : Context
 
         if (meta.Any())
         {
-            Logger.WithProperty("_meta", string.Join(", ", meta));
+            Logger.WithProperty("_03meta", string.Join(", ", meta));
         }
     }
 
@@ -96,13 +99,23 @@ public class TgvContext : Context
 
     public override async Task SendFile(Stream stream, string filename)
     {
+        if (_session is not IStreamProvider provider)
+            throw new NotSupportedException($"Only {nameof(IStreamProvider)} session is supported");
+        
+        var socket = provider.GetStream();
+        if (socket is null)
+            throw new ArgumentException("Stream cannot be null", nameof(socket));
+        
+        // dispose after usage
+        using var _ = stream;
+        
         ResponseHeaders["Content-Length"] = stream.Length.ToString();
         ResponseHeaders["Content-Type"] = MimeTypeMap.GetMimeType(filename);
         ResponseHeaders["Content-Disposition"] = $"attachment; filename=\"{filename}\"";
         
         var buff = (await CreateResponse(HttpStatusCode.OK)).Cache!;
         buff.Append(_newLine);
-        using var socket = new NetworkStream(_session.Socket);
+        
         await socket.WriteAsync(buff.Data, (int)buff.Offset, (int)buff.Size);
         await stream.CopyToAsync(socket, 4096);
 

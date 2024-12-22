@@ -143,6 +143,8 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
                 }
             }
         }
+        
+        http.Logger.Debug("Session={key}", key);
 
         return context;
     }

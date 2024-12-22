@@ -50,6 +50,12 @@ public abstract class IUserSession : IEnumerable<KeyValuePair<string, object>>
                                          // or somewhere in a future
                                         || Expired > DateTime.Now);
 
+    /// <summary>
+    /// Required to override to provide ID for logging
+    /// </summary>
+    /// <returns></returns>
+    public new abstract string ToString(); 
+
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
     {
         return _data.GetEnumerator();

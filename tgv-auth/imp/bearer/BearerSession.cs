@@ -22,4 +22,8 @@ public class BearerSession : IUserSession
     public string Owner { get; }
 
     public Guid Id { get; }
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
 }
