@@ -138,6 +138,10 @@ public class Router : IRouter
     /// <returns>A task representing the asynchronous operation of processing the route match.</returns>
     private async Task HandleInner(Context ctx, Action next, Exception? exception = null)
     {
+        ctx.Metrics.CreateCounter<int>("route_visited", description: "Successfully visited routes during route chaining")
+            .Add(1, ctx.ToTagsFull()
+                .With("route", GetRoutePath(ctx)));
+        
         // pushing current router and eject after processing finished
         ctx.CurrentPath.Push(this);
         using var __ = new Disposable(() => ctx.CurrentPath.Pop());
@@ -150,12 +154,26 @@ public class Router : IRouter
             {
                 // parse parameters for exact route
                 ctx.Parameters = routePath.Parameters(ctx);
+
+                if (ctx.Parameters?.Any() == true)
+                {
+                    ctx.Metrics.CreateHistogram<int>("route_params_parsed", description: "URL Parameters parsed")
+                        .Record(ctx.Parameters.Count, ctx.ToTagsFull()
+                            .With("route", GetRoutePath(ctx)));
+                }
             }
 
             // clear parameters after handling
             using var _ = new Disposable(() => ctx.Parameters = null);
             var navigateNext = false;
-            await match.Handler(ctx, () => navigateNext = true);
+            await match.Handler(ctx, () =>
+            {
+                navigateNext = true;
+                
+                ctx.Metrics.CreateCounter<int>("route_next_called", description: "Next function called")
+                    .Add(1, ctx.ToTagsFull()
+                        .With("route", GetRoutePath(ctx)));
+            });
             if (!navigateNext)
                 return;
         }
@@ -178,6 +196,14 @@ public class Router : IRouter
         }
 
         return this;
+    }
+
+    private string GetRoutePath(Context ctx)
+    {
+        return string.Join("/", ctx.Visited.SelectMany(x => x.Route.Segments)
+            .Union(Route.Segments)
+            .SkipWhile(x => x.IsWildcard)
+            .Select(x => x.ToString()));
     }
 
     public IEnumerator<IMatch> GetEnumerator()

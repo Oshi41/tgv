@@ -1,31 +1,45 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net;
 using Hme = tgv_core.extensions.HttpMethodExtensions;
 using System.Runtime.CompilerServices;
 using NLog;
 using tgv_core.api;
+using tgv_core.extensions;
 using tgv_core.imp;
 
 [assembly: InternalsVisibleTo("tgv-tests")]
 
 namespace tgv;
 
-public class App : IRouter
+public class App : IRouter, IMetricProvider
 {
     private IServer _server;
     internal Router _root;
 
-    public App(IServer server, RouterConfig? cfg = null)
+
+    public App(IServer server, RouterConfig? cfg = null, Meter? metrics = null)
     {
         Logger = LogManager.GetCurrentClassLogger();
+        Metrics = metrics ?? new Meter("tgv-app");
+
         _root = new Router("*", cfg ?? new RouterConfig());
         _server = server;
-        
+
         // some internals
         _server.Handler = Handle;
+        _server.Metric = Metrics;
 
-        Process.GetCurrentProcess().Exited += (_, _) => LogManager.Shutdown();
+        Process.GetCurrentProcess().Exited += (_, _) =>
+        {
+            LogManager.Shutdown();
+            
+            Metrics.CreateCounter<int>("server_shutdown", description: "Server was shut down")
+                .Add(1);
+            
+            Metrics.Dispose();
+        };
     }
 
     public string? RunningUrl
@@ -40,6 +54,7 @@ public class App : IRouter
     }
 
     public Logger Logger { get; }
+    public Meter Metrics { get; set; }
 
     public async Task Start(int port = 7000)
     {
@@ -53,6 +68,9 @@ public class App : IRouter
 
         Started?.Invoke(this, _server);
         Logger.Debug("Server started on port {port}", _server.Port);
+        
+        Metrics.CreateCounter<int>("server_started", description: "Server stop counter")
+            .Add(1, new KeyValuePair<string, object?>("port", port));
     }
 
     public bool Stop()
@@ -62,6 +80,8 @@ public class App : IRouter
         _server.Stop();
         Closed?.Invoke(this, _server);
         Logger.Debug("Server stopped");
+        Metrics.CreateCounter<int>("server_stopped", description: "Server stop counter")
+            .Add(1);
         return true;
     }
 
@@ -70,6 +90,10 @@ public class App : IRouter
 
     private Task Handle(Context ctx, Exception? error = null)
     {
+        Metrics.CreateCounter<long>("requests_total",
+                description: "Amount of HTTP(S) requests received")
+            .Add(1, ctx.ToTagsFull());
+
         this.Associate(ctx);
         return error != null ? HandleError(ctx, error) : HandleCommon(ctx);
     }
@@ -93,6 +117,10 @@ public class App : IRouter
             {
                 ctx.Logger.Info("Sending default OK response");
                 await ctx.Send(HttpStatusCode.OK);
+                
+                Metrics.CreateCounter<long>("requests_default_message",
+                        description: "Server didn't answered, sending default response")
+                    .Add(1, ctx.ToTagsFull());
             }
         }
         catch (Exception e)
@@ -105,6 +133,10 @@ public class App : IRouter
 
     private async Task HandleError(Context ctx, Exception error)
     {
+        Metrics.CreateCounter<long>("requests_errors",
+                description: "Amount of HTTP(S) requests errors occured")
+            .Add(1, ctx.ToTagsFull(error));
+
         try
         {
             if (ctx.Stage == Hme.Error)
@@ -119,6 +151,10 @@ public class App : IRouter
         {
             error = ex;
             ctx.Logger.Fatal("Exception: {error}", ex);
+
+            Metrics.CreateCounter<long>("requests_fatal_errors",
+                    description: "Fatal error during request routing")
+                .Add(1, ctx.ToTagsFull(error));
         }
         finally
         {
@@ -126,12 +162,20 @@ public class App : IRouter
             if (!ctx.WasSent)
             {
                 ctx.Logger.Info("Sending default InternalServerError response");
+
                 if (error is HttpException httpException)
                 {
                     await ctx.Send(httpException.Code, httpException.Message);
                 }
                 else
                 {
+                    Metrics.CreateCounter<long>("requests_default_message",
+                            description: "Server didn't answered, sending default response")
+                        .Add(1, ctx.ToTagsFull(error));
+                    Metrics.CreateCounter<long>("requests_default_error_message",
+                            description: "Server didn't answered, sending default 500 response")
+                        .Add(1, ctx.ToTagsFull(error));
+
                     await ctx.Send(HttpStatusCode.InternalServerError);
                 }
             }
@@ -165,7 +209,8 @@ public class App : IRouter
         return this;
     }
 
-    public IRouter Use<T, T1>(string path, params ExtensionFactory<T, T1>[] extensions) where T : class where T1 : IEquatable<T1>
+    public IRouter Use<T, T1>(string path, params ExtensionFactory<T, T1>[] extensions)
+        where T : class where T1 : IEquatable<T1>
     {
         return _root.Use(path, extensions);
     }
@@ -243,7 +288,7 @@ public class App : IRouter
     }
 
     public HttpHandler Handler => _root.Handler;
-    
+
     public IEnumerator<IMatch> GetEnumerator()
     {
         return _root.GetEnumerator();

@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using tgv_auth.api;
+﻿using tgv_auth.api;
 
 namespace tgv_auth.imp.basic;
 

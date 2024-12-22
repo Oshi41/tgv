@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Text;
 using tgv_auth.api;
 using tgv_auth.extensions;
 using tgv_core.api;
+using tgv_core.extensions;
 
 namespace tgv_auth.imp.basic;
 
@@ -18,11 +20,22 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
         if (ctx.Url?.UserInfo?.Contains(":") == true)
         {
             var arr = ctx.Url.UserInfo.Split([':']);
-            if (arr.Length == 2) return new BasicCredentials(arr[0], arr[1]);
+            if (arr.Length == 2)
+            {
+                Metrics.CreateCounter<int>("basic_cookie_provider_url", description: "Basic auth was resolved from URL")
+                    .Add(1, ctx.ToTagsFull());
+                return new BasicCredentials(arr[0], arr[1]);
+            }
         }
 
         // Second priority - header
-        return Parse(ctx.ClientHeaders[HttpRequestHeader.Authorization.ToString()]);
+        var result = Parse(ctx.ClientHeaders[HttpRequestHeader.Authorization.ToString()]);
+
+        if (result == null) return null;
+        
+        Metrics.CreateCounter<int>("basic_cookie_provider_cookie", description: "Basic auth was resolved from cookie")
+            .Add(1, ctx.ToTagsFull());
+        return result;
     }
     
     private BasicCredentials? Parse(string? header)
@@ -33,7 +46,8 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
         var bytes = Convert.FromBase64String(base64);
         var decoded = _encoding.GetString(bytes);
         var tokens = decoded.Split(':');
-        if (tokens.Length == 2) return new BasicCredentials(tokens[0], tokens[1]);
+        if (tokens.Length == 2)
+            return new BasicCredentials(tokens[0], tokens[1]);
         
         return null;
     }
@@ -42,4 +56,6 @@ public class BasicCredentialProvider : ICredentialProvider<BasicCredentials>
     {
         return $"{Scheme.ToHeader()} charset={_encoding.WebName} {ex?.Message ?? ""}";
     }
+
+    public Meter Metrics { get; set; }
 }

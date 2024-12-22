@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
@@ -19,7 +20,7 @@ class TestContext : Context
     private bool _wasSent = false;
 
     public TestContext(HttpMethod method, Uri url)
-        : base(method, Guid.NewGuid(), url, new(), new(), new())
+        : base(method, Guid.NewGuid(), url, new Meter("123"), new(), new(), new())
     {
         Stage = method;
     }

@@ -170,4 +170,9 @@ public class RoutePath : IMatch
 
         return dict;
     }
+
+    public override string ToString()
+    {
+        return string.Join("/", Segments.Select(x => x.ToString()));
+    }
 }

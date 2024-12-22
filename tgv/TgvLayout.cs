@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using NLog;
-using NLog.Config;
 using NLog.LayoutRenderers;
 
 namespace tgv;

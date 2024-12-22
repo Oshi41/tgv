@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Security;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using MimeTypes;
 using NetCoreServer;
-using NLog;
 using tgv_core.api;
-using tgv_core.imp;
 using tgv_server.api;
-using tgv_server.imp;
 
 namespace tgv_server;
 
@@ -24,10 +20,11 @@ public class TgvContext : Context
     private readonly TgvSettings _settings;
     private bool _wasSent;
 
-    public TgvContext(IHttpSession session, TgvSettings settings, ref EventHandler afterSent)
+    public TgvContext(IHttpSession session, TgvSettings settings, ref EventHandler afterSent, Meter metrics)
         : base(new HttpMethod(session.Request.Method.ToUpperInvariant()),
             session.Id,
             GetUri(session.Request),
+            metrics,
             new(session.Request.Headers),
             null,
             session.Request.Cookies)

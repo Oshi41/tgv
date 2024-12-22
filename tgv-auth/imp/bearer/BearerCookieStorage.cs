@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Linq;
 using System.Net;
 using JWT;
 using JWT.Algorithms;
@@ -16,6 +18,7 @@ namespace tgv_auth.imp.bearer;
 /// </summary>
 public class BearerCookieStorage : ICookieStorage<BearerSession>
 {
+    private readonly string _algo;
     private readonly string _cookieName;
     private readonly string? _secret;
     private readonly JwtEncoder _encoder;
@@ -23,6 +26,7 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
 
     public BearerCookieStorage(IJwtAlgorithm algo, string cookieName, string? secret = null)
     {
+        _algo = algo.Name;
         _cookieName = cookieName;
         _secret = secret;
 
@@ -36,6 +40,8 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
     public BearerSession? GetUserSession(Context ctx)
     {
         var cookie = ctx.Cookies[_cookieName];
+        if (cookie == null) return null;
+        
         if (!cookie.IsValid()) return null;
 
         try
@@ -47,18 +53,26 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
         catch (TokenNotYetValidException)
         {
             ctx.Logger.Debug("Token is not valid yet");
+            Metrics.CreateCounter<int>("bearer_cookie_token_not_yet_valid", description: "Bearer Token is not valid yet")
+                .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (TokenExpiredException)
         {
             ctx.Logger.Debug("Token has expired");
+            Metrics.CreateCounter<int>("bearer_cookie_token_expired", description: "Bearer Token is expired")
+                .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (SignatureVerificationException)
         {
             ctx.Logger.Debug("Token has invalid signature");
+            Metrics.CreateCounter<int>("bearer_cookie_token_invalid_signature", description: "Bearer Token has invalid signature")
+                .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         catch (Exception ex)
         {
             ctx.Logger.Error("Unknown error: {ex}", ex);
+            Metrics.CreateCounter<int>("bearer_cookie_token_unknown_error", description: "Bearer Token unknown error during validation")
+                .Add(1, ctx.ToTagsFull().With("algo", _algo));
         }
         
         return null;
@@ -87,30 +101,6 @@ public class BearerCookieStorage : ICookieStorage<BearerSession>
             Expires = jwtSession.Expired,
         };
     }
-    
-    private T Parse<T>(IDictionary<string, object> claims, string key, Func<string, T?> parser)
-    {
-        if (!claims.ContainsKey(key))
-        {
-            throw new Exception($"Claims doesn't contain key {key}");
-        }
-        
-        var value = claims[key];
-        if (value is T t) return t;
 
-        try
-        {
-            t = parser(value.ToString());
-            
-            if (t is null)
-                throw new NullReferenceException(nameof(t));
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Invalid claims entry: {key}={value}");
-        }
-        
-        claims.Remove(key);
-        return t;
-    }
+    public Meter Metrics { get; set; }
 }

@@ -3,7 +3,7 @@ using tgv_core.api;
 
 namespace tgv_auth.api.storage;
 
-public interface ICookieStorage<T>
+public interface ICookieStorage<T> : IMetricProvider
     where T : IUserSession
 {
     /// <summary>

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Net;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using NetCoreServer;
-using tgv_core.api;
-using tgv_core.imp;
 using tgv_server.imp.http;
 using tgv_server.imp.https;
 using IServer = tgv_core.api.IServer;
@@ -43,11 +40,11 @@ public class TgvServer(TgvSettings tgvSettings) : IServer
         {
             _server = new HttpsServerImp(Handler,
                 new SslContext(tgvSettings.Protocols, tgvSettings.Certificate, tgvSettings.CertificateValidation),
-                endpoint, tgvSettings);
+                endpoint, tgvSettings, Metric);
         }
         else
         {
-            _server = new HttpServerImp(Handler, endpoint, tgvSettings);
+            _server = new HttpServerImp(Handler, endpoint, tgvSettings, Metric);
         }
 
         if (!_server.Start())

@@ -1,7 +1,7 @@
-﻿using System.Net;
+﻿using System.Diagnostics.Metrics;
+using System.Net;
 using System.Text;
 using Flurl.Http;
-using tgv_auth;
 using tgv_auth.api;
 using tgv_auth.api.storage;
 using tgv_auth.extensions;
@@ -69,6 +69,8 @@ class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
     {
         return Task.FromResult(_active.Values.ToList());
     }
+
+    public Meter Metrics { get; set; }
 }
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]

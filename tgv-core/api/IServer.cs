@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
 using NLog;
-using tgv_core.imp;
 
 namespace tgv_core.api;
 
@@ -27,6 +27,7 @@ public delegate Task ServerHandler(Context ctx, Exception? e = null);
 public abstract class IServer
 {
     public ServerHandler Handler { get; internal set; }
+    public Meter Metric { get; internal set; }
 
     /// <summary>
     /// Gets a value indicating whether the server is currently listening for incoming connections.

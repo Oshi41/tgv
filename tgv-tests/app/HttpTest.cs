@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Flurl.Http;
-using tgv_core.imp;
 using tgv_server;
 using tgv;
 
@@ -72,9 +71,9 @@ public class HttpTest
             }
         }
 
-        _users.Clear();
-        _app.Stop();
-        _client.Dispose();
+        _users?.Clear();
+        _app?.Stop();
+        _client?.Dispose();
     }
 
     [Test(Description = "Retrieving all the users")]

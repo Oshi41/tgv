@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NLog;
 using tgv_core.api;
@@ -67,6 +65,8 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
 
     protected override Guid GetKey(Context ctx)
     {
+        Store.Metrics ??= ctx.Metrics;
+        
         var cookie = string.IsNullOrEmpty(_cookieName)
             ? null
             : ctx.Cookies[_cookieName];
@@ -81,15 +81,22 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
                 }
 
                 ctx.Logger.Debug("Wrong session cookie format: {cookie}", cookie.Value);
+                ctx.Metrics.CreateCounter<int>("session_cookie_expired", description: "Session Cookie was expired")
+                    .Add(1, ctx.ToTagsFull().With("session_cookie", cookie));
             }
             else
             {
                 ctx.Logger.Debug("Session cookie was expired: {cookie}", cookie.Value);
+                
+                ctx.Metrics.CreateCounter<int>("session_cookie_expired", description: "Session Cookie was expired")
+                    .Add(1, ctx.ToTagsFull().With("session_cookie", cookie));
             }
         }
         else
         {
             ctx.Logger.Debug("Session cookie was not found");
+            ctx.Metrics.CreateCounter<int>("session_cookie_not_found", description: "Session Cookie was not found")
+                .Add(1, ctx.ToTagsFull().With("session_cookie", cookie));
         }
 
         return ctx.TraceId;
@@ -100,12 +107,21 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
     protected override async Task<SessionContext?> GetOrCreateInternal(Context context, Guid key)
     {
         // not loaded yet
-        if (!_loaded) return null;
+        if (!_loaded)
+        {
+            context.Metrics.CreateCounter<int>("session_not_loaded_yet", description: "Session Middleware was not loaded yet")
+                .Add(1, context.ToTagsFull()
+                    .With("session", key));
+            return null;
+        }
 
         context.Logger.Debug("Opening new session [{key}]: {context}", key, context);
 
         var result = await Store.CreateNew(key as Guid? ?? Guid.NewGuid());
         context.Logger.Debug("Session {result} created", GetKey(result));
+        context.Metrics.CreateCounter<int>("session_created", description: "Session was created")
+            .Add(1, context.ToTagsFull()
+                .With("session", new {id = result.Id, Expire = result.Expires}));
         return result;
     }
 
@@ -123,6 +139,9 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
                 {
                     cookie.Expired = true;
                     cookie.Value = "";
+                    
+                    http.Metrics.CreateCounter<int>("session_must_expire", description: "Server set session cookie to expired state")
+                        .Add(1, http.ToTagsFull().With("session", key));
                 }
                 // renew cookie (if needed)
                 else if (cookie != null && context != null)
@@ -140,11 +159,16 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
                         Expires = context.Expires,
                         HttpOnly = true,
                     });
+                    
+                    http.Metrics.CreateCounter<int>("session_cookie_set", description: "Server set new session cookie")
+                        .Add(1, http.ToTagsFull().With("session", key));
                 }
             }
         }
         
         http.Logger.Debug("Session={key}", key);
+        http.Metrics.CreateCounter<int>("session_cookie_resolved", description: "Session Middleware resolved session extension")
+            .Add(1, http.ToTagsFull().With("session", key));
 
         return context;
     }
@@ -163,8 +187,9 @@ class ContextExtension : ExtensionFactory<SessionContext, Guid>
 
 public static class SessionMiddleware
 {
-    public static void UseSession(this IRouter app, IStore store, string cookieName)
+    public static void UseSession(this App app, IStore store, string cookieName)
     {
+        store.Metrics = app.Metrics;
         app.Use(new ContextExtension(store, cookieName));
     }
 

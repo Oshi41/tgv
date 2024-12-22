@@ -45,4 +45,11 @@ public class PathSegment
     /// If Pattern == "*" 
     /// </summary>
     public bool IsWildcard { get; }
+
+    public override string ToString()
+    {
+        if (IsWildcard) return "*";
+        if (IsPattern) return Name;
+        return Regex;
+    }
 }

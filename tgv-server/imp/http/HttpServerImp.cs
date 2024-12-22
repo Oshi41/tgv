@@ -1,9 +1,7 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.Metrics;
+using System.Net;
 using NetCoreServer;
-using NLog;
 using tgv_core.api;
-using tgv_core.imp;
 
 namespace tgv_server.imp.http;
 
@@ -11,13 +9,15 @@ public class HttpServerImp : HttpServer
 {
     private readonly ServerHandler _handler;
     private readonly TgvSettings _settings;
+    private readonly Meter _metric;
 
-    public HttpServerImp(ServerHandler handler, IPEndPoint endpoint, TgvSettings settings) : base(endpoint)
+    public HttpServerImp(ServerHandler handler, IPEndPoint endpoint, TgvSettings settings, Meter metric) : base(endpoint)
     {
         _handler = handler;
         _settings = settings;
+        _metric = metric;
         OptionKeepAlive = true;
     }
 
-    protected override TcpSession CreateSession() => new HttpSessionImp(this, _handler, _settings);
+    protected override TcpSession CreateSession() => new HttpSessionImp(this, _handler, _settings, _metric);
 }

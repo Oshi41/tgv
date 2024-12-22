@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using tgv_core.api;
 
 namespace tgv_auth.api.storage;
 
@@ -9,7 +10,7 @@ namespace tgv_auth.api.storage;
 /// </summary>
 /// <typeparam name="TCreds">Any possible credentials</typeparam>
 /// <typeparam name="TSession"></typeparam>
-public interface ISessionStorage<in TCreds, TSession>
+public interface ISessionStorage<in TCreds, TSession> : IMetricProvider
     where TCreds : ICredentials
     where TSession : IUserSession
 {

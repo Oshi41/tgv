@@ -72,16 +72,18 @@ public static class CookieCollectionExtensions
             .Union(left.OfType<Cookie>().Except(right.OfType<Cookie>()));
     }
 
-    public static void WriteHeaders(this IEnumerable<Cookie> cookies, NameValueCollection headers)
+    public static int WriteHeaders(this IEnumerable<Cookie> cookies, NameValueCollection headers)
     {
         var list = cookies.ToList();
-        if (!list.Any()) return;
+        if (!list.Any()) return 0;
 
         var header = string.Join(", ", list.Select(x => string.Join("; ", x.ToParts())));
         if (!string.IsNullOrEmpty(header))
         {
             headers["Set-Cookie"] = header;
         }
+
+        return list.Count;
     }
 
     public static IEnumerable<string> ToParts(this Cookie cookie)

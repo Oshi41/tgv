@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Caching;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using tgv_core.extensions;
-using tgv_core.imp;
 
 namespace tgv_core.api;
 
@@ -99,7 +95,7 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     /// </summary>
     /// <param name="context">HTTP request</param>
     protected abstract TKey? GetKey(Context context);
-    
+
     /// <summary>
     /// Returns uniq key for extension. Should match with <see cref="GetKey(Context)"/>
     /// </summary>
@@ -123,7 +119,8 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     /// <param name="context">HTTP request</param>
     /// <param name="payload">Created additional context</param>
     /// <returns></returns>
-    protected virtual CachePolicy<TExtension>? CreateCachePolicy(Context context, TExtension payload) => new(StoreType.Assign2Context);
+    protected virtual CachePolicy<TExtension>? CreateCachePolicy(Context context, TExtension payload) =>
+        new(StoreType.Assign2Context);
 
     /// <summary>
     /// Creates context from current request
@@ -131,6 +128,10 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     /// <param name="context">HTTP request</param>
     public async Task<TExtension?> GetOrCreate(Context context)
     {
+        context.Metrics.CreateCounter<long>("get_or_create_extension",
+                description: "Request to get/create an HTTP context extension")
+            .Add(1, context.ToTagsFull());
+
         TExtension? extension = default;
         CachePolicy<TExtension>? policy = default;
         TKey? key = GetKey(context);
@@ -140,16 +141,30 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
 
         // if any task pending exists
         if (_tasks.TryGetValue(key, out var task))
+        {
+            context.Metrics.CreateCounter<long>("get_or_create_extension_already_loaded",
+                    description: "Request's extension is loading already")
+                .Add(1, context.ToTagsFull());
+
             return await task;
+        }
 
         if (_payloads.TryGetValue(key, out extension))
         {
             if (extension == null || await CheckPolicies(key, extension, context))
             {
+                context.Logger.Debug("Context expired, created new one");
+                context.Metrics.CreateCounter<long>("get_or_create_extension_resolved",
+                        description: "Request's extension was successfully resolved")
+                    .Add(1, context.ToTagsFull());
+
                 return OnResolved(key, context, extension);
             }
 
             context.Logger.Debug("Context expired, created new one");
+            context.Metrics.CreateCounter<long>("get_or_create_extension_expired",
+                    description: "Request's extension was created before and now expired")
+                .Add(1, context.ToTagsFull());
         }
 
         RemoveKey(key);
@@ -165,6 +180,11 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
         {
             context.Logger.Error("Error during context calculation: {e}", e);
             RemoveKey(key);
+
+            context.Metrics.CreateCounter<long>("get_or_create_extension_created_exception",
+                    description: "Error during creation of HTTP context extension")
+                .Add(1, context.ToTagsFull(e));
+
             return OnResolved(key, context, null);
         }
         finally
@@ -172,13 +192,23 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
             // remove penging task from storage
             _tasks.TryRemove(key, out _);
         }
-        
+
         if (extension != null)
         {
             policy = CreateCachePolicy(context, extension);
             key = GetKey(extension);
+
+            context.Metrics.CreateCounter<long>("get_or_create_extension_created",
+                    description: "Request's extension was successfully created")
+                .Add(1, context.ToTagsFull());
         }
-        
+        else
+        {
+            context.Metrics.CreateCounter<long>("get_or_create_extension_created_null",
+                    description: "Request's extension was successfully created but it's null")
+                .Add(1, context.ToTagsFull());
+        }
+
         _ = Add(key, extension, policy, context);
         return OnResolved(key, context, extension);
     }
@@ -199,16 +229,27 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
         if (policy.StoreType == StoreType.Assign2Context)
         {
             // same reference exists
-            return _refs.TryGetValue(key, out var reference)
-                   && reference.TryGetTarget(out var target)
-                   && ReferenceEquals(target, http);
+            if (_refs.TryGetValue(key, out var reference)
+                && reference.TryGetTarget(out var target)
+                && ReferenceEquals(target, http))
+            {
+                return true;
+            }
         }
 
         // should store whole application
         if (policy.StoreType == StoreType.Custom)
         {
-            return policy?.IsAlive?.Invoke(http, context) == true;
+            if (policy?.IsAlive?.Invoke(http, context) == true)
+            {
+                return true;
+            }
         }
+        
+        http.Metrics.CreateCounter<long>($"get_or_create_extension_check_policies_fail",
+                description: "Current extension object cannot be used, need to create other one")
+            .Add(1, http.ToTagsFull()
+                .With("policy", policy));
 
         return false;
     }
@@ -220,12 +261,12 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     protected virtual bool RemoveKey(TKey key)
     {
         bool res = _tasks.TryRemove(key, out _);
-        if (_payloads.TryRemove(key, out _)) res = true; 
-        if (_policies.TryRemove(key, out _)) res = true; 
+        if (_payloads.TryRemove(key, out _)) res = true;
+        if (_policies.TryRemove(key, out _)) res = true;
         if (_refs.TryRemove(key, out _)) res = true;
 
         if (res) AfterRemoval(key);
-        
+
         return res;
     }
 
@@ -240,7 +281,8 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
         _refs.Clear();
     }
 
-    protected virtual async Task<bool> Add(TKey key, TExtension? context = null, CachePolicy<TExtension>? policy = null, Context? http = null)
+    protected virtual async Task<bool> Add(TKey key, TExtension? context = null, CachePolicy<TExtension>? policy = null,
+        Context? http = null)
     {
         // removing pending task
         _tasks.TryRemove(key, out _);
@@ -278,7 +320,6 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     protected virtual void AfterAdd(TKey key, TExtension? context = null, CachePolicy<TExtension>? policy = null,
         Context? http = null)
     {
-        
     }
 
     /// <summary>
@@ -287,7 +328,6 @@ public abstract class ExtensionFactory<TExtension, TKey> : IExtensionProvider<TE
     /// <param name="key">Comparable key</param>
     protected virtual void AfterRemoval(TKey key)
     {
-        
     }
 
     /// <summary>
