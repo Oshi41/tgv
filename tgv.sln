@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreServer", "netcoreser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tgv-validation", "tgv-validation\tgv-validation.csproj", "{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "akasha", "akasha\akasha.csproj", "{04AD15FA-B06C-4ADA-9D48-A690C80B7EFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -72,5 +74,9 @@ Global
 		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Debug|x64.Build.0 = Debug|x64
 		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Release|x64.ActiveCfg = Release|x64
 		{F7A78F12-2A5D-4D2B-A70E-0D510C54551C}.Release|x64.Build.0 = Release|x64
+		{04AD15FA-B06C-4ADA-9D48-A690C80B7EFF}.Debug|x64.ActiveCfg = Debug|x64
+		{04AD15FA-B06C-4ADA-9D48-A690C80B7EFF}.Debug|x64.Build.0 = Debug|x64
+		{04AD15FA-B06C-4ADA-9D48-A690C80B7EFF}.Release|x64.ActiveCfg = Release|x64
+		{04AD15FA-B06C-4ADA-9D48-A690C80B7EFF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal
