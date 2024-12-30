@@ -5,7 +5,7 @@ using NetCoreServer;
 using tgv_server.imp.http;
 using tgv_server.imp.https;
 using IServer = tgv_core.api.IServer;
-using ITransportServer = NetCoreServer.IServer;
+using ITransportServer = NetCoreServer.api.IServer;
 
 namespace tgv_server;
 

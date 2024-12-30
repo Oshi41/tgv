@@ -20,7 +20,8 @@ public class BufferStream : Stream
 
     public BufferStream(int maxCacheSize = 32768)
     {
-        _buffer = new List<byte>(maxCacheSize);
+        _buffer = new (maxCacheSize);
+        _waiter.SetResult(true);
     }
     
     #region Stream imp

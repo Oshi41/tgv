@@ -1,7 +1,7 @@
 ﻿using tgv_core.api;
 using tgv_server;
 
-namespace tgv_tests;
+namespace tgv_tests.utils;
 
 public static class Servers
 {

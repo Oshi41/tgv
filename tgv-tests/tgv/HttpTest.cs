@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Text;
 using Flurl.Http;
 using tgv_server;
-using tgv_session;
+using tgv_tests.utils;
 using tgv;
 
-namespace tgv_tests.app;
+namespace tgv_tests.tgv;
 
 [TestFixture]
 public class HttpTest

@@ -9,7 +9,7 @@ namespace akasha.api;
 public class HttpRequest
 {
     public HttpMethod? Method { get; internal set; }
-    public Uri? Uri { get; internal set; }
+    public string? Uri { get; internal set; }
     public Version? Protocol { get; internal set; }
     public NameValueCollection? Headers { get; internal set; }
     public CookieCollection? Cookies { get; internal set; }

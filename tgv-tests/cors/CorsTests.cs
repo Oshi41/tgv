@@ -4,16 +4,17 @@ using Flurl.Http;
 using tgv_core.api;
 using tgv_core.imp;
 using tgv_cors;
+using tgv_tests.utils;
 using tgv;
 
-namespace tgv_tests;
+namespace tgv_tests.cors;
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
-public class TgvCors
+public class CorsTests
 {
     private readonly App _app;
 
-    public TgvCors(Servers.ServerCreationCase fn)
+    public CorsTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
 

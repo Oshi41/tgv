@@ -1,7 +1,8 @@
 ﻿using tgv_core.api;
 using tgv_core.imp;
+using tgv_tests.utils;
 
-namespace tgv_tests;
+namespace tgv_tests.core;
 
 public class RouterTests
 {

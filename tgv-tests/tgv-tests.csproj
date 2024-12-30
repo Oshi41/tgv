@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <RootNamespace>tgv_tests</RootNamespace>
-        <LangVersion>12</LangVersion>
+        <LangVersion>13</LangVersion>
         <Nullable>enable</Nullable>
         <Platforms>x64</Platforms>
         <OutputType>Library</OutputType>
@@ -34,6 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\akasha\akasha.csproj" />
       <ProjectReference Include="..\netcoreserver\source\NetCoreServer\NetCoreServer.csproj" />
       <ProjectReference Include="..\tgv-auth\tgv-auth.csproj" />
       <ProjectReference Include="..\tgv-cors\tgv-cors.csproj" />

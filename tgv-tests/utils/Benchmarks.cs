@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using tgv_server;
 using tgv;
 
-namespace tgv_tests;
+namespace tgv_tests.utils;
 
 public class Benchmarks
 {

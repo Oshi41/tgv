@@ -1,4 +1,4 @@
-﻿namespace tgv_tests;
+﻿namespace tgv_tests.utils;
 
 [TestFixture]
 public class TgvTestUtils

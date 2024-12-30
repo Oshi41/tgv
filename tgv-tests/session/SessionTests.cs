@@ -1,16 +1,17 @@
 ﻿using Flurl.Http;
 using tgv_session;
 using tgv_session.imp;
+using tgv_tests.utils;
 using tgv;
 
-namespace tgv_tests;
+namespace tgv_tests.session;
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
-public class TgvSession
+public class SessionTests
 {
     private readonly App _app;
 
-    public TgvSession(Servers.ServerCreationCase fn)
+    public SessionTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
     }

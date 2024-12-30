@@ -1,14 +1,14 @@
-﻿using System.Diagnostics.Metrics;
-using System.Net;
+﻿using System.Net;
 using Flurl.Http;
 using tgv_auth.api;
 using tgv_auth.api.storage;
 using tgv_auth.extensions;
 using tgv_auth.imp.basic;
 using tgv_core.imp;
+using tgv_tests.utils;
 using tgv;
 
-namespace tgv_tests;
+namespace tgv_tests.auth;
 
 public class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
 {
@@ -71,11 +71,11 @@ public class TestStorage : ISessionStorage<BasicCredentials, BasicSession>
 }
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
-public class TgvAuth
+public class AuthTests
 {
     private readonly App _app;
 
-    public TgvAuth(Servers.ServerCreationCase fn)
+    public AuthTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
         _app.Get("/everyone", (ctx, next, exception) => ctx.Text("Hello!"));

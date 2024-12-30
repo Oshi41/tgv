@@ -1,4 +1,6 @@
-﻿namespace System.Runtime.CompilerServices.imp;
+﻿using System;
+
+namespace akasha.imp;
 
 internal class Disposable(Action action) : IDisposable
 {

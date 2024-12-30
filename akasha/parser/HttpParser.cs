@@ -1,171 +1,116 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices.imp;
 using System.Text;
 using System.Threading.Tasks;
 using akasha.api;
 using akasha.extensions;
+using FormatException = System.FormatException;
 
 namespace akasha.parser;
 
 public static class HttpParser
 {
-    public static async Task<HttpRequest> ParseHttpResponse(this Stream stream, int chunkSize = 2048)
+    private static Uri DefaultUri = new("http://localhost:5000");
+
+    public static async Task<HttpRequest> ParseHttpRequest(this Stream stream, int chunkSize = 2048)
     {
         var data = new HttpRequest();
-        var buffer = new byte[chunkSize];
-        byte[] pending = [];
-        var read = 0;
         var headersReceived = false;
 
-        void SavePending(Span<byte> span)
+        await foreach (var e in stream.ByLineAsync(chunkSize))
         {
-            Array.Clear(pending, 0, pending.Length);
-            pending = span.ToArray();
-        }
-
-        while (!headersReceived && (read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-        {
-            // using possible pending data
-            var span = pending.Concat(buffer.AsSpan(0, read));
-
-            // parse protocol line
+            e.GetChunk(out var span);
             if (data.Method == null || data.Protocol == null || data.Uri == null)
             {
-                var count = ParseProtocolLine(data, span);
-                if (count == 0)
-                {
-                    SavePending(span);
-                    continue;
-                }
+                // GET POST PUT 
+                var index = span.IndexOf(" "u8);
+                if (index < 0) throw new FormatException("Invalid protocol HTTP line");
+                data.Method = new HttpMethod(Encoding.UTF8.GetString(span.Slice(0, index).ToArray()));
+                span = span.Slice(index + 1);
 
-                // removing read data
-                span = span.Slice(count);
+
+                // \index.html \path\to\url
+                index = span.IndexOf(" "u8);
+                if (index < 0) throw new FormatException("Invalid protocol HTTP line");
+                data.Uri = span.Slice(0, index).ToUtf8String();
+                span = span.Slice(index + 1);
+
+
+                // HTTP/1.1 HTTP/0.9
+                index = span.LastIndexOf("/"u8);
+                if (index < 0) throw new FormatException("Invalid protocol HTTP line");
+                if (!Version.TryParse(Encoding.UTF8.GetString(span.Slice(index + 1).ToArray()), out var version))
+                    throw new FormatException("Invalid protocol HTTP line");
+                data.Protocol = version;
+
+                continue;
             }
 
-            // parse headers
-            if (!headersReceived)
+            if (!headersReceived && span.IsEmpty)
             {
-                var count = ParseHeaders(data, span);
-                if (count == 0)
+                var cookies = data.Headers?.GetValues("Cookie");
+                if (cookies?.Any() == true)
                 {
-                    SavePending(span);
-                    continue;
+                    var container = new CookieContainer();
+                    data.Cookies ??= new CookieCollection();
+
+                    foreach (var value in cookies)
+                        container.SetCookies(DefaultUri, value);
+
+                    data.Cookies.Add(container.GetCookies(DefaultUri));
                 }
-                
-                // removing read data
-                span = span.Slice(count);
+
+                // flush all the data
+                data.Body ??= new BufferStream();
+                var (buffer, offset, count) = e.StopAndFlush();
+                _ = WriteToBody(data, buffer, offset, count);
+                continue;
             }
 
-            // detecting body delmitter
             if (!headersReceived)
             {
-                var index = span.IndexOf("\r\n\r\n"u8);
-                if (index >= 0)
-                {
-                    SavePending(span.Slice(0, index + 4));
-                    headersReceived = true;
-                }
+                var index = span.IndexOf(":"u8);
+                if (index < 0) throw new FormatException("Invalid HTTP header line");
+
+                var key = Encoding.UTF8.GetString(span.Slice(0, index).ToArray()).Trim();
+                var value = Encoding.UTF8.GetString(span.Slice(index + 1).ToArray()).Trim();
+
+                data.Headers ??= new();
+                data.Headers.Add(key, value);
+                continue;
             }
         }
-        
-        // starting reading body.
-        // as it may block
-        if (!headersReceived) throw new FormatException("No HTTP body found");
 
-        data.Body = new BufferStream();
-        
-        // writing pending data
-        if (pending.Length > 0)
-            await data.Body.WriteAsync(pending, 0, pending.Length);
-        
-        // starting async copy 
-        _ = stream.CopyToAsync(data.Body);
+        // starting async copy
+        _ = ReadBodyAsync(stream, data, chunkSize);
 
         return data;
     }
-    
-    private static int ParseProtocolLine(HttpRequest request, Span<byte> span)
+
+    private static async Task ReadBodyAsync(Stream stream, HttpRequest data, int chunkSize)
     {
-        // first linebreak
-        var nlIndex = span.IndexOf("\r\n"u8);
-
-        // doesn't receive enough data
-        if (nlIndex < 0) return 0;
-
-        var line = span.Slice(0, nlIndex);
-
-        // GET POST PUT 
-        var index = line.IndexOf(" "u8);
-        if (index < 0) throw new FormatException("Invalid HTTP header line");
-        request.Method = new HttpMethod(line.Slice(0, index).ToUtf8String().ToUpperInvariant());
-        line = line.Slice(index + 1);
-
-
-        // \index.html \path\to\url
-        index = line.IndexOf(" "u8);
-        if (index < 0) throw new FormatException("Invalid HTTP header line");
-        if (!Uri.TryCreate(line.Slice(0, index).ToUtf8String(), UriKind.RelativeOrAbsolute, out var uri))
-            throw new FormatException("Invalid HTTP url in header line");
-        request.Uri = uri;
-        line = line.Slice(index + 1);
-
-
-        // HTTP/1.1 HTTP/0.9
-        index = line.IndexOf("/"u8);
-        if (index < 0) throw new FormatException("Invalid HTTP header line");
-        if (!Version.TryParse(line.Slice(index + 1).ToUtf8String(), out var version))
-            throw new FormatException("Invalid HTTP protocol version");
-        request.Protocol = version;
-
-        return index + 1 + 2;
-    }
-
-    private static int ParseHeaders(HttpRequest request, Span<byte> span)
-    {
+        data.Body ??= new BufferStream();
+        var buffer = new byte[chunkSize];
         var read = 0;
 
-        while (true)
+        while ((read = await stream.ReadAsync(buffer, 0, chunkSize)) > 0)
         {
-            // first linebreak
-            var nlIndex = span.IndexOf("\r\n"u8);
-            if (nlIndex < 0) return read; // no new line provided
-            if (nlIndex == 0) // empty line detected, navigating to the start of HTTP body delmitter
-            {
-                read -= 2;
-                return read;
-            }
-
-            read += nlIndex + 2;
-            var line = span.Slice(0, nlIndex);
-            span = span.Slice(line.Length); // removing read occurrence
-            var index = line.IndexOf(":"u8);
-            if (index < 0) throw new FormatException("Invalid HTTP header");
-
-            request.Headers ??= new();
-            var header = span.Slice(0, index).ToUtf8String().Trim();
-            var value = line.Slice(index + 1).ToUtf8String().Trim();
-            request.Headers.Add(header, value);
-            
-            if (request.Uri == null) throw new FormatException("Invalid parsing sequence");
-
-            if (string.Equals(header, "Host", StringComparison.InvariantCultureIgnoreCase))
-            {
-                if (Uri.TryCreate(new Uri(value), request.Uri, out var uri))
-                {
-                    request.Uri = uri;
-                }
-            }
-
-            if (string.Equals(header, "Cookies", StringComparison.InvariantCultureIgnoreCase))
-            {
-                // some hack here
-                var container = new CookieContainer();
-                container.SetCookies(request.Uri, value);
-                request.Cookies = container.GetCookies(request.Uri);
-            }
+            await WriteToBody(data, buffer, 0, read);
         }
+    }
+
+    private static async Task WriteToBody(HttpRequest data, byte[] buffer, int offset, int count)
+    {
+        // remove body separator occurance
+        if (buffer.AsSpan(offset, count).EndsWith("\r\n\r\n"u8))
+        {
+            count -= 4;
+        }
+
+        await data.Body!.WriteAsync(buffer, offset, count);
     }
 }

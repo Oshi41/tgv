@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using System.Security.Authentication;
 using tgv_server;
+using tgv_tests.utils;
 
-namespace tgv_tests.app;
+namespace tgv_tests.tgv;
 
 public class HttpsTests : HttpTest
 {

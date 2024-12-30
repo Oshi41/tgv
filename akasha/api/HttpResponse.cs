@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
+using akasha.extensions;
 
 namespace akasha.api;
 
 public class HttpResponse
 {
-    static Uri DefaultUrl = new Uri("https://www.google.com/");
-    
     public Version? Protocol { get; internal set; }
     public HttpStatusCode? Code { get; internal set; }
     public string? StatusMessage { get; internal set; }
@@ -29,17 +27,20 @@ public class HttpResponse
 
         if (Cookies != null)
         {
-            // some hack here
-            var container = new CookieContainer();
-            container.Add(DefaultUrl, Cookies);
-            Headers["Set-Cookie"] = container.GetCookieHeader(DefaultUrl);
+            foreach (Cookie cookie in Cookies)
+            {
+                Headers.Add("Set-Cookie", cookie.ToHttpHeader());
+            }
         }
         
         var sb = new StringBuilder();
         sb.AppendLine($"HTTP/{Protocol} {(int)Code} {StatusMessage}");
         foreach (string key in Headers)
         {
-            sb.AppendLine($"{key}: {Headers[key]}");
+            foreach (var value in Headers.GetValues(key))
+            {
+                sb.AppendLine($"{key}: {value}");
+            }
         }
 
         // body delmitter

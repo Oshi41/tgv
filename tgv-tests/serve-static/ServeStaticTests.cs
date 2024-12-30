@@ -1,16 +1,17 @@
 ﻿using Flurl.Http;
 using HtmlParserDotNet;
 using tgv_serve_static;
+using tgv_tests.utils;
 using tgv;
 
-namespace tgv_tests;
+namespace tgv_tests.serve_static;
 
 [TestFixtureSource(typeof(Servers), nameof(Servers.AllServers))]
-public class TgvServeStatic
+public class ServeStaticTests
 {
     private readonly App _app;
 
-    public TgvServeStatic(Servers.ServerCreationCase fn)
+    public ServeStaticTests(Servers.ServerCreationCase fn)
     {
         _app = new App(fn);
     }

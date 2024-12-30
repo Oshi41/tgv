@@ -1,3 +1,5 @@
 global using NUnit.Framework;
-[assembly:Parallelizable(ParallelScope.All)]
-[assembly:FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
+global using static tgv_tests.utils.AssertShortcuts;
+
+[assembly: Parallelizable(ParallelScope.All)]
+[assembly: FixtureLifeCycle(LifeCycle.InstancePerTestCase)]

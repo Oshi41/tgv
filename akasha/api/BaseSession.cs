@@ -145,7 +145,7 @@ public abstract class BaseSession
 
         try
         {
-            var req = await stream.ParseHttpResponse();
+            var req = await stream.ParseHttpRequest();
             // receiving stopped
             Status &= ~SessionStatus.Receiving;
             await HandleRequestAsync(req);

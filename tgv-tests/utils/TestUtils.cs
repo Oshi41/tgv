@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
@@ -15,7 +14,7 @@ using tgv_server;
 using tgv;
 using HttpMethod = System.Net.Http.HttpMethod;
 
-namespace tgv_tests;
+namespace tgv_tests.utils;
 
 class TestContext : Context
 {
